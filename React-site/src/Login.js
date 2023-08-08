@@ -31,14 +31,14 @@ function Login() {
             <form>
               <div className='InputEntry'>
                 <div className='InputLabel'>
-                 Username
+                  Username
                 </div>
                 <input className='InputField' type='text' placeholder='Enter your username'>
                 </input>
               </div>
               <div className='InputEntry'>
                 <div className='InputLabel'>
-                 Password
+                  Password
                 </div>
                 <input className='InputField' type='text' placeholder='Enter your password'>
                 </input>
