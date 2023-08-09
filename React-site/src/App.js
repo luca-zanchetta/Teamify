@@ -3,7 +3,7 @@ import axios from 'axios';
 import React, {useState, useEffect } from "react";
 
 import Login from "./Login";
-import SignUp from "./SingUp";
+import SignUp from "./SignUp";
 import Home from "./Home";
     
 function App() {
