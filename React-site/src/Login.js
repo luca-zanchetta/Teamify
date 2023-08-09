@@ -8,26 +8,9 @@ import axios from 'axios';
 
 var endpoint = 'http://localhost:5000/login'
 
-
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
-
-  // function handleSubmit(e) {
-  //   e.preventDefault();
-  //   var request = new XMLHttpRequest();
-  //   request.open("POST", "http://localhost:5000/login", true);
-
-  //   request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-  //   request.onreadystatechange = function() {//Call a function when the state changes.
-  //     if(request.readyState == 4 && request.status == 200) {
-  //         console.log('Response from /login: '+request.response);
-  //     }
-  //   }
-
-  //   request.send("username=luca&password=ciao");
-  // }
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -35,16 +18,12 @@ function Login() {
     try {
         // Send a POST request to the /login endpoint of the Flask server
         const response = await axios.post(endpoint, { username, password });
-        // Success message
-        setMessage(response.data.message);
         // Display received data (debugging purposes)
-        console.log("Message: "+response.data.message+"\nUsername: "+response.data.username+"\nPassword: "+response.data.password);
+        console.log("\nUsername: "+response.data.username+"\nPassword: "+response.data.password);
     } 
-    catch (error) {
+    catch (error) {   // Or something else
         // Error message
-        setMessage(error.response.data.message);
-        // Display received data (debugging purposes)
-        console.log("Error Message: "+error.response.data.message);
+        console.log("[ERROR] Request failed! "+error);
     }
   };
   
