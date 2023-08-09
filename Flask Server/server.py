@@ -11,7 +11,7 @@ def members():
 @app.route("/login", methods=['POST'])
 def login():
     data = request.get_json()
-    
+
     username = data['username']
     password = data['password']
 
@@ -19,7 +19,7 @@ def login():
 
 
 @app.route("/signup", methods=['POST'])
-def login():
+def signup():
     data = request.get_json()
 
     name = data['name']
