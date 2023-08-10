@@ -1,26 +1,43 @@
-from flask import Flask
 import psycopg2
+from DBConnection import get_connection, user, psw
 
-app = Flask(__name__)
+# Create connection
+conn = psycopg2.connect(host="localhost", port=5432, user=user, password=psw)
+conn.set_session(autocommit=True)
+cur = conn.cursor()
+if not conn:
+    print("Error during db connection")
 
-@app.route('/')
-def index():
-    # Create connection
-    conn = psycopg2.connect(host="localhost", port=5432, user="postgres", password="psw")
-    conn.set_session(autocommit=True)
-    cur = conn.cursor()
-    if not conn:
-        return "Error during db connection/a>"
+dropDB = "DROP DATABASE IF EXISTS teamify"
+createDB = "CREATE DATABASE teamify"
 
-    dropDB = "DROP DATABASE IF EXISTS teamify"
-    createDB = "CREATE DATABASE teamify"
+cur.execute(dropDB)
+try:
+    cur.execute(createDB)
+    print("DB created")
+except Exception as err:
+    print("Error: ", err)
+conn.close()
 
-    cur.execute(dropDB)
-    try:
-        cur.execute(createDB)
-        return "<h3 style=\"color:green;\">DB created</h3>"
-    except Exception as err:
-        return "<h3 style=\"color:red; display:inline\">Error: </h3>" + err
+conn = get_connection()
+if conn is None:
+    print("Error in db connection")
+cur = conn.cursor()
+dropMember = "DROP TABLE IF EXISTS member"
+member = """CREATE TABLE member (
+    email VARCHAR(100) NOT NULL,
+    username VARCHAR(100) PRIMARY KEY,
+    password CHAR(256) NOT NULL,
+    name VARCHAR(50) NOT NULL,
+    surname VARCHAR(50) NOT NULL,
+    date_birthday DATE NOT NULL
+)"""
 
-if __name__ == '__main__':
-    app.run()
+try:
+    cur.execute(dropMember)
+    cur.execute(member)   
+    conn.commit() 
+    print("Table created")
+except Exception as err:
+    print("Error: ", err)
+conn.close()
