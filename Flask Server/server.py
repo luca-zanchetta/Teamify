@@ -1,13 +1,29 @@
+# Import statements
+from hashlib import sha256
 from flask import Flask, jsonify, request
+from DBConnection import get_connection
 
+# Flask setup
 app = Flask(__name__)
 
+# DB setup
+return_message = ""
+conn = get_connection()
+conn.set_session(autocommit=True)
+if conn is None:
+    print("[ERROR] DB Connection failed.")
+    exit()
 
+
+# REST APIs
+
+# unknown
 @app.route("/")
 def members():
     return { "test" : "test"}
 
 
+# Login API
 @app.route("/login", methods=['POST'])
 def login():
     data = request.get_json()
@@ -18,20 +34,36 @@ def login():
     return jsonify({'username':username, 'password':password}), 200
 
 
+# Signup API
 @app.route("/signup", methods=['POST'])
 def signup():
     data = request.get_json()
+    curr = conn.cursor()
 
     name = data['name']
     surname = data['surname']
     birth_date = data['birth']
     email = data['email']
     username = data['username']
-    password = data['password1']
-    
-    return jsonify({'name':name, 'surname':surname,
-                    'birth':birth_date, 'email':email,
-                    'username':username, 'password':password}), 200
+    password = data['password']
+
+    encoded_password = sha256(str(password).encode('utf-8')).hexdigest()
+
+    query = "INSERT INTO member VALUES (%s, %s, %s, %s, %s, %s)"
+    params = (name, surname, birth_date, email, username, encoded_password)
+    try: 
+        curr.execute(query, params)
+        print('[INFO] /login: New user created.')
+        return_message = "ok"
+    except Exception as err:
+        print("[ERROR] /login: ", err)
+        return_message = "ko"
+
+    if(return_message == "ko"):
+        return jsonify(return_message), 400
+
+    return jsonify(return_message), 200
+
 
 
 if __name__ == "__main__":
