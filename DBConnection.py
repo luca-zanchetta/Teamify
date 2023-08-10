@@ -1,6 +1,6 @@
 import psycopg2
 user="postgres"
-psw="piero001"
+psw="postgres"
 def get_connection():
     try:
         conn = psycopg2.connect(host="localhost", port=5432, dbname="teamify", user=user, password=psw)
