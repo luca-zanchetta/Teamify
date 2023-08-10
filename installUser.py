@@ -1,5 +1,5 @@
 from flask import Flask, render_template
-from connection import get_connection
+from DBConnection import get_connection
 
 app = Flask(__name__)
 
