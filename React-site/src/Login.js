@@ -3,7 +3,30 @@ import './Css/Login.css'
 
 import {Link} from 'react-router-dom'
 
+import React, { useState } from 'react';
+import axios from 'axios';
+
+var endpoint = 'http://localhost:5000/login'
+
 function Login() {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    try {
+        // Send a POST request to the /login endpoint of the Flask server
+        const response = await axios.post(endpoint, { username, password });
+        // Display received data (debugging purposes)
+        console.log("\nUsername: "+response.data.username+"\nPassword: "+response.data.password);
+    } 
+    catch (error) {   // Or something else
+        // Error message
+        console.log("[ERROR] Request failed! "+error);
+    }
+  };
+  
   return (
     <div className='App'>
       <div className='TopBar'>
@@ -28,24 +51,23 @@ function Login() {
             <div className='CardHeading'>
               Log into your account
             </div>
-            <form>
+            <form onSubmit={handleSubmit}>
               <div className='InputEntry'>
                 <div className='InputLabel'>
                   Username
                 </div>
-                <input className='InputField' type='text' placeholder='Enter your username'>
+                <input className='InputField' type='text' placeholder='Enter your username' id='username' onChange={(event)=>setUsername(event.target.value)}>
                 </input>
               </div>
               <div className='InputEntry'>
                 <div className='InputLabel'>
                   Password
                 </div>
-                <input className='InputField' type='text' placeholder='Enter your password'>
+                <input className='InputField' type='password' placeholder='Enter your password' id='password' onChange={(event)=>setPassword(event.target.value)}>
                 </input>
               </div>
               <hr/>
-              <input type='submit' value={"Login"} id='Login'>
-              </input>
+              <input type='submit' value={"Login"} id='Login'></input>
             </form>
             <div className='Link' style={ {fontSize: 'small'}}>
               Forgot password?

@@ -28,7 +28,7 @@ function Home() {
             </div>
             <div className='SignUp'>
                 <Link to ="/signup"  style={{ color: 'inherit', textDecoration: 'inherit'}}>
-                    Sing Up
+                    Sign Up
                 </Link> 
             </div>
           </div> 
