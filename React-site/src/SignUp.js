@@ -1,13 +1,14 @@
 import './Css/App.css';
 import './Css/Login.css'
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
 var endpoint = 'http://localhost:5000/signup'
 
 function SignUp() {
+    // Form data
     const [name, setName] = useState("");
     const [surname, setSurname] = useState("");
     const [birth, setBirth] = useState("");
@@ -16,28 +17,39 @@ function SignUp() {
     const [password, setPassword] = useState("");
     const [password_again, setPasswordAgain] = useState("");
 
+    // For redirecting
+    const navigate = useNavigate()
+
+    // Handler for the event 'Submit of a form'
     const handleSubmit = async (event) => {
         event.preventDefault();
 
-        if(password == password_again) {
-            try {
-                // Send a POST request to the /signup endpoint of the Flask server
-                const response = await axios.post(endpoint, { name, surname, birth, email, username, password });
-                // Display received data (debugging purposes)
-                console.log("\nName: "+response.data.name+
-                            "\nSurname: "+response.data.surname+
-                            "\nDate of Birth: "+response.data.birth+
-                            "\nEmail: "+response.data.birth+
-                            "\nUsername: "+response.data.username+
-                            "\nPassword: "+response.data.password);
-            } 
-            catch (error) {     // Or something else
-                // Error message
-                console.log("[ERROR] Request failed! "+error);
+        if(name !== "" || surname !== "" || birth !== "" || email !== "" || username !== "" || password !== "" || password_again !== "") {
+            if(password === password_again && password !== "") {
+                try {
+                    // Send a POST request to the /signup endpoint of the Flask server
+                    const response = await axios.post(endpoint, { name, surname, birth, email, username, password });
+                    
+                    // If the signup has been successfully performed, then redirect the user to the Login page.
+                    // Sarebbe più carino un avviso di successo o qualcosa di simile
+                    if (response.status === 200) {
+                        navigate("/login");
+                    }
+                    else if (response.status === 400) {
+                        alert('[ERROR] Something bad happened: registration was unsuccessful :(')
+                    }
+                } 
+                catch (error) {
+                    // Error message
+                    console.log("[ERROR] Request failed: "+error);
+                }
+            }
+            else {  // Passwords do not match
+                alert('The inserted passwords do not match!');
             }
         }
-        else {
-            alert('The inserted passwords do not match!');  // Or something else bad :)
+        else {  // There is at least one mandatory field that has not been filled
+            alert('All the fields must be filled!');
         }
     };
 
@@ -63,7 +75,7 @@ function SignUp() {
                 <div className='CardHeading'>
                 Register your account
                 </div>
-                <form>
+                <form onSubmit={handleSubmit}>
                 <div className='InputEntry'>
                     <div className='InputLabel'>
                     Name
@@ -114,7 +126,7 @@ function SignUp() {
                     </input>
                 </div>
                 <hr/>
-                <input type='submit' value={"Register"} id='Register'>
+                <input type='submit' value={"Register"} id='Login'>
                 </input>
                 </form>
 
