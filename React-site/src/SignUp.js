@@ -24,8 +24,8 @@ function SignUp() {
     const handleSubmit = async (event) => {
         event.preventDefault();
 
-        if(name !== "" || surname !== "" || birth !== "" || email !== "" || username !== "" || password !== "" || password_again !== "") {
-            if(password === password_again && password !== "") {
+        if(name !== "" && surname !== "" && birth !== "" && email !== "" && username !== "" && password !== "" && password_again !== "") {
+            if(password === password_again) {
                 try {
                     // Send a POST request to the /signup endpoint of the Flask server
                     const response = await axios.post(endpoint, { name, surname, birth, email, username, password });
@@ -36,7 +36,7 @@ function SignUp() {
                         navigate("/login");
                     }
                     else if (response.status === 400) {
-                        alert('[ERROR] Something bad happened: registration was unsuccessful :(')
+                        alert('[ERROR] Something bad happened: registration was unsuccessful :(');
                     }
                 } 
                 catch (error) {

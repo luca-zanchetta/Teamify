@@ -1,7 +1,7 @@
 import './Css/App.css';
 import './Css/Login.css'
 
-import {Link} from 'react-router-dom'
+import {Link, useNavigate} from 'react-router-dom'
 
 import React, { useState } from 'react';
 import axios from 'axios';
@@ -12,18 +12,38 @@ function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
+  // For redirecting
+  const navigate = useNavigate()
+
+  // Handler for the event 'Submit of a form'
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    try {
+    if(username !== "" && password !== "") {
+      try {
         // Send a POST request to the /login endpoint of the Flask server
         const response = await axios.post(endpoint, { username, password });
-        // Display received data (debugging purposes)
-        console.log("\nUsername: "+response.data.username+"\nPassword: "+response.data.password);
+
+        // If the login has been successfully performed, then redirect the user to the homepage.
+        // Sarebbe più carino un avviso di successo o qualcosa di simile
+        if (response.status === 200) {
+          localStorage.setItem('user', username);   // Set a session variable
+          navigate("/");    // Da modificare a /home dopo il merge
+        }
+        else if (response.status === 400) {
+          alert('[ERROR] Username and/or password were not correct! Try again.');
+        }
+        else if (response.status === 404) {
+          alert('[ERROR] The user was not found in the system.');
+        }
     } 
-    catch (error) {   // Or something else
+    catch (error) {
         // Error message
-        console.log("[ERROR] Request failed! "+error);
+        console.log("[ERROR] Request failed: "+error);
+    }
+    }
+    else {  // There is at least one mandatory field that has not been filled
+      alert('All the fields must be filled!');
     }
   };
   
