@@ -7,7 +7,6 @@ from DBConnection import get_connection
 app = Flask(__name__)
 
 # DB setup
-return_message = ""
 conn = get_connection()
 conn.set_session(autocommit=True)
 if conn is None:
@@ -37,12 +36,16 @@ def login():
     params = (username,)
     curr.execute(query, params)
     (retrieved_password,) = curr.fetchone()
+    retrieved_password = retrieved_password.strip()     # There were some \n without any sense
 
     if retrieved_password == "":
+        print("[ERROR] /login: User not found.")
         return jsonify("not found"), 404
     elif encoded_password != retrieved_password:
+        print("[ERROR] /login: Wrong password.")
         return jsonify("ko"), 400
 
+    print("[INFO] /login: Login performed.")
     return jsonify("ok"), 200
 
 
@@ -65,17 +68,44 @@ def signup():
     params = (name, surname, birth_date, email, username, encoded_password)
     try: 
         curr.execute(query, params)
-        print('[INFO] /login: New user created.')
-        return_message = "ok"
     except Exception as err:
-        print("[ERROR] /login: ", err)
-        return_message = "ko"
+        print("[ERROR] /signup: ", err)
+        return jsonify("ko"), 400
 
-    if(return_message == "ko"):
-        return jsonify(return_message), 400
+    print('[INFO] /signup: New user created.')
+    return jsonify("ok"), 200
 
-    return jsonify(return_message), 200
 
+# Reset password API
+@app.route("/reset", methods=['POST'])
+def reset():
+    data = request.get_json()
+    curr = conn.cursor()
+
+    username = data['username']
+    new_password = data['password']
+    new_encoded_password = sha256(str(new_password).encode('utf-8')).hexdigest()
+
+    # Is there that user exist?
+    query_exists = "SELECT username FROM member WHERE username = %s"
+    param_exists = (username,)
+    curr.execute(query_exists, param_exists)
+    retrieved_username = str(curr.fetchone()).strip()
+    if retrieved_username == "":
+        print("[ERROR] /reset: User not found.")
+        return jsonify("ko"), 404
+
+    # The user exists; therefore, I can update his/her credentials.
+    query_update = "UPDATE member SET password = %s WHERE username = %s"
+    params_update = (new_encoded_password, username)
+    try:
+        curr.execute(query_update, params_update)
+    except Exception as err:
+        print("[ERROR] /reset: ", err)
+        return jsonify("ko"), 400
+    
+    print("[INFO] /reset: Reset password was successful.")
+    return jsonify("ok"), 200
 
 
 if __name__ == "__main__":
