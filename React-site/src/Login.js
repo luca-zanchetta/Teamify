@@ -29,6 +29,8 @@ function Login() {
         if (response.status === 200) {
           localStorage.setItem('user', username);   // Set a session variable
           navigate("/");    // Da modificare a /home dopo il merge
+          // localStorage.clear(); per rimuovere tutte le variabili settate
+          // localStorage.removeItem('user');
         }
         else if (response.status === 400) {
           alert('[ERROR] Username and/or password were not correct! Try again.');
@@ -90,7 +92,9 @@ function Login() {
               <input type='submit' value={"Login"} id='Login'></input>
             </form>
             <div className='Link' style={ {fontSize: 'small'}}>
-              Forgot password?
+              <Link to ="/reset">
+                Forgot password?
+              </Link>
             </div>
 
           </div>
