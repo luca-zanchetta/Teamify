@@ -27,11 +27,23 @@ def members():
 @app.route("/login", methods=['POST'])
 def login():
     data = request.get_json()
+    curr = conn.cursor()
 
     username = data['username']
     password = data['password']
+    encoded_password = sha256(str(password).encode('utf-8')).hexdigest()
 
-    return jsonify({'username':username, 'password':password}), 200
+    query = "SELECT password FROM member WHERE username = %s"
+    params = (username,)
+    curr.execute(query, params)
+    (retrieved_password,) = curr.fetchone()
+
+    if retrieved_password == "":
+        return jsonify("not found"), 404
+    elif encoded_password != retrieved_password:
+        return jsonify("ko"), 400
+
+    return jsonify("ok"), 200
 
 
 # Signup API
