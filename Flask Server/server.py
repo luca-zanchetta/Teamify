@@ -1,11 +1,12 @@
 # Import statements
 from hashlib import sha256
 from flask import Flask, jsonify, request
+from flask_cors import CORS #aggiunta
 from DBConnection import get_connection
 
 # Flask setup
 app = Flask(__name__)
-
+CORS(app) #aggiunta 
 # DB setup
 conn = get_connection()
 conn.set_session(autocommit=True)
@@ -109,4 +110,4 @@ def reset():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, host="localhost", port=5000) #modifica con aggiunta host e port
