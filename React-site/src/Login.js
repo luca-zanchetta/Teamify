@@ -2,7 +2,7 @@ import "./Css/App.css";
 import "./Css/Login.css";
 import Alert from "./Components/Alert.tsx";
 
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import React, { useState } from "react";
 import axios from "axios";
@@ -15,12 +15,11 @@ function Login() {
 
   // For redirecting
   const navigate = useNavigate();
-  const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
-  const registrationSuccess = queryParams.get("success");
+
+  const sign_up_200 = sessionStorage.getItem("sign_up_alert") === "true";
 
   const handleClosure = () => {
-    console.log("Close popup");
+    sessionStorage.setItem("sign_up_alert", false);
   };
 
   // Handler for the event 'Submit of a form'
@@ -35,7 +34,7 @@ function Login() {
         // If the login has been successfully performed, then redirect the user to the homepage.
         // Sarebbe più carino un avviso di successo o qualcosa di simile
         if (response.status === 200) {
-          localStorage.setItem('user', username);   // Set a session variable
+          localStorage.setItem("user", username); // Set a session variable
           navigate("/home");
           // localStorage.clear(); per rimuovere tutte le variabili settate
           // localStorage.removeItem('user');
@@ -74,8 +73,10 @@ function Login() {
           </div>
         </div>
       </div>
-      {registrationSuccess && (
-        <Alert onClick={handleClosure}>Successfully signed up!</Alert>
+      {sign_up_200 && (
+        <Alert onClick={handleClosure} state="success">
+          Successfully signed up!
+        </Alert>
       )}
       <div className="CentralContainer">
         <div className="LeftContainer">

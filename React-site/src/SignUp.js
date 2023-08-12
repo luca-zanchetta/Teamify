@@ -49,7 +49,8 @@ function SignUp() {
             // If the signup has been successfully performed, then redirect the user to the Login page.
             // Sarebbe più carino un avviso di successo o qualcosa di simile
             if (response.status === 200) {
-              navigate("/login?success==200"); //aggiunta di success==200 per controllare che la registrazione sia andata a buon fine ed inserire l'alert
+              navigate("/login"); //aggiunta di success==200 per controllare che la registrazione sia andata a buon fine ed inserire l'alert
+              sessionStorage.setItem("sign_up_alert", "true");
             } else if (response.status === 400) {
               alert(
                 "[ERROR] Something bad happened: registration was unsuccessful :("

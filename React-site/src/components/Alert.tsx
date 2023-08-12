@@ -4,22 +4,24 @@ import "../Css/Alert.css";
 
 interface Props {
   children: ReactNode;
+  state: string;
   onClick: () => void;
 }
 
-function Alert({ children, onClick }: Props) {
+function Alert({ children, state, onClick }: Props) {
   const [visible, visibleState] = useState(true);
+  const class_for_color = "alert alert-" + state.toString() + " mb-0 mt-0";
 
   if (visible)
     return (
-      <div className="row h-50">
-        <div class="alert alert-success mb-0 mt-0" role="alert">
+      <div className="row">
+        <div className={class_for_color} role="alert">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="16"
             height="16"
             fill="currentColor"
-            class="bi bi-x custom-icon"
+            className="bi bi-x custom-icon"
             viewBox="0 0 16 16"
             key={children}
             onClick={() => {
