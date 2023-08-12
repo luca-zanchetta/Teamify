@@ -5,7 +5,6 @@ import NavBar from './Components/NavBar';
 import TopBar from './Components/TopBar';
 import {Container} from './Css/Navigator.css'
 
-
 import {Link, useNavigate} from 'react-router-dom'
 import UserIcon from './Components/UserIcon';
 

@@ -29,10 +29,6 @@ function UserIcon() {
     }
 
 
-
-
-
-
     return ( 
     <div className='UserIcon'>
     <img src={face} onClick={ToggleUserMenu}></img>
