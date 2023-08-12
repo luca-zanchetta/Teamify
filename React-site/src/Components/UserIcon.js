@@ -1,6 +1,6 @@
 import '../Css/Navigator.css';
 
-import {Link} from 'react-router-dom'
+import {Link, useNavigate} from 'react-router-dom'
 import face from '../img/face.jpeg'
 
 import logout from '../icons/logout.png'
@@ -11,11 +11,22 @@ import { useState } from 'react';
 
 
 function UserIcon() {
+    const [show, setShow] = useState(false);
+    const navigate = useNavigate();
+
     function ToggleUserMenu() {
-        setShow(!show)  
+        setShow(!show);  
     }
 
-    const [show, setShow] = useState(false)
+    const handleLogout = async (event) => {
+        event.preventDefault();
+
+        const loggedIn = localStorage.getItem('user');
+        if(loggedIn) {
+            localStorage.clear();
+            navigate('/login');
+        }
+    }
 
 
     return ( 
@@ -45,7 +56,7 @@ function UserIcon() {
                 <div className='EntryIcon'>
                     <img src={logout}></img>
                 </div>
-                <div className='EntryText'>
+                <div className='EntryText' onClick={handleLogout}>
                     Log out
                 </div>
             </div>

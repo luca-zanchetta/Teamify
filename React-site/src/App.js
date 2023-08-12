@@ -5,6 +5,7 @@ import React, {useState, useEffect } from "react";
 import Login from "./Login";
 import SignUp from "./SignUp";
 import Home from "./Home";
+import Reset from "./Reset";
 import HomeLoggedIn from "./HomeLoggedIn";
     
 function App() {
@@ -28,6 +29,7 @@ function App() {
               <Route path="/" element= {<Home />} />
               <Route path="login" element= {<Login />} />
               <Route path="signup" element= {<SignUp />} />
+              <Route path="reset" element= {<Reset />} />
               <Route path="home" element= {<HomeLoggedIn />} />
           </Routes>
       </BrowserRouter>
