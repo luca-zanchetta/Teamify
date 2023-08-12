@@ -6,6 +6,7 @@ import Login from "./Login";
 import SignUp from "./SignUp";
 import Home from "./Home";
 import Reset from "./Reset";
+import HomeLoggedIn from "./HomeLoggedIn";
     
 function App() {
     //data è la variabile dello stato, setData è la funzione per settare il suo valore
@@ -29,6 +30,7 @@ function App() {
               <Route path="login" element= {<Login />} />
               <Route path="signup" element= {<SignUp />} />
               <Route path="reset" element= {<Reset />} />
+              <Route path="home" element= {<HomeLoggedIn />} />
           </Routes>
       </BrowserRouter>
     )

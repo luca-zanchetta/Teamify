@@ -35,8 +35,8 @@ function Login() {
         // If the login has been successfully performed, then redirect the user to the homepage.
         // Sarebbe più carino un avviso di successo o qualcosa di simile
         if (response.status === 200) {
-          localStorage.setItem("user", username); // Set a session variable
-          navigate("/"); // Da modificare a /home dopo il merge
+          localStorage.setItem('user', username);   // Set a session variable
+          navigate("/home");
           // localStorage.clear(); per rimuovere tutte le variabili settate
           // localStorage.removeItem('user');
         } else if (response.status === 400) {
