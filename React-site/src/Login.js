@@ -1,6 +1,6 @@
 import "./Css/App.css";
 import "./Css/Login.css";
-import Alert from "./components/Alert.tsx";
+import Alert from "./Components/Alert.tsx";
 
 import { Link, useNavigate, useLocation } from "react-router-dom";
 
@@ -75,7 +75,7 @@ function Login() {
         </div>
       </div>
       {registrationSuccess && (
-        <Alert onClick={handleClosure}>Succesfully sign up!</Alert>
+        <Alert onClick={handleClosure}>Successfully signed up!</Alert>
       )}
       <div className="CentralContainer">
         <div className="LeftContainer">
