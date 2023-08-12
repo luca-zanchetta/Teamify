@@ -13,7 +13,7 @@ function Login() {
   const [password, setPassword] = useState("");
 
   // For redirecting
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   // Handler for the event 'Submit of a form'
   const handleSubmit = async (event) => {
@@ -28,7 +28,7 @@ function Login() {
         // Sarebbe più carino un avviso di successo o qualcosa di simile
         if (response.status === 200) {
           localStorage.setItem('user', username);   // Set a session variable
-          navigate("/");    // Da modificare a /home dopo il merge
+          navigate("/home");
           // localStorage.clear(); per rimuovere tutte le variabili settate
           // localStorage.removeItem('user');
         }
