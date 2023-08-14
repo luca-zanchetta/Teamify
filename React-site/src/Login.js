@@ -15,6 +15,11 @@ function Login() {
 
   // For redirecting
   const navigate = useNavigate();
+  const loggedIn = localStorage.getItem('LoggedUser');
+
+  if(loggedIn) {   // If the user is logged in, (s)he should not be here.
+    navigate('/home');
+  }
 
   
   /* ALERT SECTION */
