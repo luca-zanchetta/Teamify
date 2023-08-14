@@ -5,7 +5,7 @@ import NavBar from './Components/NavBar';
 import TopBar from './Components/TopBar';
 
 
-import {Link} from 'react-router-dom'
+import {Link, useNavigate} from 'react-router-dom'
 import UserIcon from './Components/UserIcon';
 
 import Notifications from './Components/Notifications';
