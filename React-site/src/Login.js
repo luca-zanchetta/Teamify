@@ -1,13 +1,13 @@
 import "./Css/App.css";
 import "./Css/Login.css";
+
 import Alert from "./Components/Alert.tsx";
-
-import { Link, useNavigate } from "react-router-dom";
-
+import { Link, useNavigate, Navigate } from "react-router-dom";
 import React, { useState } from "react";
 import axios from "axios";
 
 var endpoint = "http://localhost:5000/login";
+const loggedIn = localStorage.getItem('LoggedUser');
 
 function Login() {
   const [username, setUsername] = useState("");
@@ -15,11 +15,6 @@ function Login() {
 
   // For redirecting
   const navigate = useNavigate();
-  const loggedIn = localStorage.getItem('LoggedUser');
-
-  if(loggedIn) {   // If the user is logged in, (s)he should not be here.
-    navigate('/home');
-  }
 
   
   /* ALERT SECTION */
@@ -96,6 +91,7 @@ function Login() {
 
         // If the login has been successfully performed, then redirect the user to the homepage.
         if (response.status === 200) {
+          localStorage.clear();
           localStorage.setItem("LoggedUser", username); // Set a session variable
           sessionStorage.setItem("login_alert", "true");
           navigate("/home");
@@ -116,6 +112,7 @@ function Login() {
 
   return (
     <div className="App">
+      {loggedIn && <Navigate to='/home' />}
       <div className="TopBar">
         <div className="BarHeading">
           <Link to="/" style={{ color: "inherit", textDecoration: "inherit" }}>

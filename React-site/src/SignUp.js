@@ -1,12 +1,13 @@
 import "./Css/App.css";
 import "./Css/Login.css";
-import { Link, useNavigate } from "react-router-dom";
-import Alert from "./Components/Alert.tsx";
 
+import { Link, useNavigate, Navigate } from "react-router-dom";
+import Alert from "./Components/Alert.tsx";
 import React, { useState } from "react";
 import axios from "axios";
 
 var endpoint = "http://localhost:5000/signup";
+const loggedIn = localStorage.getItem('LoggedUser');
 
 function SignUp() {
   // Form data
@@ -20,11 +21,6 @@ function SignUp() {
 
   // For redirecting
   const navigate = useNavigate();
-  const loggedIn = localStorage.getItem('LoggedUser');
-
-  if(loggedIn) {   // If the user is logged in, (s)he should not be here.
-    navigate('/home');
-  }
 
 
   /* ALERT SECTION */
@@ -133,6 +129,7 @@ function SignUp() {
 
   return (
     <div className="App">
+      {loggedIn && <Navigate to='/home' />}
       <div className="TopBar">
         <div className="BarHeading">
           <Link to="/" style={{ color: "inherit", textDecoration: "inherit" }}>

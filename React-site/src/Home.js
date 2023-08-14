@@ -1,23 +1,20 @@
 import './Css/App.css';
 import './Css/Homepage.css'
+
 import {TopBar,BarHeading} from './Css/Login.css'
-import {Link, useNavigate} from 'react-router-dom'
+import {Link, Navigate} from 'react-router-dom'
 
 import calendar from './icons/calendar.png'
 import paper from './icons/paper.png'
 import profits from './icons/profits.png'
 import savings from './icons/savings.png'
 
+const loggedIn = localStorage.getItem('LoggedUser');
+
 function Home() {
-  const loggedIn = localStorage.getItem('LoggedUser');
-  const navigate = useNavigate();
-
-  if(loggedIn) {   // If the user is logged in, his/her homepage is not this one.
-    navigate('/home');
-  }
-
   return ( 
     <div className='App'>
+      {loggedIn && <Navigate to='/home' />}
       <div className='TopBar'>
           <div className='BarHeading'>
             <Link to ="/"  style={{ color: 'inherit', textDecoration: 'inherit'}}>
