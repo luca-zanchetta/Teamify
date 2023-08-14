@@ -47,6 +47,7 @@ def login():
     return jsonify("ok"), 200
 
 
+
 # Signup API
 @app.route("/signup", methods=['POST'])
 def signup():
@@ -74,6 +75,7 @@ def signup():
     return jsonify("ok"), 200
 
 
+
 # Reset password API
 @app.route("/reset", methods=['POST'])
 def reset():
@@ -84,7 +86,7 @@ def reset():
     new_password = data['password']
     new_encoded_password = sha256(str(new_password).encode('utf-8')).hexdigest()
 
-    # Is there that user exist?
+    # Does that user exist?
     query_exists = "SELECT username FROM member WHERE username = %s"
     param_exists = (username,)
     curr.execute(query_exists, param_exists)
@@ -106,5 +108,28 @@ def reset():
     return jsonify("ok"), 200
 
 
+
+# Display user information
+@app.route("/home", methods=['POST'])
+def show_personal_info():
+    data = request.get_json()
+    curr = conn.cursor()
+
+    username = data['username']
+    query = "SELECT name, surname, birth_date, email FROM member WHERE username = %s"
+    params = (username,)
+
+    curr.execute(query, params)
+    (name, surname, birth, email) = curr.fetchone()
+    name = str(name).strip()
+    surname = str(surname).strip()
+    birth = str(birth).strip()
+    email = str(email).strip()
+
+    return jsonify({"name":name, "surname":surname, "birth":birth, "email":email}), 200
+
+
+############################ END REST APIs ####################################
+
 if __name__ == "__main__":
-    app.run(debug=True, host="localhost", port=5000) #modifica con aggiunta host e port
+    app.run(debug=True, host="localhost", port=5000)
