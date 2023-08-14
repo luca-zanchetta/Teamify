@@ -3,18 +3,39 @@ import './Css/Homepage.css'
 
 import NavBar from './Components/NavBar';
 import TopBar from './Components/TopBar';
-import {Container} from './Css/Navigator.css'
 
 
 import {Link} from 'react-router-dom'
 import UserIcon from './Components/UserIcon';
+
 import Notifications from './Components/Notifications';
 import Profile from './Components/Profile';
+
+import Alert from "./Components/Alert.tsx";
 
 
 
 
 function HomeLoggedIn() {
+
+  const loggedIn = localStorage.getItem('LoggedUser');
+  const navigate = useNavigate();
+
+  if(!loggedIn) {   // If the user is not logged in, (s)he has to login first.
+    navigate('/login');
+  }
+
+  /* ALERT SECTION */
+
+
+  const login_200 = sessionStorage.getItem("login_alert") === "true";
+  const handleLogin = () => {
+    sessionStorage.setItem("login_alert", "false");
+  };
+
+
+  /* END ALERT SECTION */
+
   return ( 
     <div className='App'>
       <div className='TopBar'>
@@ -31,7 +52,11 @@ function HomeLoggedIn() {
             <UserIcon></UserIcon>
           </div> 
       </div>
-    
+      {login_200 && (
+        <Alert onClick={handleLogin} state="success">
+          Welcome {loggedIn}!
+        </Alert>
+      )}
       <div className='SideContainer'>
         <NavBar></NavBar>
         <Profile></Profile>

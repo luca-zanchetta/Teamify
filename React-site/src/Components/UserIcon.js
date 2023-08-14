@@ -24,6 +24,7 @@ function UserIcon() {
         const loggedIn = localStorage.getItem('user');
         if(loggedIn) {
             localStorage.clear();
+            sessionStorage.clear();
             navigate('/login');
         }
     }

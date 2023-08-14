@@ -1,12 +1,13 @@
 # Import statements
 from hashlib import sha256
 from flask import Flask, jsonify, request
-from flask_cors import CORS #aggiunta
+from flask_cors import CORS
 from DBConnection import get_connection
 
 # Flask setup
 app = Flask(__name__)
-CORS(app) #aggiunta 
+CORS(app)
+
 # DB setup
 conn = get_connection()
 conn.set_session(autocommit=True)
@@ -15,13 +16,7 @@ if conn is None:
     exit()
 
 
-# REST APIs
-
-# unknown
-@app.route("/")
-def members():
-    return { "test" : "test"}
-
+############################ REST APIs ##################################
 
 # Login API
 @app.route("/login", methods=['POST'])
@@ -36,15 +31,17 @@ def login():
     query = "SELECT password FROM member WHERE username = %s"
     params = (username,)
     curr.execute(query, params)
-    (retrieved_password,) = curr.fetchone()
-    retrieved_password = retrieved_password.strip()     # There were some \n without any sense
+    try:
+        (retrieved_password,) = curr.fetchone()
+        retrieved_password = retrieved_password.strip()     # There were some \n without any sense
 
-    if retrieved_password == "":
+        if encoded_password != retrieved_password:
+            print("[ERROR] /login: Wrong password.")
+            return jsonify("ko"), 400
+        
+    except Exception:
         print("[ERROR] /login: User not found.")
         return jsonify("not found"), 404
-    elif encoded_password != retrieved_password:
-        print("[ERROR] /login: Wrong password.")
-        return jsonify("ko"), 400
 
     print("[INFO] /login: Login performed.")
     return jsonify("ok"), 200
