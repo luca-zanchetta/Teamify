@@ -141,7 +141,8 @@
     border-radius: 10px;
     padding: 5%;
 }
-#ProfileDrop >hr {
+
+#ProfileDrop > hr {
     width: 80%;
     border-color: rgb(49, 49, 49);
 }
@@ -170,4 +171,69 @@
     aspect-ratio: 1 / 1;
     display: flex;
     max-width: 100%;
+}
+
+/* ===== Notification Drop Down ===== */
+
+#NotificationDrop {
+    width: 30vh;
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    z-index: 2;
+    right: 0;
+    top: 4.5rem;
+    background-color: aliceblue;
+    border-radius: 10px;
+    padding: 5%;
+    max-height: 30vh;
+    overflow-y: auto;
+}
+
+#NotificationDrop > hr {
+    width: 80%;
+    border-color: rgb(49, 49, 49);
+}
+
+.NotificationEntry {
+    cursor: pointer;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-content: center;
+    align-items: center;
+}
+
+.NotificatioTitles {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 5%;
+}
+
+.NotificatioTitles > h3 {
+    margin: 0;
+    font-size: large;
+    display: flex;
+}
+
+.NotificatioTitles > h4 {
+    text-align: left;
+    margin: 0;
+    display: flex;
+    font-size: medium;
+    font-weight: normal;
+    color: rgb(91, 91, 91);
+}
+
+.NotificationIcon {
+    display: flex;
+    width: 7vh;
+}
+
+.NotificationIcon > img {
+    display: flex;
+    max-width: 100%;
+    aspect-ratio: 1 / 1;
 }

@@ -4,13 +4,20 @@ import './Css/Homepage.css'
 import NavBar from './Components/NavBar';
 import TopBar from './Components/TopBar';
 
-import {Link, useNavigate} from 'react-router-dom'
+
+import {Link} from 'react-router-dom'
 import UserIcon from './Components/UserIcon';
+
+import Notifications from './Components/Notifications';
+import Profile from './Components/Profile';
+
 import Alert from "./Components/Alert.tsx";
 
 
 
+
 function HomeLoggedIn() {
+
   const loggedIn = localStorage.getItem('LoggedUser');
   const navigate = useNavigate();
 
@@ -41,6 +48,7 @@ function HomeLoggedIn() {
             <TopBar></TopBar>
           </div>
           <div className='Buttons'>
+            <Notifications></Notifications>
             <UserIcon></UserIcon>
           </div> 
       </div>
@@ -51,6 +59,7 @@ function HomeLoggedIn() {
       )}
       <div className='SideContainer'>
         <NavBar></NavBar>
+        <Profile></Profile>
       </div>
     </div>
   );
