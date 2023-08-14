@@ -42,8 +42,31 @@ try:
     cur.execute(member)   
     conn.commit() 
 
-    print("Table created")
+    print("Table member created")
 except Exception as err:
     print("Error: ", err)
+
+
+# Create task table
+dropTask = "DROP TABLE IF EXISTS task"
+task = """CREATE TABLE task (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(50) NOT NULL,
+    description TEXT,
+    date DATE NOT NULL,
+    time TIME NOT NULL,
+    status VARCHAR(50) DEFAULT 'not_completed' CHECK (status IN ('completed','not_completed')),
+    member VARCHAR REFERENCES member(username),
+    type VARCHAR(10) DEFAULT 'personal' CHECK (type IN ('personal', 'event'))
+)"""
+
+try:
+    cur.execute(dropTask)
+    cur.execute(task)
+    conn.commit()
+    print("Task table created")
+except Exception as err:
+    print("Error: ", err)
+
 
 conn.close()

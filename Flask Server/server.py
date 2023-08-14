@@ -4,6 +4,9 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS #aggiunta
 from DBConnection import get_connection
 
+import psycopg2
+from psycopg2 import errors
+
 # Flask setup
 app = Flask(__name__)
 CORS(app) #aggiunta 
@@ -107,6 +110,52 @@ def reset():
     
     print("[INFO] /reset: Reset password was successful.")
     return jsonify("ok"), 200
+
+
+
+#New Task API
+@app.route("/newtask", methods=["POST"])
+def create_new_task():
+    curr = conn.cursor()
+
+    # Fetch the ID of the last inserted task
+    curr.execute("SELECT id FROM task ORDER BY id DESC LIMIT 1")
+    last_id = curr.fetchone()
+
+    if last_id:
+        new_id = last_id[0] + 1
+    else:
+        new_id = 1
+
+    print(new_id)
+    # Extract other data from the request
+    title = request.json["title"]
+    date = request.json["date"]
+    time = request.json["time"]
+    description = request.json["description"]
+    member=request.json["user"]
+
+    curr.execute("SELECT username FROM member where username= %s ORDER BY username DESC LIMIT 1",(member,))
+    member_db = curr.fetchone()
+
+    if not member_db:
+        return jsonify("Not auth"), 401
+    
+
+    # Insert the new task with the calculated new_id
+   # print(type(new_id),type(title),type(date),type(time),type(description),type(user))
+    query="INSERT INTO task (id, title, date, time, description, member) VALUES (%s, %s, %s, %s, %s, %s)"
+    values=(new_id, title, date, time, description, member)
+    
+    try: 
+        curr.execute(query, values)
+    except Exception as err:
+        print("[ERROR] /new_task: ", err)
+        return jsonify("ko"), 400
+
+    return jsonify({"message": "Task created successfully", "id": new_id}), 200
+
+
 
 
 if __name__ == "__main__":
