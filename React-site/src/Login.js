@@ -91,10 +91,10 @@ function Login() {
 
         // If the login has been successfully performed, then redirect the user to the homepage.
         if (response.status === 200) {
-          localStorage.clear();
           localStorage.setItem("LoggedUser", username); // Set a session variable
           sessionStorage.setItem("login_alert", "true");
           navigate("/home");
+          window.location.replace(window.location.href);
         }
       } 
       catch (error) {
