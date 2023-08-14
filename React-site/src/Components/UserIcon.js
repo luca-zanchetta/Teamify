@@ -26,6 +26,7 @@ function UserIcon() {
             localStorage.clear();
             sessionStorage.clear();
             navigate('/login');
+            window.location.replace(window.location.href);
         }
     }
 
