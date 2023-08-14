@@ -1,23 +1,55 @@
 import '../Css/Profile.css';
-
-
 import setting from '../icons/setting.png'
-
 import { useState } from 'react';
 import face from '../img/face.jpeg'
 import edit from '../icons/edit.png'
+import axios from "axios";
+
+var endpoint = "http://localhost:5000/home";
 
 
 function Profile() {
-    const [show, setShow] = useState(false)
+    const [show, setShow] = useState(false);
+    const username = localStorage.getItem('LoggedUser');
+    const [name, setName] = useState("");
+    const [surname, setSurname] = useState("");
+    const [email, setEmail] = useState("");
+    const [birth, setBirth] = useState("");
 
     function ToggleUserMenu() {
         setShow(!show)  
     }
 
+    const show_data = async (event) => {
+      try {
+        // Send a POST request to the /login endpoint of the Flask server
+        const response = await axios.post(endpoint, {
+          username
+        }).catch(
+          function (error) {
+            if(error.response) {
+              // Print error data
+              console.log("Data: "+error.response.data);
+              console.log("Status: "+error.response.status);
+              console.log("Headers: "+error.response.headers);
+            }
+          }
+        );
+  
+        setName(response.data['name']);
+        setSurname(response.data['surname']);
+        setBirth(response.data['birth']);
+        setEmail(response.data['email']);
+      } 
+      catch (error) {
+        // Request failed
+        console.log("[ERROR] Request failed: " + error);
+      }
+    }
+
 
     return ( 
-    <div className='Profile'>
+    <div className='Profile' onLoad={show_data}>
       <div className='ProfileCard'>
         <div className='ProfileNav'>
         
@@ -46,7 +78,7 @@ function Profile() {
               </div>
               <div className='ProfileInfos'>
                 <h2>
-                  Name Surname
+                  {name} {surname}
                 </h2>
                 <h3>
                   Team Manager
@@ -65,7 +97,7 @@ function Profile() {
             <div className='VerticalContainer'>
               <div className='Row'>
                 <div className='Title'>
-                  Personal Informations
+                  Personal Information
                 </div>
                 <div className='EditButton'>
                   edit
@@ -78,25 +110,25 @@ function Profile() {
                     Username
                   </h4>
                   <h2>
-                    TizianaX
+                    {username}
                   </h2>
                 </div>
               </div>
               <div className='Row'>
                 <div className='TextEntry'>
                   <h4>
-                    First Name
+                    Name
                   </h4>
                   <h2>
-                    Tiziana
+                    {name}
                   </h2>
                 </div>
                 <div className='TextEntry'>
                   <h4>
-                    First Name
+                    Surname
                   </h4>
                   <h2>
-                    Tiziana
+                    {surname}
                   </h2>
                 </div>
               </div>
@@ -106,7 +138,7 @@ function Profile() {
                     Email
                   </h4>
                   <h2>
-                    Tiziana@ayoooo.it
+                    {email}
                   </h2>
                 </div>
                 <div className='TextEntry'>
@@ -114,7 +146,7 @@ function Profile() {
                     Birth Date
                   </h4>
                   <h2>
-                    12/12/2000
+                    {birth}
                   </h2>
                 </div>
               </div>
