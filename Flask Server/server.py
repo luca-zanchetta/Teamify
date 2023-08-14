@@ -116,17 +116,19 @@ def show_personal_info():
     curr = conn.cursor()
 
     username = data['username']
-    query = "SELECT name, surname, birth_date, email FROM member WHERE username = %s"
-    params = (username,)
+    if username != "":
+        query = "SELECT name, surname, birth_date, email FROM member WHERE username = %s"
+        params = (username,)
 
-    curr.execute(query, params)
-    (name, surname, birth, email) = curr.fetchone()
-    name = str(name).strip()
-    surname = str(surname).strip()
-    birth = str(birth).strip()
-    email = str(email).strip()
+        curr.execute(query, params)
+        (name, surname, birth, email) = curr.fetchone()
+        name = str(name).strip()
+        surname = str(surname).strip()
+        birth = str(birth).strip()
+        email = str(email).strip()
 
-    return jsonify({"name":name, "surname":surname, "birth":birth, "email":email}), 200
+        return jsonify({"name":name, "surname":surname, "birth":birth, "email":email}), 200
+    return jsonify("ko"), 400
 
 
 ############################ END REST APIs ####################################
