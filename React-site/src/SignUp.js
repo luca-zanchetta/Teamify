@@ -1,10 +1,13 @@
 import "./Css/App.css";
 import "./Css/Login.css";
-import { Link, useNavigate } from "react-router-dom";
+
 import React, { useEffect, useState } from "react";
+import { Link, useNavigate, Navigate } from "react-router-dom";
+import Alert from "./Components/Alert.tsx";
 import axios from "axios";
 
 var endpoint = "http://localhost:5000/signup";
+const loggedIn = localStorage.getItem('LoggedUser');
 
 function SignUp() {
   // Form data
@@ -19,9 +22,48 @@ function SignUp() {
   // For redirecting
   const navigate = useNavigate();
 
+
+  /* ALERT SECTION */
+
+
+  // Handler for missing fields error
+  const missingFields = sessionStorage.getItem("fields_alert") === "true";
+  const handleMissingFields = () => {
+    sessionStorage.setItem("fields_alert", "false");
+  };
+
+  // Handler for passwords not matching error
+  const passwordsNotMatching = sessionStorage.getItem("passwords_alert") === "true";
+  const handlePasswordsNotMatching = () => {
+    sessionStorage.setItem("passwords_alert", "false");
+  };
+
+  // Handler for passwords not composed of 8 characters error
+  const passwordNotOf8Characters = sessionStorage.getItem("password8_alert") === "true";
+  const handlePasswordNotOf8Characters = () => {
+    sessionStorage.setItem("password8_alert", "false");
+  };
+
+  // Handler for request failed error
+  const requestFailed = sessionStorage.getItem("request_failed_alert") === "true";
+  const handleRequestFailed = () => {
+    sessionStorage.setItem("request_failed_alert", "false");
+  };
+
+
+  /* END OF ALERT SECTION */
+
+
   // Handler for the event 'Submit of a form'
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    // Set form values
+    localStorage.setItem('name', name);
+    localStorage.setItem('surname', surname);
+    localStorage.setItem('birth', birth);
+    localStorage.setItem('email', email);
+    localStorage.setItem('username', username);
 
     if (
       name !== "" &&
@@ -46,34 +88,48 @@ function SignUp() {
             });
 
             // If the signup has been successfully performed, then redirect the user to the Login page.
-            // Sarebbe più carino un avviso di successo o qualcosa di simile
             if (response.status === 200) {
-              navigate("/login"); //aggiunta di success==200 per controllare che la registrazione sia andata a buon fine ed inserire l'alert
               sessionStorage.setItem("sign_up_alert", "true");
-            } else if (response.status === 400) {
-              alert(
-                "[ERROR] Something bad happened: registration was unsuccessful :("
-              );
-            }
-          } catch (error) {
-            // Error message
+
+              // Erase form values
+              localStorage.clear();
+
+              // Redirect
+              navigate("/login"); 
+            } 
+          } 
+          catch (error) {
+            // Request failed
+            sessionStorage.setItem("request_failed_alert", "true");
+            window.location.replace(window.location.href);  // For alert purposes only
             console.log("[ERROR] Request failed: " + error);
           }
-        } else {
-          alert("The password must contain at least 8 characters!");
+        } 
+        else {
+          // The password does not contain at least 8 characters
+          sessionStorage.setItem("password8_alert", "true");
+          window.location.replace(window.location.href);  // For alert purposes only
+          console.log("The password must contain at least 8 characters!");
         }
-      } else {
+      } 
+      else {
         // Passwords do not match
-        alert("The inserted passwords do not match!");
+        sessionStorage.setItem("passwords_alert", "true");
+        window.location.replace(window.location.href);  // For alert purposes only
+        console.log("The inserted passwords do not match!");
       }
-    } else {
+    } 
+    else {
       // There is at least one mandatory field that has not been filled
-      alert("All the fields must be filled!");
+      sessionStorage.setItem("fields_alert", "true");
+      window.location.replace(window.location.href);  // For alert purposes only
+      console.log("All the fields must be filled!");
     }
   };
 
   return (
     <div className="App">
+      {loggedIn && <Navigate to='/home' />}
       <div className="TopBar">
         <div className="BarHeading">
           <Link to="/" style={{ color: "inherit", textDecoration: "inherit" }}>
@@ -90,6 +146,29 @@ function SignUp() {
           </div>
         </div>
       </div>
+      {missingFields && (
+        <Alert onClick={handleMissingFields} state="danger">
+          All the fields must be filled!
+        </Alert>
+      )}
+
+      {passwordsNotMatching && (
+        <Alert onClick={handlePasswordsNotMatching} state="danger">
+          The inserted passwords do not match!
+        </Alert>
+      )}
+
+      {passwordNotOf8Characters && (
+        <Alert onClick={handlePasswordNotOf8Characters} state="danger">
+          The password must contain at least 8 characters!
+        </Alert>
+      )}
+
+      {requestFailed && (
+        <Alert onClick={handleRequestFailed} state="danger">
+          Error: Signup failed.
+        </Alert>
+      )}
       <div className="SignUpBackground">
         <div className="CardL">
           <div className="CardHeading">Register your account</div>
@@ -101,6 +180,7 @@ function SignUp() {
                 type="text"
                 placeholder="Enter your name"
                 id="name"
+                defaultValue={localStorage.getItem("name")}
                 onChange={(event) => setName(event.target.value)}
               ></input>
             </div>
@@ -111,6 +191,7 @@ function SignUp() {
                 type="text"
                 placeholder="Enter your surname"
                 id="surname"
+                defaultValue={localStorage.getItem("surname")}
                 onChange={(event) => setSurname(event.target.value)}
               ></input>
             </div>
@@ -121,6 +202,7 @@ function SignUp() {
                 type="date"
                 placeholder="dd/mm/yyy"
                 id="birth"
+                defaultValue={localStorage.getItem("birth")}
                 onChange={(event) => setBirth(event.target.value)}
               ></input>
             </div>
@@ -131,6 +213,7 @@ function SignUp() {
                 type="text"
                 placeholder="your.email@example.com"
                 id="email"
+                defaultValue={localStorage.getItem("email")}
                 onChange={(event) => setEmail(event.target.value)}
               ></input>
             </div>
@@ -141,6 +224,7 @@ function SignUp() {
                 type="text"
                 placeholder="Enter your username"
                 id="username"
+                defaultValue={localStorage.getItem("username")}
                 onChange={(event) => setUsername(event.target.value)}
               ></input>
             </div>

@@ -12,6 +12,7 @@ import { useState } from 'react';
 
 function UserIcon() {
     const [show, setShow] = useState(false);
+    const [showData, setShowData] = useState(false);
     const navigate = useNavigate();
 
     function ToggleUserMenu() {
@@ -21,10 +22,24 @@ function UserIcon() {
     const handleLogout = async (event) => {
         event.preventDefault();
 
-        const loggedIn = localStorage.getItem('user');
+        const loggedIn = localStorage.getItem('LoggedUser');
         if(loggedIn) {
             localStorage.clear();
+            sessionStorage.clear();
             navigate('/login');
+            window.location.replace(window.location.href);
+        }
+    }
+    
+    const toggleDisplayData = async (event) => {
+        event.preventDefault();
+
+        const loggedIn = localStorage.getItem('LoggedUser');
+        if(loggedIn) {
+            localStorage.clear();
+            sessionStorage.clear();
+            navigate('/login');
+            window.location.replace(window.location.href);
         }
     }
 
@@ -35,7 +50,7 @@ function UserIcon() {
     { show && (
         <>
         <div id='ProfileDrop'>
-            <div className='ProfileEntry'>
+            <div className='ProfileEntry' onClick={toggleDisplayData}>
                 <div className='EntryIcon'>
                     <img src={user}></img>
                 </div>
@@ -52,11 +67,11 @@ function UserIcon() {
                 </div>
             </div>
             <hr />
-            <div className='ProfileEntry'>
+            <div className='ProfileEntry' onClick={handleLogout}>
                 <div className='EntryIcon'>
                     <img src={logout}></img>
                 </div>
-                <div className='EntryText' onClick={handleLogout}>
+                <div className='EntryText'>
                     Log out
                 </div>
             </div>
