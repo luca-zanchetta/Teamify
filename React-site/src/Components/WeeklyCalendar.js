@@ -39,7 +39,7 @@ const WeeklyCalendar = ({
   const localUser = localStorage.getItem("user"); //da modificare
   const localTeam = 0; //da gestire quando si implementano i team
   const currentPath = window.location.pathname; //get the current position
-  console.log(currentPath);
+  //console.log(currentPath);
 
   const EventDisplay = ({ event }) => {
     return (
@@ -50,7 +50,7 @@ const WeeklyCalendar = ({
   };
 
   const eventStyleGetter = (event, start, end, isSelected) => {
-    console.log(event);
+    //console.log(event);
     var backgroundColor = "#" + event.hexColor;
     var style = {
       backgroundColor: "#07fcaf",

@@ -13,7 +13,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import moment from "moment";
 
-var endpoint = "http://localhost:5000/home/newtask";
+var endpoint = "http://localhost:5000/home/home/newtask";
 
 function NewTask() {
   const [id, setId] = useState(0);
@@ -66,8 +66,8 @@ function NewTask() {
   //da debbugare
   const slotStyleGetter = useCallback(
     (date) => {
-      console.log("Selected Slots:", selectedSlots);
-      console.log("Current Date:", date);
+      //console.log("Selected Slots:", selectedSlots);
+      //console.log("Current Date:", date);
       const isDateSelected = selectedSlots.some(
         (selectedDate) =>
           moment(selectedDate).isSame(date, "day") &&
@@ -138,6 +138,14 @@ function NewTask() {
       }
     } else {
       sessionStorage.setItem("error_alert", true);
+      console.log(
+        "ERROR FROM NEW TASK date:",
+        date,
+        "time",
+        time,
+        "title:",
+        title
+      );
       setError(
         "All the fields must be filled and must must respect the type constraints"
       );
