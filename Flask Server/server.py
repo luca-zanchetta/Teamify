@@ -4,9 +4,11 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from DBConnection import get_connection
 
+
 # Flask setup
 app = Flask(__name__)
 CORS(app)
+
 
 # DB setup
 conn = get_connection()
@@ -128,6 +130,8 @@ def show_personal_info():
         email = str(email).strip()
 
         return jsonify({"name":name, "surname":surname, "birth":birth, "email":email}), 200
+    
+    print("[INFO] /reset: Reset password was successful.")
     return jsonify("ko"), 404
 
 
@@ -158,6 +162,7 @@ def modify_personal_info():
         print("[INFO] /home/modify-info: Update was successful.")
         return jsonify("ok"), 200   # Here we should redirect to /home at the frontend!
 
+    print("[ERROR] /home/modify-info: Username not found.")
     return jsonify("ko"), 404
 
 
@@ -182,8 +187,34 @@ def modify_personal_info():
         print("[INFO] /home/delete-account: User was successfully removed.")
         return jsonify("ok"), 200   # Here we should redirect to /login at the frontend!
 
+    print("[ERROR] /home/delete-account: Username not found.")
     return jsonify("ko"), 404
 
+
+
+# Display user notifications
+@app.route("/home/notifications", methods=['POST'])
+def get_notifications():
+    data = request.get_json()
+    curr = conn.cursor()
+    records = []
+
+    username = data['username']
+    if username != "":
+        query = "SELECT id, date, content, type, read FROM notification WHERE username = %s"
+        params = (username,)
+        curr.execute(query, params)
+
+        records = curr.fetchall()
+        if len(records) == 0:
+            print("[INFO] /home/notifications: There is no notification for this user.")
+            return jsonify("empty"), 200
+        
+        print("[INFO] /home/notifications: Display notifications was successful.")
+        return jsonify({"id":records[0], "date":records[1], "content":records[2], "type":records[3], "read":records[4]}), 200
+
+    print("[ERROR] /home/notifications: Username not found.")
+    return jsonify("ko"), 404
 
 ############################ END REST APIs ####################################
 
