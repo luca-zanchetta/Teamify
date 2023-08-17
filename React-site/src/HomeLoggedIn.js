@@ -23,7 +23,7 @@ function HomeLoggedIn() {
     //sessionStorage.setItem("error_alert", false);
   };
 
-  if (!loggedIn) {
+  if (!username) {
     // If the user is not logged in, (s)he has to login first.
     navigate("/login");
   }

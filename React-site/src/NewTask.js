@@ -13,7 +13,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import moment from "moment";
 
-var endpoint = "http://localhost:5000/home/home/newtask";
+var endpoint = "http://localhost:5000/home/newtask";
 
 function NewTask() {
   const [id, setId] = useState(0);
@@ -91,7 +91,7 @@ function NewTask() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const userFromLocal = localStorage.getItem("user");
+    const userFromLocal = localStorage.getItem("LoggedUser");
 
     if (userFromLocal == "") {
       navigate("/login");
