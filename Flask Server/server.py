@@ -169,7 +169,7 @@ def modify_personal_info():
 
 # Delete user account (cascade on all its foreign keys!)
 @app.route("/home/delete-account", methods=['POST'])
-def modify_personal_info():
+def delete_account():
     data = request.get_json()
     curr = conn.cursor()
 

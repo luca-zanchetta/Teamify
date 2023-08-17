@@ -56,6 +56,7 @@ except Exception as err:
 
 
 # Table 'notification'
+# Maybe date should be a timestamp
 dropNotification = "DROP TABLE IF EXISTS notification"
 notification = """CREATE TABLE notification (
     id SERIAL PRIMARY KEY,
