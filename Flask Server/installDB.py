@@ -1,5 +1,6 @@
 import psycopg2
 from DBConnection import get_connection, user, psw
+from hashlib import sha256
 
 # Create connection
 conn = psycopg2.connect(host="localhost", port=5432, user=user, password=psw)
@@ -49,12 +50,43 @@ try:
     cur.execute(member)   
     conn.commit() 
 
+    password = sha256(str("ciaociao").encode('utf-8')).hexdigest()
+    query = "INSERT INTO member (name, surname, birth_date, email, username, password) VALUES (%s, %s, %s, %s, %s, %s)"
+    member_data = ("Admin", "Admin", '2000-01-01', "admin@example.com", "admin", password)
+
+    cur.execute(query, member_data)
+    conn.commit()
+
     print("[INFO] Table 'member' successfully created.")
 except Exception as err:
     print("Error: ", err)
     exit()
 
 
+# Create task table
+dropTask = "DROP TABLE IF EXISTS task"
+task = """CREATE TABLE task (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(50) NOT NULL,
+    description TEXT,
+    date DATE NOT NULL,
+    time TIME NOT NULL,
+    status VARCHAR(50) DEFAULT 'not_completed' CHECK (status IN ('completed','not_completed')),
+    member VARCHAR REFERENCES member(username),
+    type VARCHAR(10) DEFAULT 'personal' CHECK (type IN ('personal', 'event')),
+    duration INTEGER DEFAULT 60 CHECK (duration > 0)
+)"""
+
+try:
+    cur.execute(dropTask)
+    cur.execute(task)
+    conn.commit()
+    print("[INFO] Table 'task' successfully created.")
+except Exception as err:
+    print("Error: ", err)
+    exit()
+
+    
 # Table 'notification'
 # Maybe date should be a timestamp
 dropNotification = "DROP TABLE IF EXISTS notification"

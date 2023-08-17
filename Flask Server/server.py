@@ -3,6 +3,9 @@ from hashlib import sha256
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from DBConnection import get_connection
+from support import get_current_week_range,convert_date
+import psycopg2
+from psycopg2 import errors
 
 
 # Flask setup
@@ -111,8 +114,113 @@ def reset():
 
 
 
+#New Task API
+@app.route("/home/newtask", methods=["POST"])
+def create_new_task():
+    curr = conn.cursor()
+
+    # Fetch the ID of the last inserted task
+    curr.execute("SELECT id FROM task ORDER BY id DESC LIMIT 1")
+    last_id = curr.fetchone()
+
+    if last_id:
+        new_id = last_id[0] + 1
+    else:
+        new_id = 1
+
+    print(new_id)
+    # Extract other data from the request
+    title = request.json["title"]
+    date = request.json["date"]
+    time = request.json["time"]
+    description = request.json["description"]
+    member=request.json["user"]
+    duration=request.json["duration"]
+
+    curr.execute("SELECT username FROM member where username= %s ORDER BY username DESC LIMIT 1",(member,))
+    member_db = curr.fetchone()
+
+    if not member_db:
+        return jsonify("Not auth"), 401
+    
+
+    # Insert the new task with the calculated new_id
+   # print(type(new_id),type(title),type(date),type(time),type(description),type(user))
+    query="INSERT INTO task (id, title, date, time, description, member,duration) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+    values=(new_id, title, date, time, description, member,duration)
+    
+    try: 
+        curr.execute(query, values)
+    except Exception as err:
+        print("[ERROR] /new_task: ", err)
+        return jsonify("ko"), 400
+
+    return jsonify({"message": "Task created successfully", "id": new_id}), 200
+
+  
+  
+#Get all tasks API
+@app.route("/tasks", methods=["GET"])
+def get_tasks():
+    curr = conn.cursor()
+    # Fetch the ID of the last inserted task
+    local_user=request.args.get("user") #get back the params from the request 
+    curr.execute("SELECT title, description, date, time, duration FROM task WHERE member = %s", (local_user,))
+    tasks = curr.fetchall()
+    
+    tasks_list = []
+    for task in tasks:
+        start_date = task[2].strftime("%Y-%m-%d") + " " + task[3].strftime("%H:%M:%S")
+        end_date = task[2].strftime("%Y-%m-%d") + " " + task[3].strftime("%H:%M:%S")
+
+        new_end_date= convert_date(end_date, task[4])
+        
+        tasks_list.append({
+            "title": task[0],
+            "start": start_date,
+            "end": new_end_date
+        })
+
+
+    return jsonify(tasks_list), 200
+
+
+  
+#Get events/tasks for shared agenda
+#GESTIONE DA FINIRE PER MANCANZA TEAM
+@app.route("/teamview", methods=["GET"])
+def get_tasks_events():
+    curr = conn.cursor()
+    # Fetch the ID of the last inserted task
+    local_user=request.args.get("user") #get back the params from the request 
+    local_team= request.args.get("team") #da gestire dopo l'implementazione dei team
+
+    curr.execute("SELECT title, description, date, time, duration FROM task WHERE member = %s", (local_user,))
+    tasks = curr.fetchall()
+
+    #curr.execute("SELECT title, description, date, time, duration FROM events WHERE team = %s", (local_team,))
+    #events = curr.fetchall()
+    
+    tasks_list = []
+    for task in tasks:
+        start_date = task[2].strftime("%Y-%m-%d") + " " + task[3].strftime("%H:%M:%S")
+        end_date = task[2].strftime("%Y-%m-%d") + " " + task[3].strftime("%H:%M:%S")
+
+        new_end_date= convert_date(end_date, task[4])
+        
+        tasks_list.append({
+            "title": task[0],
+            "start": start_date,
+            "end": new_end_date
+        })
+
+
+    return jsonify(tasks_list), 200
+
+
+  
 # Display user information
-@app.route("/home", methods=['POST'])
+@app.route("/home/profile", methods=['POST'])
 def show_personal_info():
     data = request.get_json()
     curr = conn.cursor()

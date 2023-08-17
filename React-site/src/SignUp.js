@@ -1,9 +1,9 @@
 import "./Css/App.css";
 import "./Css/Login.css";
 
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate, Navigate } from "react-router-dom";
 import Alert from "./Components/Alert.tsx";
-import React, { useState } from "react";
 import axios from "axios";
 
 var endpoint = "http://localhost:5000/signup";
