@@ -46,7 +46,6 @@ function HomeLoggedIn() {
       )}
       <div className='SideContainer'>
         <NavBar></NavBar>
-        <Profile></Profile>
       </div>
     </div>
   );
