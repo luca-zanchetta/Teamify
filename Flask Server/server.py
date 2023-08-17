@@ -128,7 +128,61 @@ def show_personal_info():
         email = str(email).strip()
 
         return jsonify({"name":name, "surname":surname, "birth":birth, "email":email}), 200
-    return jsonify("ko"), 400
+    return jsonify("ko"), 404
+
+
+
+# Modify user information
+# Notice that here we are not modifying the password, as there exists the specific REST API /reset
+@app.route("/home/modify-info", methods=['POST'])
+def modify_personal_info():
+    data = request.get_json()
+    curr = conn.cursor()
+
+    username = data['username']
+    name = data['name']
+    surname = data['surname']
+    birth_date = data['birth_date']
+    email = data['email']
+
+    if username != "":
+        query = "UPDATE member SET name = %s, surname = %s, birth_date = %s, email = %s WHERE username = %s"
+        params = (name, surname, birth_date, email, username,)
+
+        try: 
+            curr.execute(query, params)
+        except Exception as err:
+            print("[ERROR] /home/modify-info: ", err)
+            return jsonify("ko"), 400
+        
+        print("[INFO] /home/modify-info: Update was successful.")
+        return jsonify("ok"), 200   # Here we should redirect to /home at the frontend!
+
+    return jsonify("ko"), 404
+
+
+
+# Delete user account (cascade on all its foreign keys!)
+@app.route("/home/delete-account", methods=['POST'])
+def modify_personal_info():
+    data = request.get_json()
+    curr = conn.cursor()
+
+    username = data['username']
+    if username != "":
+        query = "DELETE FROM member WHERE username = %s"
+        params = (username,)
+
+        try: 
+            curr.execute(query, params)
+        except Exception as err:
+            print("[ERROR] /home/delete-account: ", err)
+            return jsonify("ko"), 400
+        
+        print("[INFO] /home/delete-account: User was successfully removed.")
+        return jsonify("ok"), 200   # Here we should redirect to /login at the frontend!
+
+    return jsonify("ko"), 404
 
 
 ############################ END REST APIs ####################################
