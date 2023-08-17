@@ -35,6 +35,7 @@ function Login() {
         // Sarebbe più carino un avviso di successo o qualcosa di simile
         if (response.status === 200) {
           localStorage.setItem("user", username); // Set a session variable
+          sessionStorage.setItem("sign_up_alert", false);
           navigate("/home");
           // localStorage.clear(); per rimuovere tutte le variabili settate
           // localStorage.removeItem('user');

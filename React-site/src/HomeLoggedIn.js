@@ -3,7 +3,7 @@ import "./Css/Homepage.css";
 
 import NavBar from "./Components/NavBar";
 import TopBar from "./Components/TopBar";
-import WeeklyCalendar from "./Components/WeeklyCalendar.tsx";
+import WeeklyCalendar from "./Components/WeeklyCalendar.js";
 import Alert from "./Components/Alert.tsx";
 import { Container } from "./Css/Navigator.css";
 
@@ -16,9 +16,11 @@ function HomeLoggedIn() {
 
   const navigate = useNavigate();
 
-  const new_task = sessionStorage.getItem("new_task");
+  //alert variable and function
+  const new_task = sessionStorage.getItem("new_task") === "true";
   const handleClosure = () => {
     sessionStorage.setItem("new_task", false);
+    //sessionStorage.setItem("error_alert", false);
   };
 
   if (!loggedIn) {
@@ -49,11 +51,11 @@ function HomeLoggedIn() {
       <div className="SideContainer">
         <NavBar></NavBar>
         <div className="CenterContainer">
-          <div className="CalendarContainer mt-5" width="100%">
+          <div className="container mt-5" width="100%">
             <div className="row text-center">
               <div className="col">
                 <h3 className="mb-3 mr-10">Personal Agenda</h3>
-                <WeeklyCalendar />
+                <WeeklyCalendar width={1000} height={570} />
               </div>
               <div className="col"></div>
               <div className="col">

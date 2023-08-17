@@ -8,6 +8,7 @@ import Home from "./Home";
 import Reset from "./Reset";
 import HomeLoggedIn from "./HomeLoggedIn";
 import NewTask from "./NewTask";
+import TeamView from "./TeamView";
 
 function App() {
   //data è la variabile dello stato, setData è la funzione per settare il suo valore
@@ -31,6 +32,7 @@ function App() {
         <Route path="reset" element={<Reset />} />
         <Route path="home" element={<HomeLoggedIn />} />
         <Route path="newtask" element={<NewTask />} />
+        <Route path="teamview" element={<TeamView />} />
       </Routes>
     </BrowserRouter>
   );

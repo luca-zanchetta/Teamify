@@ -1,5 +1,6 @@
 import psycopg2
 from DBConnection import get_connection, user, psw
+from hashlib import sha256
 
 # Create connection
 conn = psycopg2.connect(host="localhost", port=5432, user=user, password=psw)
@@ -42,7 +43,15 @@ try:
     cur.execute(member)   
     conn.commit() 
 
-    print("Table member created")
+    password = sha256(str("ciaociao").encode('utf-8')).hexdigest()
+    query = "INSERT INTO member (name, surname, birth_date, email, username, password) VALUES (%s, %s, %s, %s, %s, %s)"
+    member_data = ("Admin", "Admin", '2000-01-01', "admin@example.com", "admin", password)
+    #era troppo noioso inserire un utente ogni volta 
+
+    cur.execute(query, member_data)
+    conn.commit()
+
+    print("Table member created and member inserted")
 except Exception as err:
     print("Error: ", err)
 
@@ -57,7 +66,8 @@ task = """CREATE TABLE task (
     time TIME NOT NULL,
     status VARCHAR(50) DEFAULT 'not_completed' CHECK (status IN ('completed','not_completed')),
     member VARCHAR REFERENCES member(username),
-    type VARCHAR(10) DEFAULT 'personal' CHECK (type IN ('personal', 'event'))
+    type VARCHAR(10) DEFAULT 'personal' CHECK (type IN ('personal', 'event')),
+    duration INTEGER DEFAULT 60 CHECK (duration > 0)
 )"""
 
 try:
