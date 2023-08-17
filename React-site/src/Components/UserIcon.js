@@ -36,10 +36,7 @@ function UserIcon() {
 
         const loggedIn = localStorage.getItem('LoggedUser');
         if(loggedIn) {
-            localStorage.clear();
-            sessionStorage.clear();
-            navigate('/login');
-            window.location.replace(window.location.href);
+            // Work in progress...
         }
     }
 
@@ -50,7 +47,7 @@ function UserIcon() {
     { show && (
         <>
         <div id='ProfileDrop'>
-            <div className='ProfileEntry' onClick={toggleDisplayData}>
+            <div className='ProfileEntry'>
                 <div className='EntryIcon'>
                     <img src={user}></img>
                 </div>
