@@ -114,7 +114,7 @@ def reset():
 
 
 #New Task API
-@app.route("/newtask", methods=["POST"])
+@app.route("/home/newtask", methods=["POST"])
 def create_new_task():
     curr = conn.cursor()
 

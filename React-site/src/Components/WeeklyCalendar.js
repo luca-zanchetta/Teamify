@@ -36,7 +36,7 @@ const WeeklyCalendar = ({
   const startingHour = 8;
   const timeGutterFormat = "H:mm";
   const [events, setEvents] = useState([]);
-  const localUser = localStorage.getItem("user");
+  const localUser = localStorage.getItem("user"); //da modificare
   const localTeam = 0; //da gestire quando si implementano i team
   const currentPath = window.location.pathname; //get the current position
   console.log(currentPath);

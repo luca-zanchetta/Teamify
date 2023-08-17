@@ -31,7 +31,7 @@ function App() {
         <Route path="signup" element={<SignUp />} />
         <Route path="reset" element={<Reset />} />
         <Route path="home" element={<HomeLoggedIn />} />
-        <Route path="newtask" element={<NewTask />} />
+        <Route path="home/newtask" element={<NewTask />} />
         <Route path="teamview" element={<TeamView />} />
       </Routes>
     </BrowserRouter>

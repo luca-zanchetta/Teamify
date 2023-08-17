@@ -64,7 +64,7 @@ function HomeLoggedIn() {
                 </div>
                 <div className="row">
                   <Link
-                    to="/newtask"
+                    to="/home/newtask"
                     className="personalized-button"
                     style={{
                       textDecoration: "inherit",

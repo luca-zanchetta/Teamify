@@ -13,7 +13,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import moment from "moment";
 
-var endpoint = "http://localhost:5000/newtask";
+var endpoint = "http://localhost:5000/home/newtask";
 
 function NewTask() {
   const [id, setId] = useState(0);
