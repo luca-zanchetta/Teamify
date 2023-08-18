@@ -14,18 +14,24 @@ import Alert from "./Components/Alert.tsx";
 
 function HomeLoggedIn() {
   const username = localStorage.getItem('LoggedUser');
+  const ProfileData = localStorage.getItem('ProfileData') === 'true';
   const navigate = useNavigate();
 
-  //alert variable and function
+  if (!username) {
+    // If the user is not logged in, (s)he has to login first.
+    navigate("/login");
+  }
+
+  // Alert variable and function
   const new_task = sessionStorage.getItem("new_task") === "true";
   const handleClosure = () => {
     sessionStorage.setItem("new_task", false);
     //sessionStorage.setItem("error_alert", false);
   };
 
-  if (!username) {
-    // If the user is not logged in, (s)he has to login first.
-    navigate("/login");
+  const ToggleDisplayAgenda = () => {
+    localStorage.setItem('ProfileData', 'false');
+    navigate('home');
   }
 
   /* ALERT SECTION */
@@ -42,7 +48,7 @@ function HomeLoggedIn() {
       {!username && <Navigate to='/login' />}
       <div className='TopBar'>
           <div className='BarHeading'>
-            <Link to ="/"  style={{ color: 'inherit', textDecoration: 'inherit'}}>
+            <Link to ="/" style={{ color: 'inherit', textDecoration: 'inherit'}} onClick={ToggleDisplayAgenda}>
               Teamify
             </Link> 
           </div>
@@ -67,6 +73,8 @@ function HomeLoggedIn() {
       <div className='SideContainer'>
         <NavBar></NavBar>
         <div className="CenterContainer">
+
+        {!ProfileData && (
           <div className="container mt-5" width="100%">
             <div className="row text-center">
               <div className="col">
@@ -92,6 +100,10 @@ function HomeLoggedIn() {
               </div>
             </div>
           </div>
+        )}
+        {ProfileData && (
+          <Profile></Profile>
+        )}
         </div>
       </div>
     </div>

@@ -12,7 +12,6 @@ import { useState } from 'react';
 
 function UserIcon() {
     const [show, setShow] = useState(false);
-    const [showData, setShowData] = useState(false);
     const navigate = useNavigate();
 
     function ToggleUserMenu() {
@@ -31,13 +30,10 @@ function UserIcon() {
         }
     }
     
-    const toggleDisplayData = async (event) => {
-        event.preventDefault();
-
-        const loggedIn = localStorage.getItem('LoggedUser');
-        if(loggedIn) {
-            // Work in progress...
-        }
+    const toggleDisplayData = () => {
+        localStorage.setItem('ProfileData', 'true');
+        ToggleUserMenu();
+        navigate('/home');
     }
 
 
@@ -47,7 +43,7 @@ function UserIcon() {
     { show && (
         <>
         <div id='ProfileDrop'>
-            <div className='ProfileEntry'>
+            <div className='ProfileEntry' onClick={toggleDisplayData}>
                 <div className='EntryIcon'>
                     <img src={user}></img>
                 </div>
