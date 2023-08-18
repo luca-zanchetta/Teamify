@@ -10,7 +10,7 @@
 body > #root > div {
   height: 100vh;
 }
-.container{
+.container-scroll{
   overflow: auto;
 }
 
