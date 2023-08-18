@@ -239,7 +239,7 @@ def show_personal_info():
 
         return jsonify({"name":name, "surname":surname, "birth":birth, "email":email}), 200
     
-    print("[INFO] /reset: Reset password was successful.")
+    print("[INFO] /home/profile: User data have been successfully displayed.")
     return jsonify("ko"), 404
 
 

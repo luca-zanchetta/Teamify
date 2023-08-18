@@ -5,7 +5,7 @@ import face from '../img/face.jpeg'
 import edit from '../icons/edit.png'
 import axios from "axios";
 
-var endpoint = "http://localhost:5000/home";
+var endpoint = "http://localhost:5000/home/profile";
 
 
 function Profile() {
@@ -80,16 +80,6 @@ function Profile() {
                 <h2>
                   {name} {surname}
                 </h2>
-                <h3>
-                  Team Manager
-                </h3>
-                <h4>
-                  Leeds, United Kingdoms
-                </h4>
-              </div>
-              <div className='EditButton'>
-                edit
-                <img src={edit}></img>
               </div>
             </div>
           </div>
