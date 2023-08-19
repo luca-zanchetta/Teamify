@@ -46,7 +46,6 @@ function NewTask() {
 
   const handleSelectSlot = useCallback((slotInfo) => {
     const dateTimeStart = new Date(slotInfo.slots[0]); //take start data
-    const dateTimeEnd = new Date(slotInfo.slots[1]); //take end data
     const date_start = convertDateToInputFormat(dateTimeStart.toDateString());
     const time = dateTimeStart.toLocaleTimeString();
     const duration = (slotInfo.slots.length - 1) * 30; //get duration
@@ -56,9 +55,12 @@ function NewTask() {
     const time_input = document.getElementById("time");
     const duration_input = document.getElementById("duration");
     date_input.value = date_start;
+    setDate(date_start);
     time_input.value = time;
+    setTime(time);
     duration_input.value = duration;
-
+    setDuration(duration);
+    slotInfo.slots.pop();
     setSelectedSlots(slotInfo.slots);
   });
 
@@ -66,8 +68,6 @@ function NewTask() {
   //da debbugare
   const slotStyleGetter = useCallback(
     (date) => {
-      //console.log("Selected Slots:", selectedSlots);
-      //console.log("Current Date:", date);
       const isDateSelected = selectedSlots.some(
         (selectedDate) =>
           moment(selectedDate).isSame(date, "day") &&
