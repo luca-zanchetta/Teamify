@@ -1,7 +1,7 @@
 import psycopg2
 
 user="postgres"
-psw="postgres"
+psw=""
 
 def get_connection():
     try:
