@@ -38,10 +38,10 @@
     flex-direction: column;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     width: 100%;
-    height: fit-content;
-    overflow-y: scroll;
+    height: auto;
+    overflow-y: auto;
 }
 
 .TextContainer {
@@ -113,3 +113,9 @@
     margin: 0;
     padding: 2% 0% 2% 0%;
 }
+.personalized-button {
+    background-color: #Cdfbc4;  
+    color: black; 
+    border-radius: 10%;
+    border: 3px solid #Cdfbc4;
+  }
