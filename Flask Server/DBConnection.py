@@ -1,7 +1,7 @@
 import psycopg2
 
 user="postgres"
-psw=""
+psw="postgres"
 
 def get_connection():
     try:
@@ -9,5 +9,5 @@ def get_connection():
         return conn
     
     except:
-        print("Errore during db connection\n")
+        print("Error during db connection\n")
         return None
