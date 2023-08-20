@@ -31,7 +31,7 @@ function TeamView() {
 
       <div className="SideContainer">
         <NavBar></NavBar>
-        <div className="container">
+        <div className="container overflow-auto">
           <div className="mb-5 mt-5">
             <h1>*Team Name*</h1>
           </div>
