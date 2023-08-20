@@ -42,8 +42,8 @@ function Profile() {
       )}
       <div className='ProfileCard'>
         <div className='ProfileNav'>  
-          <div className='ProfileNavEntry' onClick={() => SetTab(1)}>
-            <input type='radio' id="Profile" name="nav" checked={1==currentTab}/>
+          <div className='ProfileNavEntry' onClick={() => SetTab(1)} >
+            <input type='radio' id="Profile" name="nav" checked={1==currentTab} style={{cursor:'pointer'}}/>
             <label for="Profile">My Profile</label>
           </div>
           <div className='ProfileNavEntry' onClick={() => SetTab(2)}>
@@ -51,10 +51,10 @@ function Profile() {
             <label for="Team">Teams</label>
           </div>
           <div className='ProfileNavEntry' onClick={() => SetTab(3)}>
-            <input type='radio' id="Notification" name="nav" />
+            <input type='radio' id="Notification" name="nav" style={{cursor:'pointer'}}/>
             <label for="Notification">Notifications</label> 
           </div>
-          <div className='ProfileNavEntry' style={{paddingTop : '15%', color: 'red'}} onClick={handleDeleteAccount}>
+          <div className='ProfileNavEntry' style={{paddingTop : '15%', color: 'red', cursor:'pointer'}} onClick={handleDeleteAccount}>
             Delete Account
           </div>
         </div>
