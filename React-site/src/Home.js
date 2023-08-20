@@ -1,16 +1,20 @@
 import './Css/App.css';
 import './Css/Homepage.css'
+
 import {TopBar,BarHeading} from './Css/Login.css'
-import {Link} from 'react-router-dom'
+import {Link, Navigate} from 'react-router-dom'
 
 import calendar from './icons/calendar.png'
 import paper from './icons/paper.png'
 import profits from './icons/profits.png'
 import savings from './icons/savings.png'
 
+const loggedIn = localStorage.getItem('LoggedUser');
+
 function Home() {
   return ( 
     <div className='App'>
+      {loggedIn && <Navigate to='/home' />}
       <div className='TopBar'>
           <div className='BarHeading'>
             <Link to ="/"  style={{ color: 'inherit', textDecoration: 'inherit'}}>

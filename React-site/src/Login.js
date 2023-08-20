@@ -1,13 +1,13 @@
 import "./Css/App.css";
 import "./Css/Login.css";
+
 import Alert from "./Components/Alert.tsx";
-
-import { Link, useNavigate } from "react-router-dom";
-
+import { Link, useNavigate, Navigate } from "react-router-dom";
 import React, { useState } from "react";
 import axios from "axios";
 
 var endpoint = "http://localhost:5000/login";
+const loggedIn = localStorage.getItem('LoggedUser');
 
 function Login() {
   const [username, setUsername] = useState("");
@@ -16,47 +16,104 @@ function Login() {
   // For redirecting
   const navigate = useNavigate();
 
-  const sign_up_200 = sessionStorage.getItem("sign_up_alert") === "true";
+  
+  /* ALERT SECTION */
 
+
+  const sign_up_200 = sessionStorage.getItem("sign_up_alert") === "true";
   const handleClosure = () => {
-    sessionStorage.setItem("sign_up_alert", false);
+    sessionStorage.setItem("sign_up_alert", "false");
   };
+
+  // Handler for missing fields error
+  const missingFields = sessionStorage.getItem("fields_alert") === "true";
+  const handleMissingFields = () => {
+    sessionStorage.setItem("fields_alert", "false");
+  };
+
+  // Handler for request failed error
+  const requestFailed = sessionStorage.getItem("request_failed_alert") === "true";
+  const handleRequestFailed = () => {
+    sessionStorage.setItem("request_failed_alert", "false");
+  };
+
+  // Handler for wrong username/password error
+  const wrongPwd = sessionStorage.getItem("wrongPwd_alert") === "true"
+  const handleWrongPwd = () => {
+    sessionStorage.setItem("wrongPwd_alert", "false");
+  };
+
+  // Handler for username not found error
+  const usernameNotFound = sessionStorage.getItem("usernameNotFound_alert") === "true"
+  const handleUsernameNotFound = () => {
+    sessionStorage.setItem("usernameNotFound_alert", "false");
+  };
+
+
+  /* END OF ALERT SECTION */
+
 
   // Handler for the event 'Submit of a form'
   const handleSubmit = async (event) => {
     event.preventDefault();
 
+    // Set form values
+    localStorage.setItem('username', username);
+
     if (username !== "" && password !== "") {
       try {
         // Send a POST request to the /login endpoint of the Flask server
-        const response = await axios.post(endpoint, { username, password });
+        const response = await axios.post(endpoint, {
+          username,
+          password 
+        }).catch(
+          function (error) {
+            if(error.response) {
+              // Print error data
+              console.log("Data: "+error.response.data);
+              console.log("Status: "+error.response.status);
+              console.log("Headers: "+error.response.headers);
+              
+              // Handle error
+              if(error.response.status === 400) {
+                sessionStorage.setItem("wrongPwd_alert", "true");
+                window.location.replace(window.location.href);  // For alert purposes only
+                console.log("[ERROR] Username and/or password were not correct! Try again.");
+              }
+              else if(error.response.status === 404) {
+                sessionStorage.setItem("usernameNotFound_alert", "true");
+                window.location.replace(window.location.href);  // For alert purposes only
+                console.log("[ERROR] The user was not found in the system.");
+              }
+            }
+          }
+        );
 
         // If the login has been successfully performed, then redirect the user to the homepage.
-        // Sarebbe più carino un avviso di successo o qualcosa di simile
         if (response.status === 200) {
-          localStorage.setItem("user", username); // Set a session variable
+          sessionStorage.setItem("sign_up_alert", false);
+          localStorage.setItem("LoggedUser", username); // Set a session variable
+          sessionStorage.setItem("login_alert", "true");
           navigate("/home");
-          // localStorage.clear(); per rimuovere tutte le variabili settate
-          // localStorage.removeItem('user');
-        } else if (response.status === 400) {
-          alert(
-            "[ERROR] Username and/or password were not correct! Try again."
-          );
-        } else if (response.status === 404) {
-          alert("[ERROR] The user was not found in the system.");
+          window.location.replace(window.location.href);
         }
-      } catch (error) {
-        // Error message
+      } 
+      catch (error) {
+        // Request failed
         console.log("[ERROR] Request failed: " + error);
       }
-    } else {
+    } 
+    else {
       // There is at least one mandatory field that has not been filled
-      alert("All the fields must be filled!");
+      sessionStorage.setItem("fields_alert", "true");
+      window.location.replace(window.location.href);  // For alert purposes only
+      console.log("All the fields must be filled!");
     }
   };
 
   return (
     <div className="App">
+      {loggedIn && <Navigate to='/home' />}
       <div className="TopBar">
         <div className="BarHeading">
           <Link to="/" style={{ color: "inherit", textDecoration: "inherit" }}>
@@ -78,6 +135,30 @@ function Login() {
           Successfully signed up!
         </Alert>
       )}
+
+      {requestFailed && (
+        <Alert onClick={handleRequestFailed} state="danger">
+          Error: Login failed.
+        </Alert>
+      )}
+
+      {missingFields && (
+        <Alert onClick={handleMissingFields} state="danger">
+          All the fields must be filled!
+        </Alert>
+      )}
+
+      {wrongPwd && (
+        <Alert onClick={handleWrongPwd} state="danger">
+          ERROR: Wrong username and/or password!
+        </Alert>
+      )}
+
+      {usernameNotFound && (
+        <Alert onClick={handleUsernameNotFound} state="danger">
+          ERROR: username not found in the system!
+        </Alert>
+      )}
       <div className="CentralContainer">
         <div className="LeftContainer">
           <div className="CardL">
@@ -90,6 +171,7 @@ function Login() {
                   type="text"
                   placeholder="Enter your username"
                   id="username"
+                  defaultValue={localStorage.getItem("username")}
                   onChange={(event) => setUsername(event.target.value)}
                 ></input>
               </div>
