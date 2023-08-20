@@ -3,34 +3,137 @@ import edit from '../icons/edit.png'
 import face from '../img/face.jpeg'
 import '../Css/Profile.css';
 import axios from "axios";
-import setting from '../icons/setting.png'
-import { useState } from 'react';
-var endpoint = "http://localhost:5000/home";
+import { useEffect, useState } from 'react';
+
+// Flask server endpoints
+var endpoint = "http://localhost:5000/home/profile";
+var endpoint_modify_info = "http://localhost:5000/home/modify-info";
+var endpoint_modify_password = "http://localhost:5000/home/modify-password";
 
 
 function UserInfo() {
-
     const [name, setName] = useState("");
     const [surname, setSurname] = useState("");
     const [email, setEmail] = useState("");
     const [birth, setBirth] = useState("");
     const username = localStorage.getItem('LoggedUser');
+    const [password, setPassword] = useState("");
+    const [editFlag, setEdit] = useState(false);
+    const [editPass, setPass] = useState(false);
 
-    const [editFlag, setEdit] = useState(false)
-    const [editPass, setPass] = useState(false)
+    let hiddenPassword = "";
 
-    function ToggleEdit() {
-      setEdit(!editFlag)
+    // Edit user information
+    const ToggleEdit = async (event) => {
+      setEdit(!editFlag);
 
+      if(editFlag === true) {
+        // Get new data
+        var new_name = document.getElementById('name').value;
+        var new_surname = document.getElementById('surname').value;
+        var new_email = document.getElementById('email').value;
+        var new_birth = document.getElementById('birth').value;
+
+        try {
+          // Send a POST request to the /home/modify-info endpoint of the Flask server
+          const response = await axios.post(endpoint_modify_info, {
+            username, new_name, new_surname, new_email, new_birth
+          }).catch(
+            function (error) {
+              if(error.response) {
+                // Print error data
+                console.log("Data: "+error.response.data);
+                console.log("Status: "+error.response.status);
+                console.log("Headers: "+error.response.headers);
+              }
+            }
+          );
+          
+          // If the modification was successful, update the initial constants
+          if(response.data.status === 200) {
+            alert(response.data.message);
+
+            setName(new_name);
+            setSurname(new_surname);
+            setEmail(new_email);
+            setBirth(new_birth);
+          }
+          else if(response.data.status === 500) {
+            alert(response.data.message);
+          }
+        } 
+        catch (error) {
+          // Request failed
+          console.log("[ERROR] Request failed: " + error);
+        }
+      }
     }
 
-    function ToggleEditPass() {
-        setPass(!editPass)
+
+    // Edit user password
+    const ToggleEditPass = async (event) =>  {
+      setPass(!editPass);
+
+      if(editPass === true) {
+        // Get new data
+        var old_password = document.getElementById('old_password').value;
+        var new_password = document.getElementById('new_password_1').value;
+        var new_password_2 = document.getElementById('new_password_2').value;
+
+        if(old_password === "" || new_password === "" || new_password_2 === "") {
+          alert('All the fields must be filled!');
+        }
+        else if(old_password !== new_password && new_password === new_password_2) {
+          try {
+            // Send a POST request to the /home/modify-info endpoint of the Flask server
+            const response = await axios.post(endpoint_modify_password, {
+              username, old_password, new_password
+            }).catch(
+              function (error) {
+                if(error.response) {
+                  // Print error data
+                  console.log("Data: "+error.response.data);
+                  console.log("Status: "+error.response.status);
+                  console.log("Headers: "+error.response.headers);
+                }
+              }
+            );
+            
+            // The modification was successful
+            if(response.data.status === 200) {
+              alert(response.data.message);
+              show_data();
+              window.location.reload();
+            }
+            else if(response.data.status === 500) {
+              alert(response.data.message);
+            }
+            else if(response.data.status === 400) {
+              alert(response.data.message);
+            }
+            // else if(response.data.status === 404) {
+            //   alert(response.data.message);
+            // }
+          } 
+          catch (error) {
+            // Request failed
+            console.log("[ERROR] Request failed: " + error);
+          }
+        }
+        else if(old_password === new_password || old_password === new_password_2) {
+          alert('The new password cannot be equal to the previous one!');
+        }
+        else if (new_password !== new_password_2) {
+          alert('The newly inserted passwords do not match!');
+        }
+      }
     }
+
     
+    // Show user data
     const show_data = async (event) => {
         try {
-          // Send a POST request to the /login endpoint of the Flask server
+          // Send a POST request to the /home/profile endpoint of the Flask server
           const response = await axios.post(endpoint, {
             username
           }).catch(
@@ -48,12 +151,22 @@ function UserInfo() {
           setSurname(response.data['surname']);
           setBirth(response.data['birth']);
           setEmail(response.data['email']);
+          for(let i = 0; i<response.data['password'].length; i++) {
+            hiddenPassword += "*";
+          }
+          setPassword(hiddenPassword);
         } 
         catch (error) {
           // Request failed
           console.log("[ERROR] Request failed: " + error);
         }
-      }
+    }
+
+    // The following function will be executed only one time at the beginning of the building of the page
+    useEffect(() => {
+      show_data();
+    }, []);
+
 
     return(
         <div className='ProfileContent'>
@@ -64,14 +177,8 @@ function UserInfo() {
               </div>
               <div className='ProfileInfos'>
                 <h2>
-                  {username} , {name} {username}
+                  {username}
                 </h2>
-                <h3>
-                  Team Manager
-                </h3>
-                <h4>
-                  Leeds, United Kingdoms
-                </h4>
               </div>
             </div>
           </div>
@@ -79,7 +186,7 @@ function UserInfo() {
             <div className='VerticalContainer'>
               <div className='Row'>
                 <div className='Title'>
-                  Account Informations
+                  Account Information
                 </div>
                 <div className='EditButton' onClick={ToggleEditPass}>
                     {
@@ -99,14 +206,14 @@ function UserInfo() {
                     !editPass && (
                       <>
                         <h2>
-                          ******************
+                          {password}
                         </h2>
                       </>
                     ) 
                     ||
                     editPass && (
                       <>
-                        <input type='text' value={surname}/>
+                        <input type='password' id='old_password'/>
                       </>
                     )
                   }
@@ -119,13 +226,13 @@ function UserInfo() {
                                 <h4>
                                 New password
                                 </h4>
-                                <input type='text' value={surname}/>
+                                <input type='password' id='new_password_1'/>
                             </div>
                             <div className='TextEntry'>
                                 <h4>
                                 Repeat new password
                                 </h4>
-                                <input type='text' value={surname}/>
+                                <input type='password' id='new_password_2'/>
                             </div>
                         </>
                         )
@@ -164,7 +271,7 @@ function UserInfo() {
                     ||
                     editFlag && (
                       <>
-                        <input type='text' value={name}/>
+                        <input type='text' defaultValue={name} id='name'/>
                       </>
                     )
                   }
@@ -184,7 +291,7 @@ function UserInfo() {
                     ||
                     editFlag && (
                       <>
-                        <input type='text' value={surname}/>
+                        <input type='text' defaultValue={surname} id='surname'/>
                       </>
                     )
                   }
@@ -206,7 +313,7 @@ function UserInfo() {
                     ||
                     editFlag && (
                       <>
-                        <input type='text' value={email}/>
+                        <input type='text' defaultValue={email} id='email'/>
                       </>
                     )
                   }
@@ -226,7 +333,7 @@ function UserInfo() {
                     ||
                     editFlag && (
                       <>
-                        <input type='date' value={birth}/>
+                        <input type='date' defaultValue={birth} id='birth'/>
                       </>
                     )
                   }

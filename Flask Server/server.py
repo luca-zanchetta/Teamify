@@ -227,35 +227,36 @@ def show_personal_info():
 
     username = data['username']
     if username != "":
-        query = "SELECT name, surname, birth_date, email FROM member WHERE username = %s"
+        query = "SELECT name, surname, birth_date, email, password FROM member WHERE username = %s"
         params = (username,)
 
         curr.execute(query, params)
-        (name, surname, birth, email) = curr.fetchone()
+        (name, surname, birth, email, password) = curr.fetchone()
         name = str(name).strip()
         surname = str(surname).strip()
         birth = str(birth).strip()
         email = str(email).strip()
+        password = str(password).strip()
 
-        return jsonify({"name":name, "surname":surname, "birth":birth, "email":email}), 200
+        print("[INFO] /home/profile: User data have been successfully displayed.")
+        return jsonify({"name":name, "surname":surname, "birth":birth, "email":email, "password":password}), 200
     
-    print("[INFO] /home/profile: User data have been successfully displayed.")
     return jsonify("ko"), 404
 
 
 
 # Modify user information
-# Notice that here we are not modifying the password, as there exists the specific REST API /reset
+# Notice that here we are not modifying the password
 @app.route("/home/modify-info", methods=['POST'])
 def modify_personal_info():
     data = request.get_json()
     curr = conn.cursor()
 
     username = data['username']
-    name = data['name']
-    surname = data['surname']
-    birth_date = data['birth_date']
-    email = data['email']
+    name = data['new_name']
+    surname = data['new_surname']
+    birth_date = data['new_birth']
+    email = data['new_email']
 
     if username != "":
         query = "UPDATE member SET name = %s, surname = %s, birth_date = %s, email = %s WHERE username = %s"
@@ -263,16 +264,67 @@ def modify_personal_info():
 
         try: 
             curr.execute(query, params)
+            print("[INFO] /home/modify-info: Update was successful.")
+            return jsonify({"message":"User data has been updated!", "status":200})
+        
         except Exception as err:
             print("[ERROR] /home/modify-info: ", err)
-            return jsonify("ko"), 400
-        
-        print("[INFO] /home/modify-info: Update was successful.")
-        return jsonify("ok"), 200   # Here we should redirect to /home at the frontend!
+            return jsonify({"message":"Error during data update.", "status":500})
 
     print("[ERROR] /home/modify-info: Username not found.")
-    return jsonify("ko"), 404
+    return jsonify({"message":"User not found.", "status":404})
 
+
+
+# Modify user password
+# Notice that here we modify the password of a logged user
+@app.route("/home/modify-password", methods=['POST'])
+def modify_password():
+    data = request.get_json()
+    curr = conn.cursor()
+
+    username = data['username']
+    old_password = data['old_password']
+    new_password = data['new_password']
+
+    encoded_old_password = sha256(str(old_password).encode('utf-8')).hexdigest()
+
+    if username != "":
+        # Does the user have inserted the correct password?
+        query_verify = "SELECT username FROM member WHERE password = %s"
+        params_verify = (encoded_old_password,)
+
+        curr.execute(query_verify, params_verify)
+
+        # There can be more than one username with the same password
+        retrieved_username = ""
+        retrieved_usernames = curr.fetchall()
+        for (user,) in retrieved_usernames:
+            if user == username:
+                retrieved_username = username
+            
+        if retrieved_username == "":
+            print("[ERROR] /home/modify-password: The original password was not correct!")
+            return jsonify({"message":"The original password was not correct!", "status":400})
+
+
+        if retrieved_username == username:
+            encoded_new_password = sha256(str(new_password).encode('utf-8')).hexdigest()  
+            query = "UPDATE member SET password = %s WHERE username = %s"
+            params = (encoded_new_password, username,)
+
+            try:
+                curr.execute(query, params)
+                print("[INFO] /home/modify-password: Update was successful.")
+                return jsonify({"message":"Password has been updated!", "status":200})
+
+            except Exception as err:
+                print("[ERROR] /home/modify-password: ", err)
+                return jsonify({"message":"Error during password update.", "status":500})
+
+
+    print("[ERROR] /home/modify-password: Username not found.")
+    return jsonify({"message":"User not found.", "status":404})
 
 
 # Delete user account (cascade on all its foreign keys!)
@@ -316,13 +368,13 @@ def get_notifications():
         records = curr.fetchall()
         if len(records) == 0:
             print("[INFO] /home/notifications: There is no notification for this user.")
-            return jsonify("empty"), 200
+            return jsonify({"message":"No notification available.", "status":201})
         
         print("[INFO] /home/notifications: Display notifications was successful.")
-        return jsonify({"id":records[0], "date":records[1], "content":records[2], "type":records[3], "read":records[4]}), 200
+        return jsonify({"notifications":records, "status":200})
 
     print("[ERROR] /home/notifications: Username not found.")
-    return jsonify("ko"), 404
+    return jsonify({"message":"Username not found.", "status":404})
 
 ############################ END REST APIs ####################################
 
