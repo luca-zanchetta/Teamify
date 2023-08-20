@@ -1,12 +1,10 @@
 import "../Css/Profile.css";
 import setting from "../icons/setting.png";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import UserInfo from "./UserInfo";
 import ProfileNotifications from "./ProfileNotifications";
 import PopUp from "./PopUp.js";
-
-export const handleConfirmation = () => {};
 
 export const handleRevert = () => {
   localStorage.setItem("deleteAccount", false);

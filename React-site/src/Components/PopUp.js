@@ -1,8 +1,35 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "../Css/confirmation.css";
-import { handleConfirmation, handleRevert } from "./Profile";
+import { handleRevert } from "./Profile";
 
 function PopUp() {
+  const navigate = useNavigate();
+
+  const handleConfirmation = () => {
+    const endpoint = `/home/profile?user=${localStorage.getItem("LoggedUser")}`;
+
+    // Make a DELETE request
+    fetch(endpoint, {
+      method: "DELETE",
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data === "ok") {
+          console.log("Account deleted successfully");
+          localStorage.clear();
+          sessionStorage.clear();
+          navigate("/login");
+          window.location.replace(window.location.href);
+        } else {
+          console.error("Failed to delete account");
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  };
+
   return (
     <div className="MessageContainer" id="message-container">
       <div className="CardPopUP">
