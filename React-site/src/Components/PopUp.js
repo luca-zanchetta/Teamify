@@ -7,7 +7,7 @@ function PopUp() {
   const navigate = useNavigate();
 
   const handleConfirmation = () => {
-    const endpoint = `/home/profile?user=${localStorage.getItem("LoggedUser")}`;
+    const endpoint = `/home/delete-account?user=${localStorage.getItem("LoggedUser")}`;
 
     // Make a DELETE request
     fetch(endpoint, {
