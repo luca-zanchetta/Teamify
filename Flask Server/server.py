@@ -24,14 +24,14 @@ if conn is None:
 ############################ REST APIs ##################################
 
 # Login API
-@app.route("/login", methods=['POST'])
+@app.route("/login", methods=["POST"])
 def login():
     data = request.get_json()
     curr = conn.cursor()
 
-    username = data['username']
-    password = data['password']
-    encoded_password = sha256(str(password).encode('utf-8')).hexdigest()
+    username = data["username"]
+    password = data["password"]
+    encoded_password = sha256(str(password).encode("utf-8")).hexdigest()
 
     query = "SELECT password FROM member WHERE username = %s"
     params = (username,)
@@ -54,42 +54,42 @@ def login():
 
 
 # Signup API
-@app.route("/signup", methods=['POST'])
+@app.route("/signup", methods=["POST"])
 def signup():
     data = request.get_json()
     curr = conn.cursor()
 
-    name = data['name']
-    surname = data['surname']
-    birth_date = data['birth']
-    email = data['email']
-    username = data['username']
-    password = data['password']
+    name = data["name"]
+    surname = data["surname"]
+    birth_date = data["birth"]
+    email = data["email"]
+    username = data["username"]
+    password = data["password"]
 
-    encoded_password = sha256(str(password).encode('utf-8')).hexdigest()
+    encoded_password = sha256(str(password).encode("utf-8")).hexdigest()
 
     query = "INSERT INTO member VALUES (%s, %s, %s, %s, %s, %s)"
     params = (name, surname, birth_date, email, username, encoded_password)
-    try: 
+    try:
         curr.execute(query, params)
     except Exception as err:
         print("[ERROR] /signup: ", err)
         return jsonify("ko"), 400
 
-    print('[INFO] /signup: New user created.')
+    print("[INFO] /signup: New user created.")
     return jsonify("ok"), 200
 
 
 
 # Reset password API
-@app.route("/reset", methods=['POST'])
+@app.route("/reset", methods=["POST"])
 def reset():
     data = request.get_json()
     curr = conn.cursor()
 
-    username = data['username']
-    new_password = data['password']
-    new_encoded_password = sha256(str(new_password).encode('utf-8')).hexdigest()
+    username = data["username"]
+    new_password = data["password"]
+    new_encoded_password = sha256(str(new_password).encode("utf-8")).hexdigest()
 
     # Does that user exist?
     query_exists = "SELECT username FROM member WHERE username = %s"
@@ -108,10 +108,37 @@ def reset():
     except Exception as err:
         print("[ERROR] /reset: ", err)
         return jsonify("ko"), 400
-    
+
     print("[INFO] /reset: Reset password was successful.")
     return jsonify("ok"), 200
 
+# Delete account
+@app.route("/home/delete-account", methods=["DELETE"])
+def delete_account():
+    curr = conn.cursor()
+
+    username = request.args.get("user")
+
+    # remove all the task connected to the user
+    query_task = "DELETE FROM task WHERE member = %s"
+    param_task = (username,)
+    try:
+        curr.execute(query_task, param_task)
+    except Exception as err:
+        print("[ERROR] /home/profile (tasks): ", err)
+        return jsonify("ko"), 400
+
+    # remove the user
+    query_member = "DELETE FROM member WHERE username = %s"
+    param_member = (username,)
+    try:
+        curr.execute(query_member, param_member)
+    except Exception as err:
+        print("[ERROR] /home/profile: (member:)", err)
+        return jsonify("ko"), 400
+
+    print("[INFO] /home/profile: user {username} succesfully deleted")
+    return jsonify("ok"), 200
 
 
 #New Task API
@@ -328,27 +355,27 @@ def modify_password():
 
 
 # Delete user account (cascade on all its foreign keys!)
-@app.route("/home/delete-account", methods=['POST'])
-def delete_account():
-    data = request.get_json()
-    curr = conn.cursor()
+# @app.route("/home/delete-account", methods=['POST'])
+# def delete_account():
+#     data = request.get_json()
+#     curr = conn.cursor()
 
-    username = data['username']
-    if username != "":
-        query = "DELETE FROM member WHERE username = %s"
-        params = (username,)
+#     username = data['username']
+#     if username != "":
+#         query = "DELETE FROM member WHERE username = %s"
+#         params = (username,)
 
-        try: 
-            curr.execute(query, params)
-        except Exception as err:
-            print("[ERROR] /home/delete-account: ", err)
-            return jsonify("ko"), 400
+#         try: 
+#             curr.execute(query, params)
+#         except Exception as err:
+#             print("[ERROR] /home/delete-account: ", err)
+#             return jsonify("ko"), 400
         
-        print("[INFO] /home/delete-account: User was successfully removed.")
-        return jsonify("ok"), 200   # Here we should redirect to /login at the frontend!
+#         print("[INFO] /home/delete-account: User was successfully removed.")
+#         return jsonify("ok"), 200   # Here we should redirect to /login at the frontend!
 
-    print("[ERROR] /home/delete-account: Username not found.")
-    return jsonify("ko"), 404
+#     print("[ERROR] /home/delete-account: Username not found.")
+#     return jsonify("ko"), 404
 
 
 

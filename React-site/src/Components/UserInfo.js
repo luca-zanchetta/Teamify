@@ -17,6 +17,7 @@ function UserInfo() {
     const [email, setEmail] = useState("");
     const [birth, setBirth] = useState("");
     const username = localStorage.getItem('LoggedUser');
+
     const [password, setPassword] = useState("");
     const [editFlag, setEdit] = useState(false);
     const [editPass, setPass] = useState(false);
