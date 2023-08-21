@@ -1,13 +1,13 @@
-import "./Css/App.css";
-import "./Css/Navigator.css";
-import "./Css/Login.css";
-import "./Css/Calendar.css";
+import "./css/App.css";
+import "./css/Navigator.css";
+import "./css/Login.css";
+import "./css/Calendar.css";
 
-import TopBar from "./Components/TopBar.js";
-import NavBar from "./Components/NavBar.js";
-import UserIcon from "./Components/UserIcon.js";
-import Alert from "./Components/Alert.tsx";
-import WeeklyCalendar from "./Components/WeeklyCalendar.js";
+import TopBar from "./components/TopBar.js";
+import NavBar from "./components/NavBar.js";
+import UserIcon from "./components/UserIcon.js";
+import Alert from "./components/Alert.tsx";
+import WeeklyCalendar from "./components/WeeklyCalendar.js";
 import React, { useState, useCallback, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";

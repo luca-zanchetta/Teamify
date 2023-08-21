@@ -1,5 +1,4 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
 import React, { useState, useEffect } from "react";
 
 import Login from "./Login";
@@ -9,7 +8,7 @@ import Reset from "./Reset";
 import HomeLoggedIn from "./HomeLoggedIn";
 import NewTask from "./NewTask";
 import TeamView from "./TeamView";
-
+import Teams from "./Teams";
 function App() {
   //data è la variabile dello stato, setData è la funzione per settare il suo valore
   const [data, setData] = useState([{}]);
@@ -33,6 +32,7 @@ function App() {
         <Route path="home" element={<HomeLoggedIn />} />
         <Route path="home/newtask" element={<NewTask />} />
         <Route path="teamview" element={<TeamView />} />
+        <Route path="home/teams" element={<Teams />} />
       </Routes>
     </BrowserRouter>
   );

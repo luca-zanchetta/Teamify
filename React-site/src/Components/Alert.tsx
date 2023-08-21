@@ -1,6 +1,6 @@
 import React from "react";
 import { useState } from "react";
-import "../Css/Alert.css";
+import "../css/Alert.css";
 
 interface Props {
   children: ReactNode;

@@ -1,14 +1,14 @@
-import "./Css/App.css";
-import "./Css/Homepage.css";
+import "./css/App.css";
+import "./css/Homepage.css";
 
-import NavBar from "./Components/NavBar";
-import TopBar from "./Components/TopBar";
-import WeeklyCalendar from "./Components/WeeklyCalendar.js";
-import Alert from "./Components/Alert.tsx";
-import { Container } from "./Css/Navigator.css";
+import NavBar from "./components/NavBar";
+import TopBar from "./components/TopBar";
+import WeeklyCalendar from "./components/WeeklyCalendar.js";
+import Alert from "./components/Alert.tsx";
+import { Container } from "./css/Navigator.css";
 
 import { Link, useNavigate } from "react-router-dom";
-import UserIcon from "./Components/UserIcon";
+import UserIcon from "./components/UserIcon";
 
 //var endpoint = "http://localhost:5000/newtask"
 
@@ -31,11 +31,11 @@ function TeamView() {
 
       <div className="SideContainer">
         <NavBar></NavBar>
-        <div className="container overflow-auto">
+        <div className="container">
           <div className="mb-5 mt-5">
             <h1>*Team Name*</h1>
           </div>
-          <div className="row">
+          <div className="container  overflow-auto" style={{ height: "80%" }}>
             <div class="accordion" id="accordionExample">
               <div class="accordion-item">
                 <h2 class="accordion-header">
@@ -56,9 +56,8 @@ function TeamView() {
                   data-bs-parent="#accordionExample"
                 >
                   <div class="accordion-body">
-                    <h3 className="mb-2 mt-5">Shared Agenda </h3>
                     <div className="mb-3 mr-10 d-flex justify-content-center">
-                      <WeeklyCalendar height={600} width={1000} />
+                      <WeeklyCalendar height={500} width={1000} />
                     </div>
                   </div>
                 </div>

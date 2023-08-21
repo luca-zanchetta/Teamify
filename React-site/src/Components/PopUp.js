@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import "../Css/confirmation.css";
+import "../css/confirmation.css";
 import { handleRevert } from "./Profile";
 
 function PopUp() {
   const navigate = useNavigate();
 
   const handleConfirmation = () => {
-    const endpoint = `/home/delete-account?user=${localStorage.getItem("LoggedUser")}`;
+    const endpoint = `/home/delete-account?user=${localStorage.getItem(
+      "LoggedUser"
+    )}`;
 
     // Make a DELETE request
     fetch(endpoint, {
