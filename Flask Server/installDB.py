@@ -88,8 +88,7 @@ except Exception as err:
 
     
 # Table 'notification'
-# Maybe date should be a timestamp
-dropNotification = "DROP TABLE IF EXISTS notification"
+dropNotification = "DROP TABLE IF EXISTS notification CASCADE"
 notification = """CREATE TABLE notification (
     id SERIAL PRIMARY KEY,
     date DATE NOT NULL,
@@ -115,6 +114,142 @@ try:
     conn.commit() 
 
     print("[INFO] Table 'notification' successfully created.")
+except Exception as err:
+    print("Error: ", err)
+    exit()
+
+
+# Table 'team'
+dropTeam = "DROP TABLE IF EXISTS team"
+team = """CREATE TABLE team (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL DEFAULT 'unnamed_team'
+)"""
+try:
+    cur.execute(dropTeam)
+    cur.execute(team)   
+    conn.commit() 
+
+    print("[INFO] Table 'team' successfully created.")
+except Exception as err:
+    print("Error: ", err)
+    exit()
+
+
+# Table 'join'
+dropJoin = "DROP TABLE IF EXISTS joinTeam CASCADE"
+join = """CREATE TABLE joinTeam (
+    username VARCHAR(100),
+    team INT,
+    CONSTRAINT join_pkey
+        PRIMARY KEY(username, team),
+    CONSTRAINT fk_username
+        FOREIGN KEY(username)
+            REFERENCES member(username)
+            ON DELETE CASCADE,
+    CONSTRAINT fk_team
+        FOREIGN KEY(team)
+            REFERENCES team(id)
+            ON DELETE CASCADE
+)"""
+try:
+    cur.execute(dropJoin)
+    cur.execute(join)   
+    conn.commit() 
+
+    print("[INFO] Table 'join' successfully created.")
+except Exception as err:
+    print("Error: ", err)
+    exit()
+
+
+# Table 'manage'
+dropManage = "DROP TABLE IF EXISTS manage CASCADE"
+manage = """CREATE TABLE manage (
+    admin VARCHAR(100),
+    team INT,
+    CONSTRAINT manage_pkey
+        PRIMARY KEY(admin, team),
+    CONSTRAINT fk_admin
+        FOREIGN KEY(admin)
+            REFERENCES member(username)
+            ON DELETE CASCADE,
+    CONSTRAINT fk_team
+        FOREIGN KEY(team)
+            REFERENCES team(id)
+            ON DELETE CASCADE
+)"""
+try:
+    cur.execute(dropManage)
+    cur.execute(manage)   
+    conn.commit() 
+
+    print("[INFO] Table 'manage' successfully created.")
+except Exception as err:
+    print("Error: ", err)
+    exit()
+
+
+# Table 'invite'
+dropInvite = "DROP TABLE IF EXISTS invite CASCADE"
+invite = """CREATE TABLE invite (
+    username VARCHAR(100),
+    admin VARCHAR(100) NOT NULL,
+    team INT,
+    CONSTRAINT invite_pkey
+        PRIMARY KEY(username, team),
+    CONSTRAINT fk_username
+        FOREIGN KEY(username)
+            REFERENCES member(username)
+            ON DELETE CASCADE,
+    CONSTRAINT fk_admin_team
+        FOREIGN KEY(admin, team)
+            REFERENCES manage(admin, team)
+            ON DELETE CASCADE
+)"""
+try:
+    cur.execute(dropInvite)
+    cur.execute(invite)   
+    conn.commit() 
+
+    print("[INFO] Table 'invite' successfully created.")
+except Exception as err:
+    print("Error: ", err)
+    exit()
+
+
+# Table 'includes'
+dropIncludes = "DROP TABLE IF EXISTS includes CASCADE"
+includes = """CREATE TABLE includes (
+    event INT,
+    team INT,
+    username VARCHAR(100),
+    state VARCHAR(50) NOT NULL,
+    CONSTRAINT includes_pkey
+        PRIMARY KEY(event, team, username),
+    CONSTRAINT fk_username
+        FOREIGN KEY(username)
+            REFERENCES member(username)
+            ON DELETE CASCADE,
+    CONSTRAINT fk_team
+        FOREIGN KEY(team)
+            REFERENCES team(id)
+            ON DELETE CASCADE,
+    CONSTRAINT fk_event
+        FOREIGN KEY(event)
+            REFERENCES task(id)
+            ON DELETE CASCADE,
+    CHECK (
+        state = 'accepted'
+        OR state = 'rejected'
+    )
+)"""
+try:
+    cur.execute(dropManage)
+    cur.execute(manage)   
+    conn.commit() 
+
+    print("[INFO] Table 'manage' successfully created.")
 except Exception as err:
     print("Error: ", err)
     exit()
