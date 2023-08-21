@@ -11,7 +11,8 @@ import moment from "moment";
 import "../Css/Calendar.css";
 import axios from "axios";
 
-var endpoint = "http://localhost:5000/tasks";
+var endpoint1 = "http://localhost:5000/tasks";
+var endpoint2 = "http://localhost:5000/teamview";
 
 const localizer = momentLocalizer(moment);
 
@@ -69,7 +70,7 @@ const WeeklyCalendar = ({
   useEffect(() => {
     if (currentPath === "/home") {
       axios
-        .get("/tasks", {
+        .get(endpoint1, {
           params: {
             user: localUser,
           },
@@ -91,7 +92,7 @@ const WeeklyCalendar = ({
     } else {
       //If i'm not on the home and so i'm on the team view, i want to visualize my tasks and all the events created in the group
       axios
-        .get("/teamview", {
+        .get(endpoint2, {
           params: {
             user: localUser,
             team: localTeam, //da gestire quando si implementano i team
