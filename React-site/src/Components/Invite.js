@@ -5,7 +5,7 @@ import UserIcon from "./UserIcon";
 import Notifications from "./Notifications";
 import Alert from "./Alert.tsx";
 import placeholder from "../img/placeholder_profile.jpeg";
-import "../Css/Invite.css";
+import "../css/Invite.css";
 
 interface Props {
   description: string; //the message the user will see

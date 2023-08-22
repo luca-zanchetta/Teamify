@@ -1,13 +1,13 @@
-import "./Css/App.css";
-import "./Css/Login.css";
+import "./css/App.css";
+import "./css/Login.css";
 
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate, Navigate } from "react-router-dom";
-import Alert from "./Components/Alert.tsx";
+import Alert from "./components/Alert.tsx";
 import axios from "axios";
 
 var endpoint = "http://localhost:5000/signup";
-const loggedIn = localStorage.getItem('LoggedUser');
+const loggedIn = localStorage.getItem("LoggedUser");
 
 function SignUp() {
   // Form data
@@ -22,9 +22,7 @@ function SignUp() {
   // For redirecting
   const navigate = useNavigate();
 
-
   /* ALERT SECTION */
-
 
   // Handler for missing fields error
   const missingFields = sessionStorage.getItem("fields_alert") === "true";
@@ -33,37 +31,38 @@ function SignUp() {
   };
 
   // Handler for passwords not matching error
-  const passwordsNotMatching = sessionStorage.getItem("passwords_alert") === "true";
+  const passwordsNotMatching =
+    sessionStorage.getItem("passwords_alert") === "true";
   const handlePasswordsNotMatching = () => {
     sessionStorage.setItem("passwords_alert", "false");
   };
 
   // Handler for passwords not composed of 8 characters error
-  const passwordNotOf8Characters = sessionStorage.getItem("password8_alert") === "true";
+  const passwordNotOf8Characters =
+    sessionStorage.getItem("password8_alert") === "true";
   const handlePasswordNotOf8Characters = () => {
     sessionStorage.setItem("password8_alert", "false");
   };
 
   // Handler for request failed error
-  const requestFailed = sessionStorage.getItem("request_failed_alert") === "true";
+  const requestFailed =
+    sessionStorage.getItem("request_failed_alert") === "true";
   const handleRequestFailed = () => {
     sessionStorage.setItem("request_failed_alert", "false");
   };
 
-
   /* END OF ALERT SECTION */
-
 
   // Handler for the event 'Submit of a form'
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     // Set form values
-    localStorage.setItem('name', name);
-    localStorage.setItem('surname', surname);
-    localStorage.setItem('birth', birth);
-    localStorage.setItem('email', email);
-    localStorage.setItem('username', username);
+    localStorage.setItem("name", name);
+    localStorage.setItem("surname", surname);
+    localStorage.setItem("birth", birth);
+    localStorage.setItem("email", email);
+    localStorage.setItem("username", username);
 
     if (
       name !== "" &&
@@ -95,41 +94,37 @@ function SignUp() {
               localStorage.clear();
 
               // Redirect
-              navigate("/login"); 
-            } 
-          } 
-          catch (error) {
+              navigate("/login");
+            }
+          } catch (error) {
             // Request failed
             sessionStorage.setItem("request_failed_alert", "true");
-            window.location.replace(window.location.href);  // For alert purposes only
+            window.location.replace(window.location.href); // For alert purposes only
             console.log("[ERROR] Request failed: " + error);
           }
-        } 
-        else {
+        } else {
           // The password does not contain at least 8 characters
           sessionStorage.setItem("password8_alert", "true");
-          window.location.replace(window.location.href);  // For alert purposes only
+          window.location.replace(window.location.href); // For alert purposes only
           console.log("The password must contain at least 8 characters!");
         }
-      } 
-      else {
+      } else {
         // Passwords do not match
         sessionStorage.setItem("passwords_alert", "true");
-        window.location.replace(window.location.href);  // For alert purposes only
+        window.location.replace(window.location.href); // For alert purposes only
         console.log("The inserted passwords do not match!");
       }
-    } 
-    else {
+    } else {
       // There is at least one mandatory field that has not been filled
       sessionStorage.setItem("fields_alert", "true");
-      window.location.replace(window.location.href);  // For alert purposes only
+      window.location.replace(window.location.href); // For alert purposes only
       console.log("All the fields must be filled!");
     }
   };
 
   return (
     <div className="App">
-      {loggedIn && <Navigate to='/home' />}
+      {loggedIn && <Navigate to="/home" />}
       <div className="TopBar">
         <div className="BarHeading">
           <Link to="/" style={{ color: "inherit", textDecoration: "inherit" }}>

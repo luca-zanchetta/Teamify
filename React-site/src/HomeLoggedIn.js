@@ -1,20 +1,19 @@
-import './Css/App.css';
-import './Css/Homepage.css'
+import "./css/App.css";
+import "./css/Homepage.css";
 
-import WeeklyCalendar from "./Components/WeeklyCalendar.js";
-import { Container } from "./Css/Navigator.css";
+import WeeklyCalendar from "./components/WeeklyCalendar.js";
+import { Container } from "./css/Navigator.css";
 import { Link, useNavigate, Navigate } from "react-router-dom";
-import NavBar from './Components/NavBar';
-import TopBar from './Components/TopBar';
-import UserIcon from './Components/UserIcon';
-import Notifications from './Components/Notifications';
-import Profile from './Components/Profile';
-import Alert from "./Components/Alert.tsx";
-
+import NavBar from "./components/NavBar";
+import TopBar from "./components/TopBar";
+import UserIcon from "./components/UserIcon";
+import Notifications from "./components/Notifications";
+import Profile from "./components/Profile";
+import Alert from "./components/Alert.tsx";
 
 function HomeLoggedIn() {
-  const username = localStorage.getItem('LoggedUser');
-  const ProfileData = localStorage.getItem('ProfileData') === 'true';
+  const username = localStorage.getItem("LoggedUser");
+  const ProfileData = localStorage.getItem("ProfileData") === "true";
   const navigate = useNavigate();
 
   if (!username) {
@@ -30,9 +29,9 @@ function HomeLoggedIn() {
   };
 
   const ToggleDisplayAgenda = () => {
-    localStorage.setItem('ProfileData', 'false');
-    navigate('home');
-  }
+    localStorage.setItem("ProfileData", "false");
+    navigate("home");
+  };
 
   /* ALERT SECTION */
 
@@ -43,22 +42,26 @@ function HomeLoggedIn() {
 
   /* END ALERT SECTION */
 
-  return ( 
-    <div className='App'>
-      {!username && <Navigate to='/login' />}
-      <div className='TopBar'>
-          <div className='BarHeading'>
-            <Link to ="/" style={{ color: 'inherit', textDecoration: 'inherit'}} onClick={ToggleDisplayAgenda}>
-              Teamify
-            </Link> 
-          </div>
-          <div className='MenuOptions'>
-            <TopBar></TopBar>
-          </div>
-          <div className='Buttons'>
-            <Notifications></Notifications>
-            <UserIcon></UserIcon>
-          </div> 
+  return (
+    <div className="App">
+      {!username && <Navigate to="/login" />}
+      <div className="TopBar">
+        <div className="BarHeading">
+          <Link
+            to="/"
+            style={{ color: "inherit", textDecoration: "inherit" }}
+            onClick={ToggleDisplayAgenda}
+          >
+            Teamify
+          </Link>
+        </div>
+        <div className="MenuOptions">
+          <TopBar></TopBar>
+        </div>
+        <div className="Buttons">
+          <Notifications></Notifications>
+          <UserIcon></UserIcon>
+        </div>
       </div>
       {login_200 && (
         <Alert onClick={handleLogin} state="success">
@@ -70,40 +73,37 @@ function HomeLoggedIn() {
           New task correctly created!
         </Alert>
       )}
-      <div className='SideContainer'>
+      <div className="SideContainer">
         <NavBar></NavBar>
         <div className="CenterContainer">
-
-        {!ProfileData && (
-          <div className="container mt-5" width="100%">
-            <div className="row text-center">
-              <div className="col">
-                <h3 className="mb-3 mr-10">Personal Agenda</h3>
-                <WeeklyCalendar width={1000} height={570} />
-              </div>
-              <div className="col"></div>
-              <div className="col">
-                <div className="row text-center mt-5">
-                  <h5>Filter</h5>
+          {!ProfileData && (
+            <div className="container mt-5" width="100%">
+              <div className="row text-center">
+                <div className="col">
+                  <h3 className="mb-3 mr-10">Personal Agenda</h3>
+                  <WeeklyCalendar width={1000} height={570} />
                 </div>
-                <div className="row">
-                  <Link
-                    to="/home/newtask"
-                    className="personalized-button"
-                    style={{
-                      textDecoration: "inherit",
-                    }}
-                  >
-                    New Task
-                  </Link>
+                <div className="col"></div>
+                <div className="col">
+                  <div className="row text-center mt-5">
+                    <h5>Filter</h5>
+                  </div>
+                  <div className="row">
+                    <Link
+                      to="/home/newtask"
+                      className="personalized-button"
+                      style={{
+                        textDecoration: "inherit",
+                      }}
+                    >
+                      New Task
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
-        {ProfileData && (
-          <Profile></Profile>
-        )}
+          )}
+          {ProfileData && <Profile></Profile>}
         </div>
       </div>
     </div>

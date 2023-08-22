@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import "../Css/confirmation.css";
+import "../css/confirmation.css";
 import { handleRevert } from "./Profile";
 
 function PopUp() {

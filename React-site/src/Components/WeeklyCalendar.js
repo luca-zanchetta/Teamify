@@ -8,7 +8,7 @@ import React, {
 import { Calendar, momentLocalizer, Slot } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import moment from "moment";
-import "../Css/Calendar.css";
+import "../css/Calendar.css";
 import axios from "axios";
 
 var endpoint1 = "http://localhost:5000/tasks";
