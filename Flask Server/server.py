@@ -275,7 +275,7 @@ def team_list():
     return jsonify(teams), 200
 
 #Create a team
-@app.route("/home/teams", methods=["POST"])
+@app.route("/home/newteam", methods=["POST"])
 def team_create():
     curr = conn.cursor()
 
