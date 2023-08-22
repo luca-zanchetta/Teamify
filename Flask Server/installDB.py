@@ -129,7 +129,7 @@ except Exception as err:
 # Table 'team'
 dropTeam = "DROP TABLE IF EXISTS team"
 team = """CREATE TABLE team (
-    id SERIAL PRIMARY KEY,
+    id SERIAL UNIQUE,
     name VARCHAR(100) NOT NULL DEFAULT 'unnamed_team',
     description VARCHAR(500),
     CONSTRAINT joinn_pkey
