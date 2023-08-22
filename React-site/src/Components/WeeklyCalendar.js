@@ -40,20 +40,9 @@ const WeeklyCalendar = ({
   const localUser = localStorage.getItem("LoggedUser");
   const localTeam = 0; //da gestire quando si implementano i team
   const currentPath = window.location.pathname; //get the current position
-  //console.log(currentPath);
-
-  const EventDisplay = ({ event }) => {
-    return (
-      <div className="custom-event" style={event.style}>
-        {event.title}
-      </div>
-    );
-  };
 
   const eventStyleGetter = (event, start, end, isSelected) => {
-    //console.log(event);
-    var backgroundColor = "#" + event.hexColor;
-    var style = {
+    const style = {
       backgroundColor: "#07fcaf",
       borderRadius: "10px",
       color: "black",
@@ -68,6 +57,15 @@ const WeeklyCalendar = ({
   const handleSelectEvent = useCallback((event) => {
     alert(event.title);
   });
+
+  const MyEvent = ({ event }) => <div>{event.title}</div>;
+
+  const components = {
+    agenda: {
+      event: MyEvent, // Use your custom event component
+    },
+    event: MyEvent,
+  };
 
   useEffect(() => {
     if (currentPath === "/home") {
@@ -130,10 +128,8 @@ const WeeklyCalendar = ({
         formats={{
           timeGutterFormat,
         }}
+        components={components}
         messages={messages}
-        components={{
-          event: EventDisplay,
-        }}
         onSelectEvent={handleSelectEvent}
         eventPropGetter={eventStyleGetter}
         onSelectSlot={handleSelectSlot}

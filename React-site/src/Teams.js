@@ -10,7 +10,8 @@ import axios from "axios";
 function Teams() {
   const username = localStorage.getItem("LoggedUser");
   const navigate = useNavigate();
-  //var endpoint = "http://localhost:5000/tasks";
+  const endpoint = "http://localhost:5000/home/teams";
+  const [teams, setTeams] = useState([]);
 
   const ToggleDisplayAgenda = () => {
     localStorage.setItem("ProfileData", "false");
@@ -20,6 +21,28 @@ function Teams() {
   const handleBack = () => {
     navigate("/home");
   };
+
+  useEffect(() => {
+    axios
+      .get(endpoint, {
+        params: {
+          user: username,
+        },
+      }) // Pass the user parameter in the query string
+      .then((response) => {
+        const res = response.data;
+
+        const formattedTeams = res.map((team) => ({
+          title: team.name,
+          description: team.description,
+          members: team.members,
+        }));
+        setTeams(formattedTeams);
+      })
+      .catch((error) => {
+        console.error("Error fetching team data:", error);
+      });
+  }, []);
 
   return (
     <div className="App">
@@ -88,19 +111,20 @@ function Teams() {
                 }}
               />
             </div>
-
-            <div className="row mb-5">
-              <div className="col">
-                <div>Lab</div>
+            {teams.map((team, index) => (
+              <div className="row mb-5" key={index}>
+                <div className="col">
+                  <div>{team.title}</div>
+                </div>
+                <div className="col">
+                  <div>{team.description}</div>
+                </div>
+                <div className="col mb-3">
+                  <div>Administrator</div>
+                </div>
+                <hr />
               </div>
-              <div className="col">
-                <div>Lab team</div>
-              </div>
-              <div className="col mb-3">
-                <div>Administrator</div>
-              </div>
-              <hr />
-            </div>
+            ))}
           </div>
           <div className="mt-5" style={{ textAlign: "right" }}>
             <button className="btn btn-light"> New Team</button>

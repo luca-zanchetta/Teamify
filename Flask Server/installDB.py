@@ -47,12 +47,19 @@ member = """CREATE TABLE member (
 )"""
 try:
     cur.execute(dropMember)
-    cur.execute(member)   
-    conn.commit() 
+    cur.execute(member)
+    conn.commit()
 
-    password = sha256(str("ciaociao").encode('utf-8')).hexdigest()
+    password = sha256(str("ciaociao").encode("utf-8")).hexdigest()
     query = "INSERT INTO member (name, surname, birth_date, email, username, password) VALUES (%s, %s, %s, %s, %s, %s)"
-    member_data = ("Admin", "Admin", '2000-01-01', "admin@example.com", "admin", password)
+    member_data = (
+        "Admin",
+        "Admin",
+        "2000-01-01",
+        "admin@example.com",
+        "admin",
+        password,
+    )
 
     cur.execute(query, member_data)
     conn.commit()
@@ -86,7 +93,7 @@ except Exception as err:
     print("Error: ", err)
     exit()
 
-    
+
 # Table 'notification'
 dropNotification = "DROP TABLE IF EXISTS notification CASCADE"
 notification = """CREATE TABLE notification (
@@ -110,8 +117,8 @@ notification = """CREATE TABLE notification (
 )"""
 try:
     cur.execute(dropNotification)
-    cur.execute(notification)   
-    conn.commit() 
+    cur.execute(notification)
+    conn.commit()
 
     print("[INFO] Table 'notification' successfully created.")
 except Exception as err:
@@ -128,8 +135,8 @@ team = """CREATE TABLE team (
 )"""
 try:
     cur.execute(dropTeam)
-    cur.execute(team)   
-    conn.commit() 
+    cur.execute(team)
+    conn.commit()
 
     print("[INFO] Table 'team' successfully created.")
 except Exception as err:
@@ -155,8 +162,8 @@ join = """CREATE TABLE joinTeam (
 )"""
 try:
     cur.execute(dropJoin)
-    cur.execute(join)   
-    conn.commit() 
+    cur.execute(join)
+    conn.commit()
 
     print("[INFO] Table 'join' successfully created.")
 except Exception as err:
@@ -182,8 +189,8 @@ manage = """CREATE TABLE manage (
 )"""
 try:
     cur.execute(dropManage)
-    cur.execute(manage)   
-    conn.commit() 
+    cur.execute(manage)
+    conn.commit()
 
     print("[INFO] Table 'manage' successfully created.")
 except Exception as err:
@@ -210,8 +217,8 @@ invite = """CREATE TABLE invite (
 )"""
 try:
     cur.execute(dropInvite)
-    cur.execute(invite)   
-    conn.commit() 
+    cur.execute(invite)
+    conn.commit()
 
     print("[INFO] Table 'invite' successfully created.")
 except Exception as err:
@@ -247,8 +254,8 @@ includes = """CREATE TABLE includes (
 )"""
 try:
     cur.execute(dropManage)
-    cur.execute(manage)   
-    conn.commit() 
+    cur.execute(manage)
+    conn.commit()
 
     print("[INFO] Table 'manage' successfully created.")
 except Exception as err:

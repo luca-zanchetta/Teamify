@@ -8,7 +8,9 @@ import Reset from "./Reset";
 import HomeLoggedIn from "./HomeLoggedIn";
 import NewTask from "./NewTask";
 import TeamView from "./TeamView";
+import Invite from "./components/Invite";
 import Teams from "./Teams";
+
 function App() {
   //data è la variabile dello stato, setData è la funzione per settare il suo valore
   const [data, setData] = useState([{}]);
@@ -32,6 +34,7 @@ function App() {
         <Route path="home" element={<HomeLoggedIn />} />
         <Route path="home/newtask" element={<NewTask />} />
         <Route path="teamview" element={<TeamView />} />
+        <Route path="invite" element={<Invite />} />
         <Route path="home/teams" element={<Teams />} />
       </Routes>
     </BrowserRouter>
