@@ -31,7 +31,7 @@ const [description, setDescription] = useState("");
   };
 
   const handleBack = () => {
-    navigate("/home");
+    navigate("/home/teams");
   };
   const requestFailed =
   sessionStorage.getItem("request_failed_alert") === "true";
@@ -168,7 +168,7 @@ const [description, setDescription] = useState("");
             </div>
             
             <hr />
-            <input type="submit" value={"Register"} id="Login"></input>
+            <input type="submit" value={"Create"} id="Login"></input>
           </form></div></div>
           <div className="mt-5" style={{ textAlign: "right" }}>
           </div>
