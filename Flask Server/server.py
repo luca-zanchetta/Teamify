@@ -213,6 +213,10 @@ def get_tasks():
     return jsonify(tasks_list), 200
 
 
+
+
+
+
 # Get events/tasks for shared agenda
 # GESTIONE DA FINIRE PER MANCANZA TEAM
 @app.route("/teamview", methods=["GET"])
@@ -255,9 +259,7 @@ def team_list():
     )
     entries = curr.fetchall()
     teams = []
-    print(entries)
     for entry in entries:
-        print(entry[2])
         curr.execute(
         "SELECT admin from manage where team= %s and admin= %s",
         (entry[0],user,),
@@ -271,6 +273,41 @@ def team_list():
         teams.append({"name": entry[1], "description": entry[2], "role": isAdmin})
 
     return jsonify(teams), 200
+
+#Create a team
+@app.route("/home/teams", methods=["POST"])
+def team_create():
+    curr = conn.cursor()
+
+    data = request.get_json()
+    username = data["username"]
+    name = data["name"]
+    description = data["description"]
+    
+    # Fetch the ID of the last inserted task
+    curr.execute(
+        "INSERT INTO team (name, description) VALUES (%s,%s)",
+        (name,description,),
+    )
+    curr.execute(
+        "SELECT id FROM team WHERE name=%s AND description=%s",
+        (name,description,),
+    )
+    id=curr.fetchall()[0]
+    curr.execute(
+        "INSERT INTO joinTeam (team, username) VALUES (%s,%s)",
+        (id,username,),
+    )
+    curr.execute(
+        "INSERT INTO manage (team, admin) VALUES (%s,%s)",
+        (id,username,),
+    )
+
+    return jsonify("ok"),200
+
+
+
+
 
 
 # Display user information
