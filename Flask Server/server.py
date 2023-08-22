@@ -254,7 +254,7 @@ def team_list():
     # Fetch the ID of the last inserted task
     user = request.args.get("user")
     curr.execute(
-        "SELECT team id, name, description FROM joinTeam JOIN team ON team.id=joinTeam.team WHERE username = %s",
+        "SELECT team id, name, description FROM joinTeam JOIN team ON team.id=joinTeam.team WHERE username = %s ORDER BY name",
         (user,),
     )
     entries = curr.fetchall()

@@ -2,12 +2,24 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate, Navigate } from "react-router-dom";
 import TopBar from "./components/TopBar";
 import NavBar from "./components/NavBar";
+import Alert from "./components/Alert.tsx";
 
 import UserIcon from "./components/UserIcon";
 import Notifications from "./components/Notifications";
 import axios from "axios";
 
 function Teams() {
+
+  useEffect(() => {
+    //useEffect viene chiamato a fine render del component
+    handleTeamCreated();
+    }, []);
+
+  const teamCreated = localStorage.getItem("teamCreated_alert") === "true";
+  const handleTeamCreated = () => {
+    localStorage.setItem("teamCreated_alert", "false")
+  };  
+
   const username = localStorage.getItem("LoggedUser");
   const navigate = useNavigate();
   const endpoint = "http://localhost:5000/home/teams";
@@ -20,6 +32,10 @@ function Teams() {
 
   const handleBack = () => {
     navigate("/home");
+  };
+
+  const handleCreateTeam = () => {
+    navigate("/home/createteam");
   };
 
   useEffect(() => {
@@ -35,7 +51,7 @@ function Teams() {
         const formattedTeams = res.map((team) => ({
           title: team.name,
           description: team.description,
-          members: team.members,
+          role: team.role,
         }));
         setTeams(formattedTeams);
       })
@@ -68,6 +84,11 @@ function Teams() {
       <div className="SideContainer">
         <NavBar></NavBar>
         <div className="container">
+        {teamCreated && (
+        <Alert onClick={handleTeamCreated} state="success">
+          Team created
+        </Alert>
+      )}
           <div className="row mt-4 mb-2" style={{ textAlign: "left" }}>
             <div className="col">
               <h1>Teams</h1>
@@ -120,14 +141,18 @@ function Teams() {
                   <div>{team.description}</div>
                 </div>
                 <div className="col mb-3">
-                  <div>Administrator</div>
+                  <div>{team.role}</div>
                 </div>
                 <hr />
               </div>
             ))}
           </div>
           <div className="mt-5" style={{ textAlign: "right" }}>
-            <button className="btn btn-light"> New Team</button>
+            <Link
+            to="/home/createteam"
+            style={{ color: "inherit", textDecoration: "inherit" }}
+            className="btn btn-light"
+          >Create team</Link>
           </div>
         </div>
       </div>
