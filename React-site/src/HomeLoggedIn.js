@@ -4,17 +4,20 @@ import "./css/Homepage.css";
 import WeeklyCalendar from "./components/WeeklyCalendar.js";
 import { Container } from "./css/Navigator.css";
 import { Link, useNavigate, Navigate } from "react-router-dom";
+import React, { useCallback, useState } from "react";
 import NavBar from "./components/NavBar";
 import TopBar from "./components/TopBar";
 import UserIcon from "./components/UserIcon";
 import Notifications from "./components/Notifications";
 import Profile from "./components/Profile";
 import Alert from "./components/Alert.tsx";
+import Task from "./components/Task.js";
 
 function HomeLoggedIn() {
   const username = localStorage.getItem("LoggedUser");
   const ProfileData = localStorage.getItem("ProfileData") === "true";
   const navigate = useNavigate();
+  const [task, setTask] = useState([]);
 
   if (!username) {
     // If the user is not logged in, (s)he has to login first.
@@ -41,6 +44,10 @@ function HomeLoggedIn() {
   };
 
   /* END ALERT SECTION */
+
+  const handleSelectEvent = useCallback((event) => {
+    setTask(event);
+  });
 
   return (
     <div className="App">
@@ -73,6 +80,7 @@ function HomeLoggedIn() {
           New task correctly created!
         </Alert>
       )}
+      {task.id !== undefined && <Task task={task} />}
       <div className="SideContainer">
         <NavBar></NavBar>
         <div className="CenterContainer">
@@ -81,7 +89,11 @@ function HomeLoggedIn() {
               <div className="row text-center">
                 <div className="col">
                   <h3 className="mb-3 mr-10">Personal Agenda</h3>
-                  <WeeklyCalendar width={1000} height={570} />
+                  <WeeklyCalendar
+                    width={1000}
+                    height={570}
+                    handleSelectEvent={handleSelectEvent}
+                  />
                 </div>
                 <div className="col"></div>
                 <div className="col">

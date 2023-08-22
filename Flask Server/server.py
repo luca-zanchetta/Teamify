@@ -157,7 +157,6 @@ def create_new_task():
     else:
         new_id = 1
 
-    print(new_id)
     # Extract other data from the request
     title = request.json["title"]
     date = request.json["date"]
@@ -189,6 +188,38 @@ def create_new_task():
     return jsonify({"message": "Task created successfully", "id": new_id}), 200
 
 
+# Modify a task API
+@app.route("/home/updatetask/", methods=["PUT"])
+def update_task(task_id):
+    curr = conn.cursor()
+    local_user = request.args.get("user")  # get back the params from the request
+
+    # Extract data from the request
+    data = request.json
+    title = data.get("title")
+    date = data.get("date")
+    time = data.get("time")
+    description = data.get("description")
+    duration = data.get("duration")
+
+    curr.execute("SELECT * FROM task WHERE id = %s", (task_id,))
+    existing_task = curr.fetchone()
+    if not existing_task:
+        return jsonify({"message": "Task not found"}), 404
+
+    update_query = "UPDATE task SET title = %s, date = %s, time = %s, description = %s, member = %s, duration = %s WHERE id = %s"
+    update_values = (title, date, time, description, local_user, duration, task_id)
+
+    try:
+        curr.execute(update_query, update_values)
+        conn.commit()
+    except Exception as err:
+        print("[ERROR] /updatetask: ", err)
+        return jsonify({"message": "Update failed"}), 400
+
+    return jsonify({"message": "Task updated successfully"}), 200
+
+
 # Get all tasks API
 @app.route("/tasks", methods=["GET"])
 def get_tasks():
@@ -196,7 +227,7 @@ def get_tasks():
     # Fetch the ID of the last inserted task
     local_user = request.args.get("user")  # get back the params from the request
     curr.execute(
-        "SELECT title, description, date, time, duration FROM task WHERE member = %s",
+        "SELECT title, description, date, time,id, duration FROM task WHERE member = %s",
         (local_user,),
     )
     tasks = curr.fetchall()
@@ -208,7 +239,15 @@ def get_tasks():
 
         new_end_date = convert_date(end_date, task[4])
 
-        tasks_list.append({"title": task[0], "start": start_date, "end": new_end_date})
+        tasks_list.append(
+            {
+                "title": task[0],
+                "start": start_date,
+                "end": new_end_date,
+                "description": task[1],
+                "id": task[5],
+            }
+        )
 
     return jsonify(tasks_list), 200
 

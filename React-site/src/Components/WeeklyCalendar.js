@@ -26,6 +26,7 @@ interface Props {
   height: integer;
   handleSelectSlot: () => void;
   slotPropGetter: () => void;
+  handleSelectEvent: () => void;
 }
 
 const WeeklyCalendar = ({
@@ -33,6 +34,7 @@ const WeeklyCalendar = ({
   height,
   handleSelectSlot,
   slotPropGetter,
+  handleSelectEvent,
 }: Props) => {
   const startingHour = 8;
   const timeGutterFormat = "H:mm";
@@ -54,7 +56,7 @@ const WeeklyCalendar = ({
     };
   };
 
-  const handleSelectEvent = useCallback((event) => {
+  const hSE = useCallback((event) => {
     alert(event.title);
   });
 
@@ -79,9 +81,11 @@ const WeeklyCalendar = ({
           const tasks = response.data;
 
           const formattedEvents = tasks.map((task) => ({
+            id: task.id,
             title: task.title,
             start: new Date(task.start),
             end: new Date(task.end),
+            description: task.description,
           }));
 
           setEvents(formattedEvents);
@@ -102,9 +106,11 @@ const WeeklyCalendar = ({
           const tasks = response.data;
 
           const formattedEvents = tasks.map((task) => ({
+            id: task.id,
             title: task.title,
             start: new Date(task.start),
             end: new Date(task.end),
+            description: task.description,
           }));
 
           setEvents(formattedEvents);

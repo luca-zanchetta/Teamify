@@ -1,40 +1,34 @@
 import { useNavigate } from "react-router-dom";
 import "../css/confirmation.css";
 import { handleRevert } from "./Profile";
+import React, { useState } from "react";
+import axios from "axios";
 
-function PopUp() {
+interface Props {
+  task: Object;
+}
+function Task({ task }: Props) {
   const navigate = useNavigate();
+  const [updatedTask, setUpdatedTask] = useState([]);
 
-  const handleConfirmation = () => {
-    const endpoint = `/home/delete-account?user=${localStorage.getItem(
-      "LoggedUser"
-    )}`;
+  const handleConfirmation = () => {};
 
-    // Make a DELETE request
-    fetch(endpoint, {
-      method: "DELETE",
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data === "ok") {
-          console.log("Account deleted successfully");
-          localStorage.clear();
-          sessionStorage.clear();
-          navigate("/login");
-          window.location.replace(window.location.href);
-        } else {
-          console.error("Failed to delete account");
-        }
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
+  const handleUpdateTask = async (taskId) => {
+    try {
+      const response = await axios.put(
+        `http://localhost:5000/home/updatetask/${taskId}`,
+        updatedTask
+      );
+      console.log(response.data.message); // Display the response message
+    } catch (error) {
+      console.error("Error:", error);
+    }
   };
 
   return (
     <div className="MessageContainer" id="message-container">
       <div className="CardPopUP">
-        <h1>Do you want to delete your account?</h1>
+        <h1>{task.title}</h1>
         <div className="row">
           <div className="col">
             <button
@@ -58,4 +52,4 @@ function PopUp() {
   );
 }
 
-export default PopUp;
+export default Task;
