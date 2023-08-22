@@ -131,9 +131,9 @@ dropTeam = "DROP TABLE IF EXISTS team"
 team = """CREATE TABLE team (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL DEFAULT 'unnamed_team',
-    description VARCHAR(500)
+    description VARCHAR(500),
     CONSTRAINT joinn_pkey
-        PRIMARY KEY(name, description),
+        PRIMARY KEY(name, description)
 )"""
 try:
     cur.execute(dropTeam)

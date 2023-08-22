@@ -15,6 +15,7 @@ function CreateTeam() {
 useEffect(() => {
     //useEffect viene chiamato a fine render del component
     handleRequestFailed();
+    handleMissingFields();
     }, []);
 
 const [name, setName] = useState("");
@@ -37,6 +38,11 @@ const [description, setDescription] = useState("");
   sessionStorage.getItem("request_failed_alert") === "true";
   const handleRequestFailed = () => {
     sessionStorage.setItem("request_failed_alert", "false");
+  };
+  const missingFields =
+  sessionStorage.getItem("missing_field_alert") === "true";
+  const handleMissingFields = () => {
+    sessionStorage.setItem("missing_field_alert", "false");
   };
 
 
@@ -76,7 +82,7 @@ const [description, setDescription] = useState("");
         }
     } else {
       // There is at least one mandatory field that has not been filled
-      sessionStorage.setItem("request_failed_alert", "true");
+      sessionStorage.setItem("missing_field_alert", "true");
       window.location.replace(window.location.href); // For alert purposes only
       console.log("All the fields must be filled!");
     }
@@ -114,7 +120,12 @@ const [description, setDescription] = useState("");
         <div className="container">
         {requestFailed && (
         <Alert onClick={handleRequestFailed} state="danger">
-          Error: You must insert the name
+          Error: there already exist a team with same name and description
+        </Alert>
+      )}
+      {missingFields && (
+        <Alert onClick={handleMissingFields} state="danger">
+          Error: You must insert the team name
         </Alert>
       )}
           <div className="row mt-4 mb-2" style={{ textAlign: "left" }}>
