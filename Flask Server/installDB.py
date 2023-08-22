@@ -123,7 +123,8 @@ except Exception as err:
 dropTeam = "DROP TABLE IF EXISTS team"
 team = """CREATE TABLE team (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL DEFAULT 'unnamed_team'
+    name VARCHAR(100) NOT NULL DEFAULT 'unnamed_team',
+    description VARCHAR(500)
 )"""
 try:
     cur.execute(dropTeam)
