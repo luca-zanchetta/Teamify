@@ -250,15 +250,25 @@ def team_list():
     # Fetch the ID of the last inserted task
     user = request.args.get("user")
     curr.execute(
-        "SELECT team, name FROM joinTeam JOIN team ON team.id=joinTeam.team WHERE username = %s",
+        "SELECT team id, name, description FROM joinTeam JOIN team ON team.id=joinTeam.team WHERE username = %s",
         (user,),
     )
-    ids = curr.fetchall()
+    entries = curr.fetchall()
     teams = []
-    for id in ids:
-        curr.execute("SELECT username FROM joinTeam WHERE team = %s", (id[0],))
-        members = curr.fetchall()
-        teams.append({"name": id[1], "description": "test", "members": members})
+    print(entries)
+    for entry in entries:
+        print(entry[2])
+        curr.execute(
+        "SELECT admin from manage where team= %s and admin= %s",
+        (entry[0],user,),
+        )
+        admin=curr.fetchall()
+        isAdmin=len(admin)
+        if isAdmin==0:
+            isAdmin="Member"
+        else:
+            isAdmin="Administrator"
+        teams.append({"name": entry[1], "description": entry[2], "role": isAdmin})
 
     return jsonify(teams), 200
 
