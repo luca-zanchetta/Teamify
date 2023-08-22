@@ -3,13 +3,22 @@ import "./css/Login.css";
 
 import Alert from "./components/Alert.tsx";
 import { Link, useNavigate, Navigate } from "react-router-dom";
-import React, { useState } from "react";
+import React, { useState, useEffect } from 'react';
 import axios from "axios";
 
 var endpoint = "http://localhost:5000/login";
 const loggedIn = localStorage.getItem("LoggedUser");
 
 function Login() {
+  useEffect(() => {
+    //useEffect viene chiamato a fine render del component
+    handleMissingFields();
+    handleRequestFailed();
+    handleWrongPwd();
+    handleUsernameNotFound();
+  }, []);
+
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 

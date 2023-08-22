@@ -10,6 +10,15 @@ var endpoint = "http://localhost:5000/signup";
 const loggedIn = localStorage.getItem("LoggedUser");
 
 function SignUp() {
+  useEffect(() => {
+    //useEffect viene chiamato a fine render del component
+    handleMissingFields();
+    handleRequestFailed();
+    handlePasswordsNotMatching();
+    handlePasswordNotOf8Characters();
+  }, []);
+
+
   // Form data
   const [name, setName] = useState("");
   const [surname, setSurname] = useState("");
