@@ -245,7 +245,34 @@ def get_tasks_events():
     return jsonify(tasks_list), 200
 
 
-  
+@app.route("/team/list", methods=["POST"])
+def team_list():
+
+    curr = conn.cursor()
+    # Fetch the ID of the last inserted task
+    data = request.get_json()
+    user=data["user"]
+    curr.execute("SELECT team, name FROM joinTeam JOIN team ON team.id=joinTeam.team WHERE username = %s", (user,))
+    ids = curr.fetchall()
+    
+    teams = []
+    for id in ids:
+        curr.execute("SELECT username FROM joinTeam WHERE team = %s", (id[0],))
+        members=curr.fetchall()
+        
+        teams.append({
+            "name": id[1],
+            "description": "test",
+            "members": members
+        })
+    return jsonify(teams), 200
+
+
+
+
+
+
+
 # Display user information
 @app.route("/home/profile", methods=['POST'])
 def show_personal_info():
