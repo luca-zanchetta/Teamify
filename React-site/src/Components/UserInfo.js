@@ -2,6 +2,7 @@ import "../css/Navigator.css";
 import edit from "../icons/edit.png";
 import face from "../img/face.jpeg";
 import "../css/Profile.css";
+
 import axios from "axios";
 import { useEffect, useState } from "react";
 
@@ -22,6 +23,7 @@ function UserInfo() {
   const [editPass, setPass] = useState(false);
 
   let hiddenPassword = "";
+
 
   // Edit user information
   const ToggleEdit = async (event) => {
@@ -55,14 +57,19 @@ function UserInfo() {
 
         // If the modification was successful, update the initial constants
         if (response.data.status === 200) {
-          alert(response.data.message);
+          console.log(response.data.message);
 
           setName(new_name);
           setSurname(new_surname);
           setEmail(new_email);
           setBirth(new_birth);
+
+          sessionStorage.setItem("dataUpdate_alert", "true");
+          window.location.replace(window.location.href);
         } else if (response.data.status === 500) {
-          alert(response.data.message);
+          console.log(response.data.message);
+          sessionStorage.setItem("dataUpdateErr_alert", "true");
+          window.location.replace(window.location.href);
         }
       } catch (error) {
         // Request failed
@@ -82,45 +89,54 @@ function UserInfo() {
       var new_password_2 = document.getElementById("new_password_2").value;
 
       if (old_password === "" || new_password === "" || new_password_2 === "") {
+        // MATTEO: Sostituisci alert con console.log; poi, guarda come ho fatto io negli altri alert e replica
         alert("All the fields must be filled!");
-      } else if (
-        old_password !== new_password &&
-        new_password === new_password_2
-      ) {
-        try {
-          // Send a POST request to the /home/modify-info endpoint of the Flask server
-          const response = await axios
-            .post(endpoint_modify_password, {
-              username,
-              old_password,
-              new_password,
-            })
-            .catch(function (error) {
-              if (error.response) {
-                // Print error data
-                console.log("Data: " + error.response.data);
-                console.log("Status: " + error.response.status);
-                console.log("Headers: " + error.response.headers);
-              }
-            });
-
-          // The modification was successful
-          if (response.data.status === 200) {
-            alert(response.data.message);
-            show_data();
-            window.location.reload();
-          } else if (response.data.status === 500) {
-            alert(response.data.message);
-          } else if (response.data.status === 400) {
-            alert(response.data.message);
+      } 
+      else if (old_password !== new_password && new_password === new_password_2) {
+        if(new_password.length >= 8) {
+          try {
+            // Send a POST request to the /home/modify-info endpoint of the Flask server
+            const response = await axios
+              .post(endpoint_modify_password, {
+                username,
+                old_password,
+                new_password,
+              })
+              .catch(function (error) {
+                if (error.response) {
+                  // Print error data
+                  console.log("Data: " + error.response.data);
+                  console.log("Status: " + error.response.status);
+                  console.log("Headers: " + error.response.headers);
+                }
+              });
+  
+            // The modification was successful
+            if (response.data.status === 200) {
+              console.log(response.data.message);
+              show_data();
+              sessionStorage.setItem("rightPassword_alert", "true");
+              window.location.replace(window.location.href);
+            } 
+            else if (response.data.status === 500) {
+              alert(response.data.message);   // Error during password update
+            } 
+            else if (response.data.status === 400) {
+              console.log(response.data.message);
+              sessionStorage.setItem("wrongPassword_alert", "true");
+              window.location.replace(window.location.href);
+            }
+          } catch (error) {
+            // Request failed
+            console.log("[ERROR] Request failed: " + error);
           }
-          // else if(response.data.status === 404) {
-          //   alert(response.data.message);
-          // }
-        } catch (error) {
-          // Request failed
-          console.log("[ERROR] Request failed: " + error);
         }
+        else {
+          sessionStorage.setItem("password8_alert", "true");
+          window.location.replace(window.location.href); // For alert purposes only
+          console.log("The new password must contain at least 8 characters!");
+        }
+        
       } else if (
         old_password === new_password ||
         old_password === new_password_2
