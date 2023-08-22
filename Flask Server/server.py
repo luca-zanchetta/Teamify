@@ -246,7 +246,6 @@ def get_tasks_events():
 # Get the list of teams releted to a certain user
 @app.route("/home/teams", methods=["GET"])
 def team_list():
-    print("START")
     curr = conn.cursor()
     # Fetch the ID of the last inserted task
     user = request.args.get("user")
