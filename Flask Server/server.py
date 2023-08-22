@@ -246,10 +246,10 @@ def get_tasks_events():
 # Get the list of teams releted to a certain user
 @app.route("/home/teams", methods=["GET"])
 def team_list():
+    print("START")
     curr = conn.cursor()
     # Fetch the ID of the last inserted task
-    data = request.get_json()
-    user = data["user"]
+    user = request.args.get("user")
     curr.execute(
         "SELECT team, name FROM joinTeam JOIN team ON team.id=joinTeam.team WHERE username = %s",
         (user,),
@@ -259,7 +259,6 @@ def team_list():
     for id in ids:
         curr.execute("SELECT username FROM joinTeam WHERE team = %s", (id[0],))
         members = curr.fetchall()
-
         teams.append({"name": id[1], "description": "test", "members": members})
 
     return jsonify(teams), 200
