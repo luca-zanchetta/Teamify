@@ -1,11 +1,10 @@
 import "../css/Navigator.css";
 
 import { Link, useNavigate, navigate } from "react-router-dom";
-import calendar from "../icons/calendar.png";
 
-import paper from "../icons/paper.png";
-import profits from "../icons/profits.png";
-import savings from "../icons/savings.png";
+import calendar from "../icons/calendar.png";
+import team from "../icons/team.png";
+import profile from "../icons/users.png";
 
 function NavBar() {
   const navigate = useNavigate();
@@ -14,21 +13,27 @@ function NavBar() {
     navigate("/home/teams");
   };
 
+  const GoToAgenda = () => {
+    localStorage.setItem("ProfileData", "false");
+    navigate("/home");
+  }
+
+  const GoToProfile = () => {
+    localStorage.setItem("ProfileData", "true");
+    navigate("/home");
+  }
+
   return (
     <div className="NavContainer">
       <div className="IconContainer">
         <div className="IconEntry">
-          <img src={calendar}></img>
+          <img src={calendar} onClick={GoToAgenda}></img>
         </div>
         <div className="IconEntry">
-          <img src={paper} onClick={ToggleTeams}></img>
-        </div>
-
-        <div className="IconEntry">
-          <img src={profits}></img>
+          <img src={team} onClick={ToggleTeams}></img>
         </div>
         <div className="IconEntry">
-          <img src={savings}></img>
+          <img src={profile} onClick={GoToProfile}></img>
         </div>
       </div>
     </div>
