@@ -111,8 +111,9 @@ function Teams() {
                 }}
               />
             </div>
+            <div className="row mb-5"></div>
             {teams.map((team, index) => (
-              <div className="row mb-5" key={index}>
+              <div className="row mb-1" key={index}>
                 <div className="col">
                   <div>{team.title}</div>
                 </div>

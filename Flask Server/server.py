@@ -272,6 +272,7 @@ def get_tasks():
                 "start": start_date,
                 "end": new_end_date,
                 "description": task[1],
+                "duration": task[4],
                 "id": task[5],
                 "status": task[6],
                 "type": task[7],

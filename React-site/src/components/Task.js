@@ -1,8 +1,9 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "../css/task.css";
 import { handleRevert } from "./Profile";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { formatTime } from "../support.js";
 
 interface Props {
   task: Object;
@@ -13,12 +14,7 @@ function Task({ task }: Props) {
   const navigate = useNavigate();
   const [updatedTask, setUpdatedTask] = useState([]);
   const [members, setMembers] = useState([]);
-
-  const end_time = new Date(task.end);
-  const h = end_time.getHours().toString().padStart(2, "0");
-  const m = end_time.getMinutes().toString().padStart(2, "0");
-  const s = end_time.getSeconds().toString().padStart(2, "0");
-  const formattedTime = `${h}:${m}:${s}`;
+  const formattedTime = formatTime(task.end);
 
   const [isExpanded, setIsExpanded] = useState(false);
   const toggleAccordion = () => {
@@ -38,19 +34,9 @@ function Task({ task }: Props) {
     }
   };
 
-  //for the modification mooolto da rivedere
-  const handleUpdateTask = async (taskId) => {
-    try {
-      const response = await axios.put(
-        `http://localhost:5000/home/updatetask/${
-          task.id
-        }/${localStorage.getItem("LoggedUser")}`,
-        updatedTask //parameters to pass
-      );
-      console.log(response.data.message); // Display the response message
-    } catch (error) {
-      console.error("Error:", error);
-    }
+  //in this way you can pass the props through the navigate
+  const handleEdit = () => {
+    navigate("/home/tasks/edittask", { state: { task: task } });
   };
 
   useEffect(() => {
@@ -146,7 +132,7 @@ function Task({ task }: Props) {
                   color: "black",
                   width: "100%",
                 }}
-                onClick={handleUpdateTask}
+                onClick={handleEdit}
               >
                 Edit
               </button>

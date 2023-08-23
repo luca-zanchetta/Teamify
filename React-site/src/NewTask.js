@@ -9,13 +9,17 @@ import UserIcon from "./components/UserIcon.js";
 import Alert from "./components/Alert.tsx";
 import WeeklyCalendar from "./components/WeeklyCalendar.js";
 import React, { useState, useCallback, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import moment from "moment";
+import { formatTime, formatDate } from "./support.js";
 
-var endpoint = "http://localhost:5000/home/newtask";
+const endpoint = "http://localhost:5000/home/newtask";
 
 function NewTask() {
+  const location = useLocation();
+  const [modify, setModify] = useState(false);
+  const [task, setTask] = useState([]);
   const [id, setId] = useState(0);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -87,7 +91,7 @@ function NewTask() {
   );
 
   //handle the highlit of the slot once you selected it
-
+  //to create a task
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -152,6 +156,18 @@ function NewTask() {
     }
   };
 
+  //check if i'm going to modify the task and so i passed it or not
+  useEffect(() => {
+    if (location.state && location.state.task) {
+      setTask(location.state.task);
+      setTime(formatTime(task.start));
+      setDate(formatDate(task.start));
+      setModify(true);
+    } else {
+      setModify(false);
+    }
+  }, [location.state]);
+  console.log(date);
   return (
     <div>
       <div className="App">
@@ -178,18 +194,22 @@ function NewTask() {
         )}
 
         <div className="SignUpBackground">
-          <div className="container">
-            <div className="row">
+          <div className="container" style={{ Display: "flex" }}>
+            <div className="row" style={{ Display: "flex" }}>
               <div className="col-sm">
                 <div className="CardL">
-                  <div className="CardHeading">Create new task</div>
+                  <div className="CardHeading">
+                    {(modify && "Modify task") || "Create new task"}
+                  </div>
                   <form onSubmit={handleSubmit}>
                     <div className="InputEntry">
                       <div className="InputLabel">Title</div>
                       <input
                         className="InputField"
                         type="text"
-                        placeholder="Enter a title for your task"
+                        placeholder={
+                          (modify && task.title) || "Enter a new title"
+                        }
                         id="task"
                         onChange={(event) => setTitle(event.target.value)}
                       ></input>
@@ -199,7 +219,10 @@ function NewTask() {
                       <input
                         className="InputField"
                         type="text"
-                        placeholder="Enter a description if you want"
+                        placeholder={
+                          (modify && task.description) ||
+                          "Enter a description if you want"
+                        }
                         id="description"
                         onChange={(event) => setDescription(event.target.value)}
                       ></input>
@@ -209,7 +232,7 @@ function NewTask() {
                       <input
                         className="InputField"
                         type="date"
-                        placeholder="dd/mm/yyy"
+                        value={(modify && date) || "dd/mm/yyy"}
                         id="date"
                         onChange={(event) => setDate(event.target.value)}
                       ></input>
@@ -220,6 +243,7 @@ function NewTask() {
                         className="InputField"
                         type="time"
                         id="time"
+                        value={modify ? time : "10:00"}
                         onChange={(event) => setTime(event.target.value)}
                       ></input>
                     </div>
@@ -229,6 +253,7 @@ function NewTask() {
                         className="InputField"
                         type="integer"
                         id="duration"
+                        placeholder={(modify && task.duration) || "0"}
                         onChange={(event) => setDuration(event.target.value)}
                       ></input>
                     </div>

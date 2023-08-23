@@ -57,8 +57,8 @@ function TeamView() {
                 <Accordion.Body>
                   <div className="container">
                     <div className="row">
-                      Actual Members:
-                      {/* Here the list miss the connection with the beckend*/}
+                      Actual Members: Here the list miss the connection with the
+                      beckend
                     </div>
                     <div className="row">
                       <div className="col">

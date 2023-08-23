@@ -88,6 +88,7 @@ const WeeklyCalendar = ({
             description: task.description,
             status: task.status,
             type: task.type,
+            duration: task.duration,
           }));
 
           setEvents(formattedEvents);
@@ -115,6 +116,7 @@ const WeeklyCalendar = ({
             description: task.description,
             status: task.status,
             type: task.type,
+            duration: task.duration,
           }));
 
           setEvents(formattedEvents);
