@@ -10,11 +10,6 @@ import axios from "axios";
 
 function Teams() {
 
-  useEffect(() => {
-    //useEffect viene chiamato a fine render del component
-    handleTeamCreated();
-    }, []);
-
   const teamCreated = localStorage.getItem("teamCreated_alert") === "true";
   const handleTeamCreated = () => {
     localStorage.setItem("teamCreated_alert", "false")
@@ -34,10 +29,6 @@ function Teams() {
     navigate("/home");
   };
 
-  const handleCreateTeam = () => {
-    navigate("/home/createteam");
-  };
-
   useEffect(() => {
     axios
       .get(endpoint, {
@@ -54,11 +45,24 @@ function Teams() {
           role: team.role,
         }));
         setTeams(formattedTeams);
+        //handleTeamCreated();
       })
       .catch((error) => {
         console.error("Error fetching team data:", error);
       });
   }, []);
+
+  //dopo 5 secondi setto la variabile dell'avviso a false, per evitare che venga messa a false e poi l'avviso non compaia
+  //a causa dal re-render dato dalla call di axios (fatta nell'altro useEffect)
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      handleTeamCreated();
+    }, 5000)
+
+    return () => clearTimeout(timeout)
+
+  }, [])
+
 
   return (
     <div className="App">
@@ -81,7 +85,7 @@ function Teams() {
           <UserIcon></UserIcon>
         </div>
       </div>
-      <div className="SideContainer">
+      <div className="SideContainer overflow-auto">
         <NavBar></NavBar>
         <div className="container">
         {teamCreated && (
@@ -113,7 +117,7 @@ function Teams() {
               </svg>
             </div>
           </div>
-          <div className="container overflow-auto" height="80%">
+          <div className="container" height="80%">
             <div className="row mt-5">
               <div className="col">
                 <div style={{ fontSize: "28px", fontWeight: "bold" }}>Name</div>
@@ -147,7 +151,7 @@ function Teams() {
               </div>
             ))}
           </div>
-          <div className="mt-5" style={{ textAlign: "right" }}>
+          <div className="mt-5 pb-5" style={{ textAlign: "right" }}>
             <Link
             to="/home/createteam"
             style={{ color: "inherit", textDecoration: "inherit" }}

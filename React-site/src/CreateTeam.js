@@ -117,7 +117,7 @@ const [description, setDescription] = useState("");
       </div>
       <div className="SideContainer">
         <NavBar></NavBar>
-        <div className="container">
+        <div className="container align-items-center justify-content-center">
         {requestFailed && (
         <Alert onClick={handleRequestFailed} state="danger">
           Error: there already exist a team with same name and description
@@ -152,7 +152,7 @@ const [description, setDescription] = useState("");
               </svg>
             </div>
           </div>
-          <div className="CardL ">
+          <div className="CardL align-items-center justify-content-center">
           <div className="CardHeading">
           <form onSubmit={handleSubmit}>
             <div className="InputEntry">
