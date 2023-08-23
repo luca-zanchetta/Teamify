@@ -490,6 +490,62 @@ def get_notifications():
     print("[ERROR] /home/notifications: Username not found.")
     return jsonify({"message": "Username not found.", "status": 404})
 
+#given team id and username, invites the user to the team
+@app.route("/invite", methods=["POST"])
+def invite():
+    data = request.get_json()
+    curr = conn.cursor()
+
+    username = data["username"]
+    id = data["id"]
+    admin = data["admin"]
+
+    curr.execute(
+        "INSERT INTO invite (username, admin, team) VALUES (%s,%s,%s)",
+        (username, admin, id,),
+    )
+    return jsonify("ok"),200
+
+#given username, check invites of user
+@app.route("/checkInvites", methods=["GET"])
+def check_invites():
+    curr = conn.cursor()
+    username = request.args.get("username")
+    curr.execute(
+        "SELECT admin, team id, name, description FROM invite JOIN team on team.id=invite.team WHERE username = %s ORDER BY name",
+        (username,),
+    )
+    invites = curr.fetchall()
+    invitesJson = []
+    for invite in invites:
+        invitesJson.append({"admin": invite[0], "id": invite[1], "team_name": invite[2], "team_description": invite[3]})
+    return jsonify(invitesJson),200
+
+    
+#given team id and username, user accepts invite and therefore joins team
+@app.route("/acceptInvite", methods=["POST"])
+def accept_invite():
+    curr = conn.cursor()
+    data = request.get_json()
+    username = data["username"]
+    id = data["id"]
+    curr.execute(
+            'SELECT * from invite WHERE username=%s AND team=%s',
+            (username, id,),
+            )
+    if curr.fetchone():
+        curr.execute(
+            "DELETE FROM invite WHERE username=%s AND team=%s",
+            (username, id,),
+        )
+        curr.execute(
+            "INSERT INTO joinTeam (username,team) values (%s,%s)",
+            (username, id,),
+        )
+        return jsonify("ok"),200
+    else:
+        return jsonify("ko"), 400
+
 
 ############################ END REST APIs ####################################
 
