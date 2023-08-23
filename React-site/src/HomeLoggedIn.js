@@ -14,6 +14,8 @@ import Alert from "./components/Alert.tsx";
 import Task from "./components/Task.js";
 import EditTask from "./components/EditTask.js";
 
+import WebSocketComponent from "./components/WebSocketComponent";
+
 function HomeLoggedIn() {
   const username = localStorage.getItem("LoggedUser");
   const ProfileData = localStorage.getItem("ProfileData") === "true";
@@ -65,6 +67,7 @@ function HomeLoggedIn() {
   return (
     <div className="App">
       {!username && <Navigate to="/login" />}
+      <WebSocketComponent></WebSocketComponent>
       <div className="TopBar">
         <div className="BarHeading">
           <Link

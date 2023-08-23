@@ -4,13 +4,14 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from DBConnection import get_connection
 from support import get_current_week_range, convert_date
-import psycopg2
-from psycopg2 import errors
+from flask_socketio import SocketIO, emit, join_room, leave_room
 
 
-# Flask setup
+# Server setup
 app = Flask(__name__)
 CORS(app)
+socketio = SocketIO(app, cors_allowed_origins="http://localhost:3000")
+connected_clients = []
 
 
 # DB setup
@@ -19,6 +20,29 @@ conn.set_session(autocommit=True)
 if conn is None:
     print("[ERROR] DB Connection failed.")
     exit()
+
+
+############################ WEBSOCKET ROUTES ############################
+@socketio.on('connect')
+def handle_connect():
+    print('[INFO] Client connected: '+str(request.sid))
+    connected_clients.append(request.sid)
+    
+
+
+@socketio.on('message')
+def handle_message(message):
+    print(f'[INFO] Recieved message: {message}')
+    
+    # Now send the message to all the connected clients
+    emit('message', message, broadcast=True)
+
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    print('[INFO] Client disconnected: '+str(request.sid))
+    connected_clients.remove(request.sid)
+    
 
 
 ############################ REST APIs ##################################
@@ -571,3 +595,4 @@ def get_notifications():
 
 if __name__ == "__main__":
     app.run(debug=True, host="localhost", port=5000)
+    socketio.run(app)
