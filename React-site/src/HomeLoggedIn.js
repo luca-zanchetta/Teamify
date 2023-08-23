@@ -4,7 +4,7 @@ import "./css/Homepage.css";
 import WeeklyCalendar from "./components/WeeklyCalendar.js";
 import { Container } from "./css/Navigator.css";
 import { Link, useNavigate, Navigate } from "react-router-dom";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import NavBar from "./components/NavBar";
 import TopBar from "./components/TopBar";
 import UserIcon from "./components/UserIcon";
@@ -12,12 +12,25 @@ import Notifications from "./components/Notifications";
 import Profile from "./components/Profile";
 import Alert from "./components/Alert.tsx";
 import Task from "./components/Task.js";
+import EditTask from "./components/EditTask.js";
 
 function HomeLoggedIn() {
   const username = localStorage.getItem("LoggedUser");
   const ProfileData = localStorage.getItem("ProfileData") === "true";
   const navigate = useNavigate();
   const [task, setTask] = useState([]);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  const updateDimensions = () => {
+    setWindowWidth(window.innerWidth);
+  };
+
+  useEffect(() => {
+    window.addEventListener("resize", updateDimensions);
+    return () => {
+      window.removeEventListener("resize", updateDimensions);
+    };
+  }, []);
 
   if (!username) {
     // If the user is not logged in, (s)he has to login first.
@@ -89,23 +102,29 @@ function HomeLoggedIn() {
               <div className="row text-center">
                 <div className="col">
                   <h3 className="mb-3 mr-10">Personal Agenda</h3>
-                  <WeeklyCalendar
-                    width={1000}
-                    height={570}
-                    handleSelectEvent={handleSelectEvent}
-                  />
+                  <div className="container" style={{ display: "flex" }}>
+                    <WeeklyCalendar
+                      width={(windowWidth * 60) / 100}
+                      height={570}
+                      handleSelectEvent={handleSelectEvent}
+                    />
+                  </div>
                 </div>
-                <div className="col"></div>
-                <div className="col">
+                <div
+                  className="col"
+                  style={{ marginLeft: 10, Display: "flex" }}
+                >
                   <div className="row text-center mt-5">
                     <h5>Filter</h5>
                   </div>
-                  <div className="row">
+                  <div className="row d-flex justify-content-center align-items-center">
                     <Link
                       to="/home/newtask"
-                      className="personalized-button"
+                      className="btn"
                       style={{
                         textDecoration: "inherit",
+                        backgroundColor: "#c5fdc8",
+                        width: "100px",
                       }}
                     >
                       New Task

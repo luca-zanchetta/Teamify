@@ -86,6 +86,8 @@ const WeeklyCalendar = ({
             start: new Date(task.start),
             end: new Date(task.end),
             description: task.description,
+            status: task.status,
+            type: task.type,
           }));
 
           setEvents(formattedEvents);
@@ -111,6 +113,8 @@ const WeeklyCalendar = ({
             start: new Date(task.start),
             end: new Date(task.end),
             description: task.description,
+            status: task.status,
+            type: task.type,
           }));
 
           setEvents(formattedEvents);

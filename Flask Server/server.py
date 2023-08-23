@@ -189,12 +189,10 @@ def create_new_task():
 
 
 # Modify a task API
-@app.route("/home/updatetask/", methods=["PUT"])
-def update_task(task_id):
+@app.route("/home/updatetask/<int:task_id>", methods=["PUT"])
+def update_task(task_id, local_user):
     curr = conn.cursor()
-    local_user = request.args.get("user")  # get back the params from the request
 
-    # Extract data from the request
     data = request.json
     title = data.get("title")
     date = data.get("date")
@@ -220,6 +218,35 @@ def update_task(task_id):
     return jsonify({"message": "Task updated successfully"}), 200
 
 
+# Complete a task API
+@app.route("/home/completetask/<int:task_id>", methods=["PUT"])
+def complete_task(task_id):
+    curr = conn.cursor()
+
+    curr.execute("SELECT * FROM task WHERE id = %s", (task_id,))
+    existing_task = curr.fetchone()
+    if not existing_task:
+        return jsonify({"message": "Task not found"}), 404
+
+    status = existing_task[5]
+    if status == "completed":
+        change = "not_completed"
+    else:
+        change = "completed"
+
+    update_query = "UPDATE task SET status = %s WHERE id = %s"
+    update_values = (change, task_id)
+
+    try:
+        curr.execute(update_query, update_values)
+        conn.commit()
+    except Exception as err:
+        print("[ERROR] /updatetask: ", err)
+        return jsonify({"message": "Update failed"}), 400
+
+    return jsonify({"message": "Task completed successfully"}), 200
+
+
 # Get all tasks API
 @app.route("/tasks", methods=["GET"])
 def get_tasks():
@@ -227,7 +254,7 @@ def get_tasks():
     # Fetch the ID of the last inserted task
     local_user = request.args.get("user")  # get back the params from the request
     curr.execute(
-        "SELECT title, description, date, time,id, duration FROM task WHERE member = %s",
+        "SELECT title, description, date, time, duration, id, status,type FROM task WHERE member = %s",
         (local_user,),
     )
     tasks = curr.fetchall()
@@ -246,6 +273,8 @@ def get_tasks():
                 "end": new_end_date,
                 "description": task[1],
                 "id": task[5],
+                "status": task[6],
+                "type": task[7],
             }
         )
 
