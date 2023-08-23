@@ -45,7 +45,6 @@ function Teams() {
           role: team.role,
         }));
         setTeams(formattedTeams);
-        //handleTeamCreated();
       })
       .catch((error) => {
         console.error("Error fetching team data:", error);
@@ -57,7 +56,7 @@ function Teams() {
   useEffect(() => {
     const timeout = setTimeout(() => {
       handleTeamCreated();
-    }, 5000)
+    }, 1000)
 
     return () => clearTimeout(timeout)
 
