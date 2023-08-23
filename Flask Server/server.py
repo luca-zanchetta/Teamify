@@ -319,17 +319,72 @@ def team_list():
     # Fetch the ID of the last inserted task
     user = request.args.get("user")
     curr.execute(
-        "SELECT team, name FROM joinTeam JOIN team ON team.id=joinTeam.team WHERE username = %s",
+        "SELECT team id, name, description FROM joinTeam JOIN team ON team.id=joinTeam.team WHERE username = %s ORDER BY name",
         (user,),
     )
-    ids = curr.fetchall()
+    entries = curr.fetchall()
     teams = []
-    for id in ids:
-        curr.execute("SELECT username FROM joinTeam WHERE team = %s", (id[0],))
-        members = curr.fetchall()
-        teams.append({"name": id[1], "description": "test", "members": members})
+    for entry in entries:
+        curr.execute(
+        "SELECT admin from manage where team= %s and admin= %s",
+        (entry[0],user,),
+        )
+        admin=curr.fetchall()
+        isAdmin=len(admin)
+        if isAdmin==0:
+            isAdmin="Member"
+        else:
+            isAdmin="Administrator"
+        teams.append({"id": entry[0], "name": entry[1], "description": entry[2], "role": isAdmin})
 
     return jsonify(teams), 200
+
+
+#ottenere la lista degli admin dato un team id
+@app.route("/adminGivenTeam", methods=["GET"])
+def admin_given_team():
+    curr = conn.cursor()
+    # Fetch the ID of the last inserted task
+    teamId = request.args.get("teamId")  # get back the params from the request
+    curr.execute(
+        "SELECT admin FROM manage WHERE team = %s",
+        (teamId,),
+    )
+    admins = curr.fetchall()
+
+    admin_list = []
+    for admin in admins:
+        admin_list.append(
+            {
+                "admin": admin[0]
+            }
+        )
+
+    return jsonify(admin_list), 200
+
+
+#ottenere la lista dei membri dato un team id
+@app.route("/membersGivenTeam", methods=["GET"])
+def members_given_team():
+    curr = conn.cursor()
+    # Fetch the ID of the last inserted task
+    teamId = request.args.get("teamId")  # get back the params from the request
+    curr.execute(
+        "SELECT username FROM joinTeam WHERE team = %s",
+        (teamId,),
+    )
+    members = curr.fetchall()
+
+    member_list = []
+    for member in members:
+        member_list.append(
+            {
+                "member": member[0]
+            }
+        )
+
+    return jsonify(member_list), 200
+
 
 
 # Display user information
