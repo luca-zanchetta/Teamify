@@ -42,7 +42,11 @@ function TeamView() {
             <Accordion>
               <Accordion.Item eventKey="0">
                 <Accordion.Header>Agenda</Accordion.Header>
-                <Accordion.Body></Accordion.Body>
+                <Accordion.Body>
+                  <div className="container d-flex justify-content-center mt-3">
+                    <WeeklyCalendar width={1000} height={570} />
+                  </div>
+                </Accordion.Body>
               </Accordion.Item>
               <Accordion.Item eventKey="1">
                 <Accordion.Header>Team Info</Accordion.Header>
