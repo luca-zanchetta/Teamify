@@ -283,6 +283,38 @@ def get_tasks():
     return jsonify(tasks_list), 200
 
 
+# delete a task API
+@app.route("/home/deletetask/<int:task_id>", methods=["DELETE"])
+def delete_task(task_id):
+    curr = conn.cursor()
+
+    query_task = "SELECT type FROM task WHERE id = %s"
+    param_task = (task_id,)
+    curr.execute(query_task, param_task)
+    task = curr.fetchone()
+    if task[0] == "event":
+        print("Event")
+        return jsonify(
+            {"message": f"[INFO] /home/deletetask: id {task_id} successfully deleted"}
+        )
+
+        # TODO: se è un evento dobbiamo cancellare anche le righe della tabella join
+    else:
+        # remove all the task connected to the user
+        query_delete = "DELETE FROM task WHERE id = %s"
+        param_delete = (task_id,)
+        try:
+            curr.execute(query_delete, param_delete)
+            return jsonify(
+                {
+                    "message": f"[INFO] /home/deletetask: id {task_id} successfully deleted"
+                }
+            )
+        except Exception as err:
+            print("[ERROR] /home/deletetask : ", err)
+            return jsonify("ko"), 400
+
+
 # Get events/tasks for shared agenda
 # GESTIONE DA FINIRE PER MANCANZA TEAM
 @app.route("/teamview", methods=["GET"])

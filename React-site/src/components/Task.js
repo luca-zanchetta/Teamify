@@ -24,7 +24,11 @@ function Task({ task }: Props) {
     setIsExpanded(!isExpanded);
   };
 
-  const handleDelete = async () => {};
+  const handleDelete = async () => {
+    localStorage.setItem("task_to_delete", task.id);
+    localStorage.setItem("delete", true);
+    window.location.reload();
+  };
 
   const handleComplete = async () => {
     const status = task.state;

@@ -13,6 +13,7 @@ import Profile from "./components/Profile";
 import Alert from "./components/Alert.tsx";
 import Task from "./components/Task.js";
 import EditTask from "./components/EditTask.js";
+import PopUp from "./components/PopUp.js";
 
 function HomeLoggedIn() {
   const username = localStorage.getItem("LoggedUser");
@@ -20,6 +21,8 @@ function HomeLoggedIn() {
   const navigate = useNavigate();
   const [task, setTask] = useState([]);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const showDeletePopUp = localStorage.getItem("delete") === "true";
+  const task_id = localStorage.getItem("task_to_delete");
 
   const updateDimensions = () => {
     setWindowWidth(window.innerWidth);
@@ -94,6 +97,7 @@ function HomeLoggedIn() {
         </Alert>
       )}
       {task.id !== undefined && <Task task={task} />}
+      {showDeletePopUp && <PopUp type="task" task_id={task_id} />}
       <div className="SideContainer">
         <NavBar></NavBar>
         <div className="CenterContainer">
