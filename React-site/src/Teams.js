@@ -2,12 +2,19 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate, Navigate } from "react-router-dom";
 import TopBar from "./components/TopBar";
 import NavBar from "./components/NavBar";
+import Alert from "./components/Alert.tsx";
 
 import UserIcon from "./components/UserIcon";
 import Notifications from "./components/Notifications";
 import axios from "axios";
 
 function Teams() {
+
+  const teamCreated = localStorage.getItem("teamCreated_alert") === "true";
+  const handleTeamCreated = () => {
+    localStorage.setItem("teamCreated_alert", "false")
+  };  
+
   const username = localStorage.getItem("LoggedUser");
   const navigate = useNavigate();
   const endpoint = "http://localhost:5000/home/teams";
@@ -36,7 +43,7 @@ function Teams() {
           id: team.id,
           title: team.name,
           description: team.description,
-          members: team.members,
+          role: team.role,
         }));
         setTeams(formattedTeams);
       })
@@ -44,6 +51,18 @@ function Teams() {
         console.error("Error fetching team data:", error);
       });
   }, []);
+
+  //dopo 5 secondi setto la variabile dell'avviso a false, per evitare che venga messa a false e poi l'avviso non compaia
+  //a causa dal re-render dato dalla call di axios (fatta nell'altro useEffect)
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      handleTeamCreated();
+    }, 1000)
+
+    return () => clearTimeout(timeout)
+
+  }, [])
+
 
   return (
     <div className="App">
@@ -66,9 +85,14 @@ function Teams() {
           <UserIcon></UserIcon>
         </div>
       </div>
-      <div className="SideContainer">
+      <div className="SideContainer overflow-auto">
         <NavBar></NavBar>
         <div className="container">
+        {teamCreated && (
+        <Alert onClick={handleTeamCreated} state="success">
+          Team created
+        </Alert>
+      )}
           <div className="row mt-4 mb-2" style={{ textAlign: "left" }}>
             <div className="col">
               <h1>Teams</h1>
@@ -93,7 +117,7 @@ function Teams() {
               </svg>
             </div>
           </div>
-          <div className="container overflow-auto" height="80%">
+          <div className="container" height="80%">
             <div className="row mt-5">
               <div className="col">
                 <div style={{ fontSize: "28px", fontWeight: "bold" }}>Name</div>
@@ -122,14 +146,18 @@ function Teams() {
                   <div>{team.description}</div>
                 </div>
                 <div className="col mb-3">
-                  <div>Administrator</div>
+                  <div>{team.role}</div>
                 </div>
                 <hr />
               </div>
             ))}
           </div>
-          <div className="mt-5" style={{ textAlign: "right" }}>
-            <button className="btn btn-light"> New Team</button>
+          <div className="mt-5 pb-5" style={{ textAlign: "right" }}>
+            <Link
+            to="/home/createteam"
+            style={{ color: "inherit", textDecoration: "inherit" }}
+            className="btn btn-light"
+          >Create team</Link>
           </div>
         </div>
       </div>
