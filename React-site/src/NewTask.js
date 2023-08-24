@@ -40,18 +40,10 @@ function NewTask() {
     sessionStorage.setItem("error_alert", false);
   };
 
-  function convertDateToInputFormat(dateString) {
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  }
-
   const handleSelectSlot = useCallback((slotInfo) => {
-    const dateTimeStart = new Date(slotInfo.slots[0]); //take start data
-    const date_start = convertDateToInputFormat(dateTimeStart.toDateString());
-    const time = dateTimeStart.toLocaleTimeString();
+    const date_start = formatDate(slotInfo.slots[0]);
+    const time = formatTime(slotInfo.slots[0]);
+    console.log(date_start, time);
     const duration = (slotInfo.slots.length - 1) * 30; //get duration
 
     //get objects related to data, time and duration and change the value inside them
@@ -59,17 +51,19 @@ function NewTask() {
     const time_input = document.getElementById("time");
     const duration_input = document.getElementById("duration");
     date_input.value = date_start;
-    setDate(date_start);
     time_input.value = time;
-    setTime(time);
     duration_input.value = duration;
+
+    setDate(date_start);
+    setTime(time);
     setDuration(duration);
+
     slotInfo.slots.pop();
     setSelectedSlots(slotInfo.slots);
   });
 
   //function to handle the change of style when you select a slot
-  //da debbugare
+  // FIXME: da debbugare
   const slotStyleGetter = useCallback(
     (date) => {
       const isDateSelected = selectedSlots.some(
@@ -174,7 +168,7 @@ function NewTask() {
         );
         if (response.status == 200) {
           navigate("/home");
-          //add alert
+          // TODO: add alert
         }
         console.log(response.data.message); // Display the response message
       } catch (error) {
@@ -262,10 +256,10 @@ function NewTask() {
                       <input
                         className="InputField"
                         type="date"
-                        value={(modify && date) || "dd/mm/yyy"}
+                        value={date ? date : formatDate(new Date())} // Use the current date
                         id="date"
                         onChange={(event) => setDate(event.target.value)}
-                      ></input>
+                      />
                     </div>
                     <div className="InputEntry">
                       <div className="InputLabel">Time</div>
@@ -273,7 +267,7 @@ function NewTask() {
                         className="InputField"
                         type="time"
                         id="time"
-                        value={modify ? time : "10:00"}
+                        value={time ? time : "10:00"}
                         onChange={(event) => setTime(event.target.value)}
                       ></input>
                     </div>
@@ -281,9 +275,10 @@ function NewTask() {
                       <div className="InputLabel">Duration (minutes)</div>
                       <input
                         className="InputField"
-                        type="integer"
+                        type="number"
                         id="duration"
                         placeholder={(modify && task.duration) || "0"}
+                        value={duration}
                         onChange={(event) => setDuration(event.target.value)}
                       ></input>
                     </div>
