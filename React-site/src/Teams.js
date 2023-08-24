@@ -33,6 +33,7 @@ function Teams() {
         const res = response.data;
 
         const formattedTeams = res.map((team) => ({
+          id: team.id,
           title: team.name,
           description: team.description,
           members: team.members,
@@ -115,7 +116,7 @@ function Teams() {
             {teams.map((team, index) => (
               <div className="row mb-1" key={index}>
                 <div className="col">
-                  <div>{team.title}</div>
+                  <Link to={`/teamview?${team.id}`}>{team.title}</Link>
                 </div>
                 <div className="col">
                   <div>{team.description}</div>
