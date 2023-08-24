@@ -10,9 +10,10 @@ from flask_socketio import SocketIO, emit, join_room, leave_room
 # Server setup
 app = Flask(__name__)
 CORS(app)
-socketio = SocketIO(app, cors_allowed_origins="http://localhost:3000")
-connected_clients = []
+socketio = SocketIO(app, cors_allowed_origins="http://localhost:3000", async_mode='eventlet')
 
+connected_clients = []
+teams = []  # List of teams; each team should be represented as a list of members
 
 # DB setup
 conn = get_connection()
@@ -25,9 +26,13 @@ if conn is None:
 ############################ WEBSOCKET ROUTES ############################
 @socketio.on('connect')
 def handle_connect():
-    print('[INFO] Client connected: '+str(request.sid))
-    connected_clients.append(request.sid)
+    print('[INFO] New connected client.')
     
+
+@socketio.on('initial_data')
+def handle_initial_data(data):
+    print('[INFO] Client connected: '+str(data))
+    connected_clients.append()
 
 
 @socketio.on('message')
@@ -40,8 +45,8 @@ def handle_message(message):
 
 @socketio.on('disconnect')
 def handle_disconnect():
-    print('[INFO] Client disconnected: '+str(request.sid))
-    connected_clients.remove(request.sid)
+    print('[INFO] Client disconnected')
+    # connected_clients.pop()
     
 
 
@@ -594,5 +599,5 @@ def get_notifications():
 ############################ END REST APIs ####################################
 
 if __name__ == "__main__":
-    app.run(debug=True, host="localhost", port=5000)
-    socketio.run(app)
+    # app.run(debug=True, host="localhost", port=5000)
+    socketio.run(app, host='localhost', port=5000)

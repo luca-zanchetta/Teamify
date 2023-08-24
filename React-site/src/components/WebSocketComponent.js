@@ -12,11 +12,15 @@ const WebSocketComponent = () => {
 
     newSocket.on('connect', () => {
       console.log('[INFO] Connected to the WebSocket server.');
+
+      // Send to the server the username of the logged user
+      const initialData = {"username":localStorage.getItem('LoggedUser')};
+      socket.emit('initial_data', 'prova');
     });
 
     // Ricevi i messaggi dal server
     newSocket.on('message', (message) => {
-      setMessages((prevMessages) => [...prevMessages, message]);
+      // setMessages((prevMessages) => [...prevMessages, message]);
       console.log('[INFO] Received message: '+message);
     });
 
