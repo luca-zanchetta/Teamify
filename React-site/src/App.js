@@ -11,6 +11,7 @@ import TeamView from "./TeamView";
 import Invite from "./components/Invite";
 import Teams from "./Teams";
 import Task from "./NewTask.js";
+import CreateTeam from "./CreateTeam";
 
 function App() {
   //data è la variabile dello stato, setData è la funzione per settare il suo valore
@@ -38,6 +39,7 @@ function App() {
         <Route path="invite" element={<Invite />} />
         <Route path="home/teams" element={<Teams />} />
         <Route path="home/tasks/edittask" element={<Task />} />
+        <Route path="home/createteam" element={<CreateTeam />} />
       </Routes>
     </BrowserRouter>
   );

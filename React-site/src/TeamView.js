@@ -39,7 +39,7 @@ function TeamView() {
             <h1>*Team Name*</h1>
           </div>
           <div className="container  overflow-auto" style={{ height: "80%" }}>
-            <Accordion>
+            <Accordion defaultActiveKey="0">
               <Accordion.Item eventKey="0">
                 <Accordion.Header>Agenda</Accordion.Header>
                 <Accordion.Body>
