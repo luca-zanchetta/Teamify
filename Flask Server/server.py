@@ -127,37 +127,6 @@ def delete_account(user):
         print("[ERROR] /home/profile (tasks): ", err)
         return jsonify("ko"), 400
 
-    # remove from join
-    query_join = "DELETE FROM join WHERE username = %s"
-    param_join = (user,)
-    try:
-        curr.execute(query_join, param_join)
-    except Exception as err:
-        print("[ERROR] /home/profile (join): ", err)
-        return jsonify("ko"), 400
-
-    # TODO: gestire manage
-
-    # TODO: gestire event
-
-    # remove from invite
-    query_invite = "DELETE FROM invite WHERE username = %s"
-    param_invite = (user,)
-    try:
-        curr.execute(query_invite, param_invite)
-    except Exception as err:
-        print("[ERROR] /home/profile (invite): ", err)
-        return jsonify("ko"), 400
-
-    # remove from includes
-    query_includes = "DELETE FROM includes WHERE username = %s"
-    param_includes = (user,)
-    try:
-        curr.execute(query_includes, param_includes)
-    except Exception as err:
-        print("[ERROR] /home/profile (includes): ", err)
-        return jsonify("ko"), 400
-
     # remove the user
     query_member = "DELETE FROM member WHERE username = %s"
     param_member = (user,)
