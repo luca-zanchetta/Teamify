@@ -14,8 +14,8 @@ const WebSocketComponent = () => {
       console.log('[INFO] Connected to the WebSocket server.');
 
       // Send to the server the username of the logged user
-      const initialData = {"username":localStorage.getItem('LoggedUser')};
-      socket.emit('initial_data', 'prova');
+      const username = localStorage.getItem('LoggedUser');
+      newSocket.emit('initial_data', username);
     });
 
     // Ricevi i messaggi dal server

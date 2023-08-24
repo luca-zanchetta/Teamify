@@ -3,7 +3,7 @@ from hashlib import sha256
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from DBConnection import get_connection
-from support import get_current_week_range, convert_date
+from support import get_current_week_range, convert_date, get_teams
 from flask_socketio import SocketIO, emit, join_room, leave_room
 
 
@@ -13,7 +13,7 @@ CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="http://localhost:3000", async_mode='eventlet')
 
 connected_clients = []
-teams = []  # List of teams; each team should be represented as a list of members
+teams = []  # List of teams; each team is of the following format: [name, [member1, member2, ..., member10]]
 
 # DB setup
 conn = get_connection()
@@ -26,13 +26,19 @@ if conn is None:
 ############################ WEBSOCKET ROUTES ############################
 @socketio.on('connect')
 def handle_connect():
-    print('[INFO] New connected client.')
+    global teams
     
+    # If it is the initial state, then retrieve all the database information about teams
+    if len(connected_clients) == 0:
+        teams = get_teams()
+        print('[INFO] Teams retrieved successfully.')
+
 
 @socketio.on('initial_data')
-def handle_initial_data(data):
-    print('[INFO] Client connected: '+str(data))
-    connected_clients.append()
+def handle_initial_data(username):
+    print('[INFO] Client connected: '+str(username))
+    new_client = (username, request.sid)
+    connected_clients.append(new_client)
 
 
 @socketio.on('message')
@@ -45,8 +51,14 @@ def handle_message(message):
 
 @socketio.on('disconnect')
 def handle_disconnect():
-    print('[INFO] Client disconnected')
-    # connected_clients.pop()
+    for client in connected_clients:
+        if client[1] == request.sid:
+            disconnected_client = client
+            break
+    
+    username = disconnected_client[0]
+    print('[INFO] Client disconnected: '+username)
+    connected_clients.remove(disconnected_client)
     
 
 
@@ -600,4 +612,4 @@ def get_notifications():
 
 if __name__ == "__main__":
     # app.run(debug=True, host="localhost", port=5000)
-    socketio.run(app, host='localhost', port=5000)
+    socketio.run(app, host='localhost', port=5000, debug=True)
