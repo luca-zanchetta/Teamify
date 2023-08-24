@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from DBConnection import get_connection
 
 def get_current_week_range():
     today = datetime.now()
@@ -26,3 +27,35 @@ def convert_date(end_date, duration):
 def convert_one_date(date):
     end_datetime = datetime.strptime(date, "%Y-%m-%d")
     return end_datetime
+
+
+def get_teams():
+    teams = []
+    
+    # DB setup
+    conn = get_connection()
+    conn.set_session(autocommit=True)
+    if conn is None:
+        print("[ERROR] DB Connection failed.")
+        exit()
+        
+    curr = conn.cursor()
+    
+    query_retrieve_teams = "SELECT id, name FROM team"
+    curr.execute(query_retrieve_teams)
+        
+    retrieved_teams = curr.fetchall()
+    if len(retrieved_teams) != 0:
+        query_retrieve_members = "SELECT user FROM joinTeam WHERE team = %s"
+        
+        for team in retrieved_teams:
+            params = (team[0])
+            curr.execute(query_retrieve_members, params)
+                
+            retrieved_users = curr.fetchall()
+            if len(retrieved_users) != 0:
+                teams.append([team[1], retrieved_users])
+            else:
+                teams.append([team[1], []])
+    
+    return teams

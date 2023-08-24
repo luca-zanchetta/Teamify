@@ -3,15 +3,17 @@ from hashlib import sha256
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from DBConnection import get_connection
-from support import get_current_week_range, convert_date
-import psycopg2
-from psycopg2 import errors
+from support import get_current_week_range, convert_date, get_teams
+from flask_socketio import SocketIO, emit, join_room, leave_room
 
 
-# Flask setup
+# Server setup
 app = Flask(__name__)
 CORS(app)
+socketio = SocketIO(app, cors_allowed_origins="http://localhost:3000", async_mode='eventlet')
 
+connected_clients = []
+teams = []  # List of teams; each team is of the following format: [name, [member1, member2, ..., member10]]
 
 # DB setup
 conn = get_connection()
@@ -19,6 +21,45 @@ conn.set_session(autocommit=True)
 if conn is None:
     print("[ERROR] DB Connection failed.")
     exit()
+
+
+############################ WEBSOCKET ROUTES ############################
+@socketio.on('connect')
+def handle_connect():
+    global teams
+    
+    # If it is the initial state, then retrieve all the database information about teams
+    if len(connected_clients) == 0:
+        teams = get_teams()
+        print('[INFO] Teams retrieved successfully.')
+
+
+@socketio.on('initial_data')
+def handle_initial_data(username):
+    print('[INFO] Client connected: '+str(username))
+    new_client = (username, request.sid)
+    connected_clients.append(new_client)
+
+
+@socketio.on('message')
+def handle_message(message):
+    print(f'[INFO] Recieved message: {message}')
+    
+    # Now send the message to all the connected clients
+    emit('message', message, broadcast=True)
+
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    for client in connected_clients:
+        if client[1] == request.sid:
+            disconnected_client = client
+            break
+    
+    username = disconnected_client[0]
+    print('[INFO] Client disconnected: '+username)
+    connected_clients.remove(disconnected_client)
+    
 
 
 ############################ REST APIs ##################################
@@ -764,4 +805,5 @@ def accept_invite():
 ############################ END REST APIs ####################################
 
 if __name__ == "__main__":
-    app.run(debug=True, host="localhost", port=5000)
+    # app.run(debug=True, host="localhost", port=5000)
+    socketio.run(app, host='localhost', port=5000, debug=True)
