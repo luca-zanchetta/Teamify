@@ -255,11 +255,11 @@ includes = """CREATE TABLE includes (
     )
 )"""
 try:
-    cur.execute(dropManage)
-    cur.execute(manage)
+    cur.execute(dropIncludes)
+    cur.execute(includes)
     conn.commit()
 
-    print("[INFO] Table 'manage' successfully created.")
+    print("[INFO] Table 'includes' successfully created.")
 except Exception as err:
     print("Error: ", err)
     exit()

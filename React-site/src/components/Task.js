@@ -12,7 +12,7 @@ interface Props {
   task: Object;
 }
 function Task({ task }: Props) {
-  const endpoint = "http://localhost:5000/home/members/";
+  const endpoint = "http://localhost:5000/home/event/members";
   const username = localStorage.getItem("LoggedUser");
   const navigate = useNavigate();
   const [updatedTask, setUpdatedTask] = useState([]);
@@ -23,7 +23,6 @@ function Task({ task }: Props) {
   const toggleAccordion = () => {
     setIsExpanded(!isExpanded);
   };
-
   const handleDelete = async () => {
     if (task.member === username) {
       localStorage.setItem("task_to_delete", task.id);
@@ -69,23 +68,18 @@ function Task({ task }: Props) {
       axios
         .get(endpoint, {
           params: {
-            user: username,
+            eventId: task.id,
           },
-        }) // Pass the user parameter in the query string
+        })
         .then((response) => {
-          //const res = response.data;
-          //const formattedTeams = res.map((team) => ({
-          // title: team.name,
-          //description: team.description,
-          //members: team.members,
-          //}));
-          //setTeams(formattedTeams);
+          const res = response.data;
+          setMembers(res);
         })
         .catch((error) => {
           console.error("Error fetching team data:", error);
         });
     }
-  });
+  }, [isExpanded]);
 
   useEffect(() => {
     if (task.status === "completed") {
@@ -135,16 +129,16 @@ function Task({ task }: Props) {
           </p>
         </div>
         {task.type === "event" && (
-          <div className="accordion">
+          <div className="accordion mb-3">
             <div className="accordion-header" onClick={toggleAccordion}>
               <button className="btn btn-light" type="button">
-                Group Members{" "}
+                Group Members
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
                   height="16"
                   fill="currentColor"
-                  class="bi bi-caret-down"
+                  className="bi bi-caret-down"
                   viewBox="0 0 16 16"
                 >
                   <path d="M3.204 5h9.592L8 10.481 3.204 5zm-.753.659 4.796 5.48a1 1 0 0 0 1.506 0l4.796-5.48c.566-.647.106-1.659-.753-1.659H3.204a1 1 0 0 0-.753 1.659z" />
@@ -154,9 +148,15 @@ function Task({ task }: Props) {
             {isExpanded && (
               <div className="accordion-content">
                 <ul>
-                  {members.map((member, index) => (
-                    <li key={index}>{member}</li>
-                  ))}
+                  {members.length === 0 ? (
+                    <div>
+                      <li> You </li>
+                    </div>
+                  ) : (
+                    members.map((member, index) => (
+                      <li key={index}>{member}</li>
+                    ))
+                  )}
                 </ul>
               </div>
             )}

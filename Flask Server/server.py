@@ -559,6 +559,25 @@ def members_given_team():
     return jsonify(member_list), 200
 
 
+# Get list of members included in a certain event
+@app.route("/home/event/members", methods=["GET"])
+def members_given_event():
+    curr = conn.cursor()
+    # Fetch the ID of the last inserted task
+    event_id = request.args.get("eventId")  # get back the params from the request
+    curr.execute(
+        "SELECT username FROM includes WHERE event = %s",
+        (event_id,),
+    )
+    members = curr.fetchall()
+
+    member_list = []
+    for member in members:
+        member_list.append({"member": member[0]})
+
+    return jsonify(member_list), 200
+
+
 # Display user information
 @app.route("/home/profile", methods=["POST"])
 def show_personal_info():
