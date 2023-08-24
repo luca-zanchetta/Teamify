@@ -71,7 +71,7 @@ function TeamView() {
                               className="InputField"
                               type="string"
                               id="member_field"
-                              placeholder="Insert the email or the username"
+                              placeholder="Insert the username"
                               onChange={(event) =>
                                 setNewMember(event.target.value)
                               }
