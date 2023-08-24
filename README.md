@@ -5,6 +5,7 @@ Open the git folder with vs code:
 ### Set up react environment
 
 - cd to React-site folder
+- npm install socket.io-client
 - run npm ci
 - run npm run start
 
@@ -18,4 +19,6 @@ Open the git folder with vs code:
 - pip install flask in the environment
 - pip install flask_cors
 - pip install psycopg2
+- pip install flask_socketio
+- pip install eventlet
 - python ./server.py to launch the server
