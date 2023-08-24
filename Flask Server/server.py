@@ -405,8 +405,53 @@ def team_list():
 
     return jsonify(teams), 200
 
+#team details given team id
+@app.route("/teamDetails", methods=["GET"])
+def team_details():
+    curr = conn.cursor()
+    # Fetch the ID of the last inserted task
+    id = request.args.get("id")
+    curr.execute(
+        "SELECT name, description FROM team WHERE id = %s",
+        (id,),
+    )
+    teamData = curr.fetchone()
+    print(teamData)
 
-# Create a team
+    curr.execute(
+        "SELECT username FROM joinTeam WHERE team = %s",
+        (id,),
+    )
+    members = curr.fetchall()
+    members2=[]
+    for member in members:
+        members2.append(member[0])
+    print(members2)
+    
+    curr.execute(
+        "SELECT admin FROM manage WHERE team = %s",
+        (id,),
+    )
+    admins = curr.fetchall()
+    admins2=[]
+    for admin in admins:
+        admins2.append(admin[0])
+    print(admins2)
+
+    diff = []
+    for element in members2:
+        if element not in admins2:
+            diff.append(element)
+    print(diff)
+
+    result=[]
+    result.append(
+            {"teamName": teamData[0], "description": teamData[1], "members": diff, "admins": admins2}
+        )
+
+    return jsonify(result), 200
+
+#Create a team
 @app.route("/home/newteam", methods=["POST"])
 def team_create():
     curr = conn.cursor()
