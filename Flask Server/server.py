@@ -189,11 +189,12 @@ def create_new_task():
 
 
 # Modify a task API
-@app.route("/home/updatetask/<int:task_id>", methods=["PUT"])
+@app.route("/home/updatetask/<int:task_id>/<string:local_user>", methods=["PUT"])
 def update_task(task_id, local_user):
+    print(request.json)
     curr = conn.cursor()
 
-    data = request.json
+    data = request.get_json()
     title = data.get("title")
     date = data.get("date")
     time = data.get("time")
@@ -326,21 +327,26 @@ def team_list():
     teams = []
     for entry in entries:
         curr.execute(
-        "SELECT admin from manage where team= %s and admin= %s",
-        (entry[0],user,),
+            "SELECT admin from manage where team= %s and admin= %s",
+            (
+                entry[0],
+                user,
+            ),
         )
-        admin=curr.fetchall()
-        isAdmin=len(admin)
-        if isAdmin==0:
-            isAdmin="Member"
+        admin = curr.fetchall()
+        isAdmin = len(admin)
+        if isAdmin == 0:
+            isAdmin = "Member"
         else:
-            isAdmin="Administrator"
-        teams.append({"id": entry[0], "name": entry[1], "description": entry[2], "role": isAdmin})
+            isAdmin = "Administrator"
+        teams.append(
+            {"id": entry[0], "name": entry[1], "description": entry[2], "role": isAdmin}
+        )
 
     return jsonify(teams), 200
 
 
-#ottenere la lista degli admin dato un team id
+# ottenere la lista degli admin dato un team id
 @app.route("/adminGivenTeam", methods=["GET"])
 def admin_given_team():
     curr = conn.cursor()
@@ -354,16 +360,12 @@ def admin_given_team():
 
     admin_list = []
     for admin in admins:
-        admin_list.append(
-            {
-                "admin": admin[0]
-            }
-        )
+        admin_list.append({"admin": admin[0]})
 
     return jsonify(admin_list), 200
 
 
-#ottenere la lista dei membri dato un team id
+# ottenere la lista dei membri dato un team id
 @app.route("/membersGivenTeam", methods=["GET"])
 def members_given_team():
     curr = conn.cursor()
@@ -377,14 +379,9 @@ def members_given_team():
 
     member_list = []
     for member in members:
-        member_list.append(
-            {
-                "member": member[0]
-            }
-        )
+        member_list.append({"member": member[0]})
 
     return jsonify(member_list), 200
-
 
 
 # Display user information

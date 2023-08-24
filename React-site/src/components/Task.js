@@ -4,6 +4,9 @@ import { handleRevert } from "./Profile";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { formatTime } from "../support.js";
+import Container from "react-bootstrap/Container";
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
 
 interface Props {
   task: Object;
@@ -15,20 +18,29 @@ function Task({ task }: Props) {
   const [updatedTask, setUpdatedTask] = useState([]);
   const [members, setMembers] = useState([]);
   const formattedTime = formatTime(task.end);
-
+  const [completeButton, setButtonText] = useState("Complete");
   const [isExpanded, setIsExpanded] = useState(false);
   const toggleAccordion = () => {
     setIsExpanded(!isExpanded);
   };
 
-  const handleDelete = () => {};
+  const handleDelete = async () => {};
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
+    const status = task.state;
     try {
-      const response = axios.put(
+      const response = await axios.put(
         `http://localhost:5000/home/completetask/${task.id}`
       );
+
       console.log(response.data.message); // Display the response message
+      if (response.status === 200) {
+        if (task.state === "not_completed") {
+          setButtonText("Restore");
+        } else {
+          setButtonText("Complete");
+        }
+      }
     } catch (error) {
       console.error("Error:", error);
     }
@@ -61,6 +73,12 @@ function Task({ task }: Props) {
         });
     }
   });
+
+  useEffect(() => {
+    if (task.status === "completed") {
+      setButtonText("Restore");
+    }
+  }, [task.status]);
 
   //bisogna cambiare i pulsanti e metterli cliccabili solo se admin
   return (
@@ -109,9 +127,9 @@ function Task({ task }: Props) {
           </div>
         )}
 
-        <div className="container">
-          <div className="row mt-2">
-            <div className="col">
+        <Container>
+          <Row>
+            <Col>
               <button
                 className="btn btn-block"
                 style={{
@@ -123,8 +141,8 @@ function Task({ task }: Props) {
               >
                 Delete
               </button>
-            </div>
-            <div className="col">
+            </Col>
+            <Col>
               <button
                 className="btn btn-block"
                 style={{
@@ -136,38 +154,23 @@ function Task({ task }: Props) {
               >
                 Edit
               </button>
-            </div>
-            {(task.status === "not_completed" && (
-              <div className="col">
-                <button
-                  className="btn btn-block"
-                  style={{
-                    border: "solid #c5fdc8",
-                    color: "black",
-                    width: "100%",
-                  }}
-                  onClick={handleComplete}
-                >
-                  Complete
-                </button>
-              </div>
-            )) || (
-              <div className="col">
-                <button
-                  className="btn btn-block"
-                  style={{
-                    border: "solid #c5fdc8",
-                    color: "black",
-                    width: "100%",
-                  }}
-                  onClick={handleComplete}
-                >
-                  Restore
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
+            </Col>
+            <Col>
+              <button
+                className="btn btn-block"
+                style={{
+                  border: "solid #c5fdc8",
+                  color: "black",
+                  width: "100%",
+                }}
+                id="complete"
+                onClick={handleComplete}
+              >
+                {completeButton}
+              </button>
+            </Col>
+          </Row>
+        </Container>
       </div>
     </div>
   );

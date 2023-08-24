@@ -102,72 +102,102 @@ function NewTask() {
       alert("Not auth");
     }
 
-    if (title !== "" && date !== "" && time !== "") {
-      try {
-        // Send a POST request to the /newtask endpoint of the Flask server
-        const response = await axios.post(endpoint, {
-          title,
+    const buttonId = event.nativeEvent.submitter.id;
+    if (buttonId == "NewTask") {
+      console.log("new");
+      if (title !== "" && date !== "" && time !== "") {
+        try {
+          // Send a POST request to the /newtask endpoint of the Flask server
+          const response = await axios.post(endpoint, {
+            title,
+            date,
+            time,
+            description,
+            user: userFromLocal,
+            duration,
+          });
+          // If task has been successfully created, then redirect the user to the Home page.
+          console.log(response.status);
+          if (response.status === 200) {
+            navigate("/home");
+            sessionStorage.setItem("new_task", true);
+          } else {
+            console.log("error");
+            sessionStorage.setItem("error_alert", true);
+            setError("Something dab happened");
+          }
+        } catch (error) {
+          if (
+            axios.isAxiosError(error) &&
+            error.response &&
+            error.response.status === 401
+          ) {
+            navigate("/login");
+            console.log("Unauthorized: User not authenticated");
+          } else {
+            // There is at least one mandatory field that has not been filled
+            console.log("ERROR FROM NEW TASK", error);
+            sessionStorage.setItem("error_alert", true);
+            setError(
+              "All the fields must be filled and must must respect the type constraints"
+            );
+          }
+        }
+      } else {
+        sessionStorage.setItem("error_alert", true);
+        console.log(
+          "ERROR FROM NEW TASK date:",
           date,
+          "time",
           time,
-          description,
-          user: userFromLocal,
-          duration,
-        });
-        // If task has been successfully created, then redirect the user to the Home page.
-        console.log(response.status);
-        if (response.status === 200) {
-          navigate("/home");
-          sessionStorage.setItem("new_task", true);
-        } else {
-          console.log("error");
-          sessionStorage.setItem("error_alert", true);
-          setError("Something dab happened");
-        }
-      } catch (error) {
-        if (
-          axios.isAxiosError(error) &&
-          error.response &&
-          error.response.status === 401
-        ) {
-          navigate("/login");
-          console.log("Unauthorized: User not authenticated");
-        } else {
-          // There is at least one mandatory field that has not been filled
-          console.log("ERROR FROM NEW TASK", error);
-          sessionStorage.setItem("error_alert", true);
-          setError(
-            "All the fields must be filled and must must respect the type constraints"
-          );
-        }
+          "title:",
+          title
+        );
+        setError(
+          "All the fields must be filled and must must respect the type constraints"
+        );
       }
-    } else {
-      sessionStorage.setItem("error_alert", true);
-      console.log(
-        "ERROR FROM NEW TASK date:",
-        date,
-        "time",
-        time,
-        "title:",
-        title
-      );
-      setError(
-        "All the fields must be filled and must must respect the type constraints"
-      );
+    } else if (buttonId == "Edit") {
+      console.log("edit");
+      try {
+        const response = await axios.put(
+          `http://localhost:5000/home/updatetask/${
+            task.id
+          }/${localStorage.getItem("LoggedUser")}`,
+          {
+            title: title,
+            description: description,
+            date: date,
+            time: time,
+            duration: duration, //parameters to pass
+          }
+        );
+        if (response.status == 200) {
+          navigate("/home");
+          //add alert
+        }
+        console.log(response.data.message); // Display the response message
+      } catch (error) {
+        console.error("Error:", error);
+      }
     }
   };
 
   //check if i'm going to modify the task and so i passed it or not
   useEffect(() => {
     if (location.state && location.state.task) {
-      setTask(location.state.task);
-      setTime(formatTime(task.start));
-      setDate(formatDate(task.start));
+      const t = location.state.task;
+      setTask(t);
+      setTime(formatTime(t.start));
+      setDate(formatDate(t.start));
+      setTitle(t.title);
+      setDescription(t.description);
+      setDuration(t.duration);
       setModify(true);
     } else {
       setModify(false);
     }
   }, [location.state]);
-  console.log(date);
   return (
     <div>
       <div className="App">
@@ -257,12 +287,21 @@ function NewTask() {
                         onChange={(event) => setDuration(event.target.value)}
                       ></input>
                     </div>
-                    <input
-                      className="personalized-button mt-3"
-                      type="submit"
-                      value={"NewTask"}
-                      id="NewTask"
-                    ></input>
+                    {(!modify && (
+                      <input
+                        className="personalized-button mt-3"
+                        type="submit"
+                        value={"NewTask"}
+                        id="NewTask"
+                      ></input>
+                    )) || (
+                      <input
+                        className="personalized-button mt-3"
+                        type="submit"
+                        value={"Edit"}
+                        id="Edit"
+                      ></input>
+                    )}
                   </form>
                 </div>
               </div>
