@@ -118,14 +118,44 @@ def reset():
 @app.route("/home/delete-account/<string:user>", methods=["DELETE"])
 def delete_account(user):
     curr = conn.cursor()
-
-    # remove all the task connected to the user
+    # removal the task connected to the user
     query_task = "DELETE FROM task WHERE member = %s"
     param_task = (user,)
     try:
         curr.execute(query_task, param_task)
     except Exception as err:
         print("[ERROR] /home/profile (tasks): ", err)
+        return jsonify("ko"), 400
+
+    # remove from join
+    query_join = "DELETE FROM join WHERE username = %s"
+    param_join = (user,)
+    try:
+        curr.execute(query_join, param_join)
+    except Exception as err:
+        print("[ERROR] /home/profile (join): ", err)
+        return jsonify("ko"), 400
+
+    # TODO: gestire manage
+
+    # TODO: gestire event
+
+    # remove from invite
+    query_invite = "DELETE FROM invite WHERE username = %s"
+    param_invite = (user,)
+    try:
+        curr.execute(query_invite, param_invite)
+    except Exception as err:
+        print("[ERROR] /home/profile (invite): ", err)
+        return jsonify("ko"), 400
+
+    # remove from includes
+    query_includes = "DELETE FROM includes WHERE username = %s"
+    param_includes = (user,)
+    try:
+        curr.execute(query_includes, param_includes)
+    except Exception as err:
+        print("[ERROR] /home/profile (includes): ", err)
         return jsonify("ko"), 400
 
     # remove the user
@@ -375,7 +405,8 @@ def team_list():
 
     return jsonify(teams), 200
 
-#Create a team
+
+# Create a team
 @app.route("/home/newteam", methods=["POST"])
 def team_create():
     curr = conn.cursor()
@@ -384,31 +415,39 @@ def team_create():
     username = data["username"]
     name = data["name"]
     description = data["description"]
-    
+
     # Fetch the ID of the last inserted task
     curr.execute(
         "INSERT INTO team (name, description) VALUES (%s,%s)",
-        (name,description,),
+        (
+            name,
+            description,
+        ),
     )
     curr.execute(
         "SELECT id FROM team WHERE name=%s AND description=%s",
-        (name,description,),
+        (
+            name,
+            description,
+        ),
     )
-    id=curr.fetchall()[0]
+    id = curr.fetchall()[0]
     curr.execute(
         "INSERT INTO joinTeam (team, username) VALUES (%s,%s)",
-        (id,username,),
+        (
+            id,
+            username,
+        ),
     )
     curr.execute(
         "INSERT INTO manage (team, admin) VALUES (%s,%s)",
-        (id,username,),
+        (
+            id,
+            username,
+        ),
     )
 
-    return jsonify("ok"),200
-
-
-
-
+    return jsonify("ok"), 200
 
 
 # ottenere la lista degli admin dato un team id
@@ -629,7 +668,8 @@ def get_notifications():
     print("[ERROR] /home/notifications: Username not found.")
     return jsonify({"message": "Username not found.", "status": 404})
 
-#given team id and username, invites the user to the team
+
+# given team id and username, invites the user to the team
 @app.route("/invite", methods=["POST"])
 def invite():
     data = request.get_json()
@@ -641,11 +681,16 @@ def invite():
 
     curr.execute(
         "INSERT INTO invite (username, admin, team) VALUES (%s,%s,%s)",
-        (username, admin, id,),
+        (
+            username,
+            admin,
+            id,
+        ),
     )
-    return jsonify("ok"),200
+    return jsonify("ok"), 200
 
-#given username, check invites of user
+
+# given username, check invites of user
 @app.route("/checkInvites", methods=["GET"])
 def check_invites():
     curr = conn.cursor()
@@ -657,11 +702,18 @@ def check_invites():
     invites = curr.fetchall()
     invitesJson = []
     for invite in invites:
-        invitesJson.append({"admin": invite[0], "id": invite[1], "team_name": invite[2], "team_description": invite[3]})
-    return jsonify(invitesJson),200
+        invitesJson.append(
+            {
+                "admin": invite[0],
+                "id": invite[1],
+                "team_name": invite[2],
+                "team_description": invite[3],
+            }
+        )
+    return jsonify(invitesJson), 200
 
-    
-#given team id and username, user accepts invite and therefore joins team
+
+# given team id and username, user accepts invite and therefore joins team
 @app.route("/acceptInvite", methods=["POST"])
 def accept_invite():
     curr = conn.cursor()
@@ -669,19 +721,28 @@ def accept_invite():
     username = data["username"]
     id = data["id"]
     curr.execute(
-            'SELECT * from invite WHERE username=%s AND team=%s',
-            (username, id,),
-            )
+        "SELECT * from invite WHERE username=%s AND team=%s",
+        (
+            username,
+            id,
+        ),
+    )
     if curr.fetchone():
         curr.execute(
             "DELETE FROM invite WHERE username=%s AND team=%s",
-            (username, id,),
+            (
+                username,
+                id,
+            ),
         )
         curr.execute(
             "INSERT INTO joinTeam (username,team) values (%s,%s)",
-            (username, id,),
+            (
+                username,
+                id,
+            ),
         )
-        return jsonify("ok"),200
+        return jsonify("ok"), 200
     else:
         return jsonify("ko"), 400
 
