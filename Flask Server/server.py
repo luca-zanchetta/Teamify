@@ -543,6 +543,22 @@ def members_given_team():
     return jsonify(member_list), 200
 
 
+# ottenere la lista dei membri dato un team id
+@app.route("/teamGivenID", methods=["GET"])
+def team_given_id():
+    curr = conn.cursor()
+    # Fetch the ID of the last inserted task
+    teamId = request.args.get("id")  # get back the params from the request
+    curr.execute(
+        "SELECT name FROM team WHERE id = %s",
+        (teamId,),
+    )
+    (name,) = curr.fetchone()
+    name = str(name).strip()
+
+    return jsonify({"name":name, "status":200})
+
+
 # Display user information
 @app.route("/home/profile", methods=["POST"])
 def show_personal_info():

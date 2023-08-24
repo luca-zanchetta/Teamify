@@ -26,13 +26,13 @@ function NavBar() {
   return (
     <div className="NavContainer">
       <div className="IconContainer">
-        <div className="IconEntry">
+        <div className="IconEntry" style={{cursor:"pointer"}}>
           <img src={calendar} onClick={GoToAgenda}></img>
         </div>
-        <div className="IconEntry">
+        <div className="IconEntry" style={{cursor:"pointer"}}>
           <img src={team} onClick={ToggleTeams}></img>
         </div>
-        <div className="IconEntry">
+        <div className="IconEntry" style={{cursor:"pointer"}}>
           <img src={profile} onClick={GoToProfile}></img>
         </div>
       </div>

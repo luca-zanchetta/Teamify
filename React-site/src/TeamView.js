@@ -7,15 +7,55 @@ import WeeklyCalendar from "./components/WeeklyCalendar.js";
 import Alert from "./components/Alert.tsx";
 import { Container } from "./css/Navigator.css";
 import Accordion from "react-bootstrap/Accordion";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import UserIcon from "./components/UserIcon";
+import axios from "axios";
 
-//var endpoint = "http://localhost:5000/newtask"
+var endpoint = "http://localhost:5000/teamGivenID";
 
 function TeamView() {
   const [new_member, setNewMember] = useState("");
-  const handleSubmit = () => {};
+  const [teamName, setTeamName] = useState("");
+  const username = localStorage.getItem("LoggedUser");
+  const currentURL = window.location.search;
+
+  const params = new URLSearchParams(currentURL);
+  const teamID = params.get('id');
+
+  const handleSubmit = () => {
+    console.log("new_member");
+  };
+
+  useEffect(() => {
+    axios
+      .get(endpoint, {
+        params: {
+          id:teamID,
+        },
+      }) // Pass the user parameter in the query string
+      .then((response) => {
+        setTeamName(response.data['name']);
+      })
+      .catch((error) => {
+        console.error("Error fetching team data:", error);
+      });
+  }, []);
+
+  // fetch(currentURL)
+  //   .then(response => {
+  //     if(!response.ok) {
+  //       throw new Error('Request error: ${response.status}');
+  //     }
+  //     return response.json();
+  //   })
+  //   .then(data => {
+  //     console.log(data);
+  //   })
+  //   .catch(error => {
+  //     console.error('ERROR: ', error);
+  //   });
+
   return (
     <div className="App">
       <div className="TopBar">
@@ -36,7 +76,7 @@ function TeamView() {
         <NavBar></NavBar>
         <div className="container">
           <div className="mb-5 mt-5">
-            <h1>*Team Name*</h1>
+            <h1>{teamName}</h1>
           </div>
           <div className="container  overflow-auto" style={{ height: "80%" }}>
             <Accordion defaultActiveKey="0">

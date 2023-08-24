@@ -140,7 +140,7 @@ function Teams() {
             {teams.map((team, index) => (
               <div className="row mb-1" key={index}>
                 <div className="col">
-                  <Link to={`/teamview?${team.id}`}>{team.title}</Link>
+                  <Link to={`/teamview?id=${team.id}`}>{team.title}</Link>
                 </div>
                 <div className="col">
                   <div>{team.description}</div>
