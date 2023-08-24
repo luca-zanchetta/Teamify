@@ -35,7 +35,7 @@ function Profile() {
     <div className="Profile">
       {deleteAccount && (
         <div>
-          <PopUp />
+          <PopUp type="account" />
         </div>
       )}
       <div className="ProfileCard">

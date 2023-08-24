@@ -115,15 +115,13 @@ def reset():
 
 
 # Delete account
-@app.route("/home/delete-account", methods=["DELETE"])
-def delete_account():
+@app.route("/home/delete-account/<string:user>", methods=["DELETE"])
+def delete_account(user):
     curr = conn.cursor()
-
-    username = request.args.get("user")
 
     # remove all the task connected to the user
     query_task = "DELETE FROM task WHERE member = %s"
-    param_task = (username,)
+    param_task = (user,)
     try:
         curr.execute(query_task, param_task)
     except Exception as err:
@@ -132,7 +130,7 @@ def delete_account():
 
     # remove the user
     query_member = "DELETE FROM member WHERE username = %s"
-    param_member = (username,)
+    param_member = (user,)
     try:
         curr.execute(query_member, param_member)
     except Exception as err:
