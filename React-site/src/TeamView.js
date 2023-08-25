@@ -34,12 +34,11 @@ function TeamView() {
   const id = queryParameters.get("id");
   const endpoint1 = "http://localhost:5000/teamDetails";
   const endpoint2 = "http://localhost:5000/invite";
-  const admin = localStorage.getItem("username");
   const username = localStorage.getItem("LoggedUser");
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
-  const [adminsSet, setAdmins] = useState([]);
   const navigate = useNavigate();
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const updateDimensions = () => {
     setWindowWidth(window.innerWidth);
@@ -50,13 +49,6 @@ function TeamView() {
       window.removeEventListener("resize", updateDimensions);
     };
   }, []);
-
-  //TODO: to test, invitation missing (test the disable button for non admin)
-  useEffect(() => {
-    if (!adminsSet) {
-      setIsButtonDisabled(true);
-    }
-  }, [adminsSet]);
 
   useEffect(() => {
     axios
@@ -69,10 +61,10 @@ function TeamView() {
         if (response.data[0].description == "")
           response.data[0].description = "This team has no description"; //changing the field description
         setData(response.data);
-        setAdmins(response.data[0].admins.includes(username));
+        setIsAdmin(response.data[0].admins.includes(username))
       })
       .catch((error) => console.log(error));
-  }, []);
+  }, [isAdmin]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -90,6 +82,7 @@ function TeamView() {
     // Set form values
     localStorage.setItem("new_member", new_member);
     const username = new_member;
+    const admin = localStorage.getItem("username");
 
     if (new_member !== "") {
       try {
@@ -269,7 +262,7 @@ function TeamView() {
                         ))}
                       </div>
                     ))}
-                    <form onSubmit={handleSubmit}>
+                    {isAdmin && (<form onSubmit={handleSubmit}>
                       <div className="row">
                         <div className="col-10">
                           <div className="InputEntry">
@@ -298,6 +291,7 @@ function TeamView() {
                         </div>
                       </div>
                     </form>
+                    )}
                   </div>
                 </Accordion.Body>
               </Accordion.Item>
