@@ -7,10 +7,12 @@ import WeeklyCalendar from "./components/WeeklyCalendar.js";
 import Alert from "./components/Alert.tsx";
 import { Container } from "./css/Navigator.css";
 import { Accordion, Col, Row } from "react-bootstrap";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { Link, useNavigate, Navigate } from "react-router-dom";
 import UserIcon from "./components/UserIcon";
+import Task from "./components/Task.js";
+import PopUp from "./components/PopUp.js";
 
 var endpoint = "http://localhost:5000/teamGivenID";
 
@@ -39,7 +41,9 @@ function TeamView() {
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
   const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState(false);
-
+  const [task, setTask] = useState([]);
+  const showDeletePopUp = localStorage.getItem("delete") === "true";
+  const task_id = localStorage.getItem("task_to_delete");
   const updateDimensions = () => {
     setWindowWidth(window.innerWidth);
   };
@@ -145,6 +149,11 @@ function TeamView() {
     });
   };
 
+  const handleSelectEvent = useCallback((event) => {
+    setTask(event);
+    console.log(event);
+  });
+
   return (
     <div className="App">
       <div className="TopBar">
@@ -181,6 +190,8 @@ function TeamView() {
               </Alert>
             )}
           </div>
+          {task.id !== undefined && <Task task={task} />}
+          {showDeletePopUp && <PopUp type="task" task_id={task_id} />}
           <div className="mb-5 mt-5">
             <h1>{data.map((item) => item.teamName)}</h1>
           </div>
@@ -195,6 +206,7 @@ function TeamView() {
                         <WeeklyCalendar
                           width={(windowWidth * 60) / 100}
                           height={570}
+                          handleSelectEvent={handleSelectEvent}
                         />
                       </div>
                     </Col>

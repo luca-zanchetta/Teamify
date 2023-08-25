@@ -399,8 +399,7 @@ def delete_task(task_id):
         return jsonify("ko"), 400
 
 
-# Get events/tasks for shared agenda
-# GESTIONE DA FINIRE PER MANCANZA TEAM
+# Get events/tasks for shared agenda API
 @app.route("/teamview", methods=["GET"])
 def get_tasks_events():
     curr = conn.cursor()
@@ -409,13 +408,10 @@ def get_tasks_events():
     local_team = request.args.get("team")  # da gestire dopo l'implementazione dei team
 
     curr.execute(
-        "SELECT title, description, date, time, duration FROM task WHERE member = %s",
+        "SELECT title, description, date, time, duration, id, member, type FROM task WHERE member = %s",
         (local_user,),
     )
     tasks = curr.fetchall()
-
-    # curr.execute("SELECT title, description, date, time, duration FROM events WHERE team = %s", (local_team,))
-    # events = curr.fetchall()
 
     tasks_list = []
     for task in tasks:
@@ -424,7 +420,58 @@ def get_tasks_events():
 
         new_end_date = convert_date(end_date, task[4])
 
-        tasks_list.append({"title": task[0], "start": start_date, "end": new_end_date})
+        tasks_list.append(
+            {
+                "title": task[0],
+                "start": start_date,
+                "end": new_end_date,
+                "id": task[5],
+                "description": task[1],
+                "member": task[6],
+                "type": task[7],
+            }
+        )
+
+    if local_team != 0:
+        curr.execute(
+            "SELECT event FROM includes WHERE username=%s AND state= %s",
+            (
+                local_user,
+                "accepted",
+            ),
+        )
+        events_ids = curr.fetchall()
+
+        for eventid in events_ids:
+            print("ID\n", eventid[0])
+            curr.execute(
+                "SELECT title, description, date, time, duration, id, member, type FROM task WHERE id = %s",
+                (eventid[0],),
+            )
+
+        events = curr.fetchall()
+        # here i get also the id of event i need another query to retrieve event
+        for event in events:
+            start_date = (
+                event[2].strftime("%Y-%m-%d") + " " + event[3].strftime("%H:%M:%S")
+            )
+            end_date = (
+                event[2].strftime("%Y-%m-%d") + " " + event[3].strftime("%H:%M:%S")
+            )
+
+            new_end_date = convert_date(end_date, event[4])
+
+            tasks_list.append(
+                {
+                    "title": event[0],
+                    "start": start_date,
+                    "end": new_end_date,
+                    "id": event[5],
+                    "description": event[1],
+                    "member": event[6],
+                    "type": event[7],
+                }
+            )
 
     return jsonify(tasks_list), 200
 
