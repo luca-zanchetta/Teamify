@@ -53,6 +53,7 @@ function Notifications() {
   function toggleShow() {
     setShow(!show);
     show_notifications();
+    // DA GESTIRE
     var bellIcon = document.getElementById('bell');
     bellIcon.src = bell;
   }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import io from 'socket.io-client';
 
-import user from "../icons/user.png";
+import alarm from "../icons/alarm.png";
 
 const WebSocketComponent =  forwardRef((props, ref) => {
   const username = localStorage.getItem('LoggedUser');
@@ -37,7 +37,7 @@ const WebSocketComponent =  forwardRef((props, ref) => {
       // setMessages((prevMessages) => [...prevMessages, message]);
       console.log('[INFO] Received notification: '+message);
       var bellIcon = document.getElementById('bell');
-      bellIcon.src = user;
+      bellIcon.src = alarm;
     });
 
 
