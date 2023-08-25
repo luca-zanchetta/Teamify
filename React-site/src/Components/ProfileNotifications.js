@@ -17,7 +17,6 @@ function ProfileNotifications() {
 
   // Show user notifications
   const show_notifications = async (event) => {
-    console.log("show notifications");
     try {
       // Send a POST request to the /home/profile endpoint of the Flask server
       const response = await axios

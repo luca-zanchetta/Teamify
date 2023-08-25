@@ -11,6 +11,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link, useNavigate, Navigate } from "react-router-dom";
 import UserIcon from "./components/UserIcon";
+import Notifications from "./components/Notifications";
+import WebSocketComponent from "./components/WebSocketComponent";
 
 var endpoint = "http://localhost:5000/teamGivenID";
 
@@ -138,6 +140,7 @@ function TeamView() {
 
   return (
     <div className="App">
+      {/* <WebSocketComponent></WebSocketComponent> */}
       <div className="TopBar">
         <div className="BarHeading">
           <Link to="/" style={{ color: "inherit", textDecoration: "inherit" }}>
@@ -148,6 +151,7 @@ function TeamView() {
           <TopBar></TopBar>
         </div>
         <div className="Buttons">
+          <Notifications></Notifications>
           <UserIcon></UserIcon>
         </div>
       </div>

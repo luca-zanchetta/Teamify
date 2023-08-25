@@ -5,6 +5,7 @@ from flask_cors import CORS
 from DBConnection import get_connection
 from support import get_current_week_range, convert_date, get_teams
 from flask_socketio import SocketIO, emit, join_room, leave_room
+import datetime
 
 
 # Server setup
@@ -43,13 +44,10 @@ def handle_initial_data(username):
     insert = True  # Check whether the request has been sent multiple times
     
     new_client = (username, request.sid)
-    if len(connected_clients) == 0:
-        insert = True
-    else:
-        for client in connected_clients:
-            (user, req_id) = client
-            if user == username:
-                insert = False
+    for client in connected_clients:
+        (user, req_id) = client
+        if user == username:
+            insert = False
     
     if insert == True:
         connected_clients.append(new_client)
@@ -66,6 +64,8 @@ def handle_message(message):
 
 @socketio.on("disconnect")
 def handle_disconnect():
+    disconnected_client = (None, None,)
+
     for client in connected_clients:
         if client[1] == request.sid:
             disconnected_client = client
@@ -768,18 +768,28 @@ def invite():
     id = data["id"]
     admin = data["admin"]
 
+    query_invite = "INSERT INTO invite (username, admin, team) VALUES (%s,%s,%s)"
+    params_invite = (username, admin, id,)
+
+    curr.execute("SELECT name FROM team WHERE id = %s", (id,))
+    (name,) = curr.fetchone()
+    name = str(name).strip()
+
+    query_notification = "INSERT INTO notification (date, content, type, read, username) VALUES (%s,%s,%s,%s,%s)"
+    params_notification = (datetime.datetime.now(), f'{admin} has invited you to join team {name}.', 'invite', False, username,)
     
     try:
-        curr.execute(
-        "INSERT INTO invite (username, admin, team) VALUES (%s,%s,%s)",
-        (
-            username,
-            admin,
-            id,
-        ),
-        )
-        return jsonify("ok"), 200
+        curr.execute(query_invite, params_invite)
+        print('[INFO] /invite: User invited successfully.')
+        try:
+            curr.execute(query_notification, params_notification)
+            print('[INFO] /invite: Invite notification registered.')
+            return jsonify("ok"), 200
+        except Exception as err:
+            print('[ERROR] Invite notification not registered. Err = '+str(err))
+            return jsonify("ko"), 400
     except Exception as err:
+        print('[ERROR] User not invited.')
         return jsonify("ko"), 400
 
 
@@ -870,4 +880,4 @@ def reject_invite():
 
 if __name__ == "__main__":
     # app.run(debug=True, host="localhost", port=5000)
-    socketio.run(app, host="localhost", port=5000, debug=True)
+    socketio.run(app, host="localhost", port=5000)

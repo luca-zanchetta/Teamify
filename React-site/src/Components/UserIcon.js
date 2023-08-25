@@ -46,12 +46,6 @@ function UserIcon() {
               </div>
               <div className="EntryText">Profile</div>
             </div>
-            <div className="ProfileEntry">
-              <div className="EntryIcon">
-                <img src={setting}></img>
-              </div>
-              <div className="EntryText">Settings</div>
-            </div>
             <hr />
             <div className="ProfileEntry" onClick={handleLogout}>
               <div className="EntryIcon">
