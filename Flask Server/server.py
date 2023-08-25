@@ -761,6 +761,32 @@ def accept_invite():
         return jsonify("ko"), 400
 
 
+@app.route("/rejectInvite", methods=["POST"])
+def reject_invite():
+    curr = conn.cursor()
+    data = request.get_json()
+    username = data["username"]
+    id = data["id"]
+    curr.execute(
+        "SELECT * from invite WHERE username=%s AND team=%s",
+        (
+            username,
+            id,
+        ),
+    )
+    if curr.fetchone():
+        curr.execute(
+            "DELETE FROM invite WHERE username=%s AND team=%s",
+            (
+                username,
+                id,
+            ),
+        )
+        return jsonify("ok"), 200
+    else:
+        return jsonify("ko"), 400
+
+
 ############################ END REST APIs ####################################
 
 if __name__ == "__main__":
