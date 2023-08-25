@@ -61,7 +61,7 @@ function TeamView() {
         if (response.data[0].description == "")
           response.data[0].description = "This team has no description"; //changing the field description
         setData(response.data);
-        setIsAdmin(response.data[0].admins.includes(username))
+        setIsAdmin(response.data[0].admins.includes(username));
       })
       .catch((error) => console.log(error));
   }, [isAdmin]);
@@ -136,6 +136,15 @@ function TeamView() {
     });
   };
 
+  const handleNewTask = () => {
+    navigate("/home/newtask", {
+      state: {
+        previousPage: window.location.pathname,
+        team: id,
+      },
+    });
+  };
+
   return (
     <div className="App">
       <div className="TopBar">
@@ -191,11 +200,8 @@ function TeamView() {
                     </Col>
                     <Col style={{ marginLeft: "60px" }}>
                       <Row style={{ marginTop: "200px" }}>
-                        <Link
-                          to={{
-                            pathname: "/home/newtask",
-                            state: { previousPage: window.location.pathname },
-                          }}
+                        <button
+                          onClick={handleNewTask}
                           className="btn"
                           style={{
                             textDecoration: "inherit",
@@ -204,7 +210,7 @@ function TeamView() {
                           }}
                         >
                           New Task
-                        </Link>
+                        </button>
                       </Row>
                       <Row></Row>
                       <Row className="mt-3">
@@ -262,35 +268,36 @@ function TeamView() {
                         ))}
                       </div>
                     ))}
-                    {isAdmin && (<form onSubmit={handleSubmit}>
-                      <div className="row">
-                        <div className="col-10">
-                          <div className="InputEntry">
-                            <div className="InputLabel">
-                              Invite a new member{" "}
-                            </div>
+                    {isAdmin && (
+                      <form onSubmit={handleSubmit}>
+                        <div className="row">
+                          <div className="col-10">
+                            <div className="InputEntry">
+                              <div className="InputLabel">
+                                Invite a new member{" "}
+                              </div>
 
+                              <input
+                                className="InputField"
+                                type="string"
+                                id="member_field"
+                                placeholder="Insert the username"
+                                onChange={(event) =>
+                                  setNewMember(event.target.value)
+                                }
+                              ></input>
+                            </div>
+                          </div>
+                          <div className="col-2" style={{ marginTop: 35 }}>
                             <input
-                              className="InputField"
-                              type="string"
-                              id="member_field"
-                              placeholder="Insert the username"
-                              onChange={(event) =>
-                                setNewMember(event.target.value)
-                              }
+                              className="personalized-button mt-3"
+                              type="submit"
+                              value={"Add"}
+                              id="NewMember"
                             ></input>
                           </div>
                         </div>
-                        <div className="col-2" style={{ marginTop: 35 }}>
-                          <input
-                            className="personalized-button mt-3"
-                            type="submit"
-                            value={"Add"}
-                            id="NewMember"
-                          ></input>
-                        </div>
-                      </div>
-                    </form>
+                      </form>
                     )}
                   </div>
                 </Accordion.Body>

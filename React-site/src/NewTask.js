@@ -25,13 +25,10 @@ function NewTask() {
   const username = localStorage.getItem("LoggedUser");
   const [modify, setModify] = useState(false);
   const [task, setTask] = useState([]);
-  const [id, setId] = useState(0);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState(new Date());
-  const [user, setUser] = useState("");
-  const [status, setStatus] = useState(false);
   const [type, setType] = useState("personal");
   const [duration, setDuration] = useState("");
   const [selectedSlots, setSelectedSlots] = useState([]);
@@ -42,6 +39,7 @@ function NewTask() {
   const [isEvent, setEvent] = useState(false);
   const [team_members, setMembers] = useState([]);
   const [team, setTeam] = useState(0);
+  const [eventMembers, setEventMembers] = useState([]);
 
   const handleClosure = () => {
     sessionStorage.setItem("error_alert", false);
@@ -114,18 +112,20 @@ function NewTask() {
     }
 
     const buttonId = event.nativeEvent.submitter.id; //to get the id of the button that submitted the form
-    if (buttonId == "NewTask") {
-      console.log("new");
+    if (buttonId == "NewTask" || buttonId == "NewEvent") {
       if (title !== "" && date !== "" && time !== "") {
         try {
           // Send a POST request to the /newtask endpoint of the Flask server
           const response = await axios.post(endpoint, {
-            title,
-            date,
-            time,
-            description,
+            title: title,
+            date: date,
+            time: time,
+            description: description,
             user: userFromLocal,
-            duration,
+            duration: duration,
+            type: type,
+            members: eventMembers,
+            teamId: team,
           });
           // If task has been successfully created, then redirect the user to the Home page.
           console.log(response.status);
@@ -217,8 +217,13 @@ function NewTask() {
         setEvent(true);
         setMembers(location.state.event);
         setTeam(location.state.team);
+        setType("event");
       }
-      setPreviousPage(location.state.previousPage);
+      if (location.state.team) {
+        setPreviousPage(
+          location.state.previousPage + "?id=" + location.state.team
+        );
+      }
     }
   }, [location.state]);
 
@@ -354,7 +359,9 @@ function NewTask() {
                               id={`member-${member.id}`}
                               disabled={member === username}
                               checked={member === username}
-                              // Implement logic to handle member selection/unselection
+                              onChange={(event) =>
+                                setEventMembers(event.target.value)
+                              }
                             />
                           ))}
                         </div>

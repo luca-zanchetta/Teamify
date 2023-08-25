@@ -15,7 +15,6 @@ function Task({ task }: Props) {
   const endpoint = "http://localhost:5000/home/event/members";
   const username = localStorage.getItem("LoggedUser");
   const navigate = useNavigate();
-  const [updatedTask, setUpdatedTask] = useState([]);
   const [members, setMembers] = useState([]);
   const formattedTime = formatTime(task.end);
   const [completeButton, setButtonText] = useState("Complete");
@@ -23,6 +22,7 @@ function Task({ task }: Props) {
   const toggleAccordion = () => {
     setIsExpanded(!isExpanded);
   };
+  console.log(task.member);
   const handleDelete = async () => {
     if (task.member === username) {
       localStorage.setItem("task_to_delete", task.id);
@@ -73,7 +73,8 @@ function Task({ task }: Props) {
         })
         .then((response) => {
           const res = response.data;
-          setMembers(res);
+          console.log(res[0]);
+          setMembers(res[0]);
         })
         .catch((error) => {
           console.error("Error fetching team data:", error);
@@ -132,7 +133,7 @@ function Task({ task }: Props) {
           <div className="accordion mb-3">
             <div className="accordion-header" onClick={toggleAccordion}>
               <button className="btn btn-light" type="button">
-                Group Members
+                Event Members
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
@@ -146,16 +147,17 @@ function Task({ task }: Props) {
               </button>
             </div>
             {isExpanded && (
-              <div className="accordion-content">
+              <div
+                className="accordion-content overflow-auto"
+                style={{ maxHeight: "75px" }}
+              >
                 <ul>
-                  {members.length === 0 ? (
-                    <div>
-                      <li> You </li>
-                    </div>
-                  ) : (
-                    members.map((member, index) => (
-                      <li key={index}>{member}</li>
-                    ))
+                  {Object.values(members).map((member, index) =>
+                    member == username ? (
+                      <li>You</li>
+                    ) : (
+                      <li key={member}>{member}</li>
+                    )
                   )}
                 </ul>
               </div>

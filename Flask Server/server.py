@@ -41,7 +41,7 @@ def handle_connect():
 @socketio.on("initial_data")
 def handle_initial_data(username):
     insert = True  # Check whether the request has been sent multiple times
-    
+
     new_client = (username, request.sid)
     if len(connected_clients) == 0:
         insert = True
@@ -50,10 +50,10 @@ def handle_initial_data(username):
             (user, req_id) = client
             if user == username:
                 insert = False
-    
+
     if insert == True:
         connected_clients.append(new_client)
-        print('[INFO] Client connected: '+str(username))
+        print("[INFO] Client connected: " + str(username))
 
 
 @socketio.on("message")
@@ -219,6 +219,11 @@ def create_new_task():
     description = request.json["description"]
     member = request.json["user"]
     duration = request.json["duration"]
+    type_task = request.json["type"]
+
+    # if event
+    team_id = request.json["teamId"]
+    event_members = request.json["members"]
 
     curr.execute(
         "SELECT username FROM member where username= %s ORDER BY username DESC LIMIT 1",
@@ -230,17 +235,54 @@ def create_new_task():
         return jsonify("Not auth"), 401
 
     # Insert the new task with the calculated new_id
-    # print(type(new_id),type(title),type(date),type(time),type(description),type(user))
-    query = "INSERT INTO task (id, title, date, time, description, member,duration) VALUES (%s, %s, %s, %s, %s, %s, %s)"
-    values = (new_id, title, date, time, description, member, duration)
 
-    try:
-        curr.execute(query, values)
-    except Exception as err:
-        print("[ERROR] /new_task: ", err)
-        return jsonify("ko"), 400
+    # if is a pernsonal task
+    if type_task == "personal":
+        query = "INSERT INTO task (id, title, date, time, description, member,duration) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+        values = (new_id, title, date, time, description, member, duration)
 
-    return jsonify({"message": "Task created successfully", "id": new_id}), 200
+        try:
+            curr.execute(query, values)
+        except Exception as err:
+            print("[ERROR] /new_task: ", err)
+            return jsonify("ko"), 400
+
+        return jsonify({"message": "Task created successfully", "id": new_id}), 200
+
+    else:
+        query = "INSERT INTO task (id, title, date, time, description, member, duration,type) VALUES (%s, %s, %s, %s, %s, %s, %s,%s)"
+        values = (new_id, title, date, time, description, member, duration, type_task)
+
+        try:
+            curr.execute(query, values)
+        except Exception as err:
+            print("[ERROR] /new_task: ", err)
+            return jsonify("ko"), 400
+
+        # here i includes the user that creates the event
+        query_inclues = (
+            "INSERT INTO includes (event,team,username,state) VALUES (%s,%s,%s,%s)"
+        )
+        params_includes = (new_id, team_id, member, "accepted")
+
+        try:
+            curr.execute(query_inclues, params_includes)
+        except Exception as err:
+            print("[ERROR] /new_event: ", err)
+            return jsonify("ko"), 400
+
+        for person in event_members:
+            query_inclues_member = (
+                "INSERT INTO includes (event,team,username,state) VALUES (%s,%s,%s,%s)"
+            )
+            params_includes_member = (new_id, team_id, person, "pending")
+            try:
+                curr.execute(query_inclues_member, params_includes_member)
+            except Exception as err:
+                print("[ERROR] /new_event (event member): ", err)
+                return jsonify("ko"), 400
+
+        return jsonify({"message": "Task created successfully", "id": new_id}), 200
 
 
 # Modify a task API
@@ -310,7 +352,7 @@ def get_tasks():
     # Fetch the ID of the last inserted task
     local_user = request.args.get("user")  # get back the params from the request
     curr.execute(
-        "SELECT title, description, date, time, duration, id, status,type FROM task WHERE member = %s",
+        "SELECT title, description, date, time, duration, id, status, type, member FROM task WHERE member = %s",
         (local_user,),
     )
     tasks = curr.fetchall()
@@ -332,6 +374,7 @@ def get_tasks():
                 "id": task[5],
                 "status": task[6],
                 "type": task[7],
+                "member": task[8],
             }
         )
 
@@ -343,31 +386,17 @@ def get_tasks():
 def delete_task(task_id):
     curr = conn.cursor()
 
-    query_task = "SELECT type FROM task WHERE id = %s"
-    param_task = (task_id,)
-    curr.execute(query_task, param_task)
-    task = curr.fetchone()
-    if task[0] == "event":
-        print("Event")
+    # remove all the task connected to the user
+    query_delete = "DELETE FROM task WHERE id = %s"
+    param_delete = (task_id,)
+    try:
+        curr.execute(query_delete, param_delete)
         return jsonify(
             {"message": f"[INFO] /home/deletetask: id {task_id} successfully deleted"}
         )
-
-        # TODO: se è un evento dobbiamo cancellare anche le righe della tabella join
-    else:
-        # remove all the task connected to the user
-        query_delete = "DELETE FROM task WHERE id = %s"
-        param_delete = (task_id,)
-        try:
-            curr.execute(query_delete, param_delete)
-            return jsonify(
-                {
-                    "message": f"[INFO] /home/deletetask: id {task_id} successfully deleted"
-                }
-            )
-        except Exception as err:
-            print("[ERROR] /home/deletetask : ", err)
-            return jsonify("ko"), 400
+    except Exception as err:
+        print("[ERROR] /home/deletetask : ", err)
+        return jsonify("ko"), 400
 
 
 # Get events/tasks for shared agenda
@@ -456,7 +485,7 @@ def team_details():
     members2 = []
     for member in members:
         members2.append(member[0])
-    
+
     curr.execute(
         "SELECT admin FROM manage WHERE team = %s",
         (id,),
@@ -579,18 +608,21 @@ def team_given_id():
     (name,) = curr.fetchone()
     name = str(name).strip()
 
-    return jsonify({"name":name, "status":200})
+    return jsonify({"name": name, "status": 200})
 
 
-# Get list of members included in a certain event
-@app.route("/home/event/members", methods=["GET"])
+# Get list of members included in a certain event the one that accepted
+@app.route("/home/event/members", methods=["get"])
 def members_given_event():
     curr = conn.cursor()
     # Fetch the ID of the last inserted task
     event_id = request.args.get("eventId")  # get back the params from the request
     curr.execute(
-        "SELECT username FROM includes WHERE event = %s",
-        (event_id,),
+        "SELECT username FROM includes WHERE event = %s AND state = %s",
+        (
+            event_id,
+            "accepted",
+        ),
     )
     members = curr.fetchall()
 
@@ -768,15 +800,14 @@ def invite():
     id = data["id"]
     admin = data["admin"]
 
-    
     try:
         curr.execute(
-        "INSERT INTO invite (username, admin, team) VALUES (%s,%s,%s)",
-        (
-            username,
-            admin,
-            id,
-        ),
+            "INSERT INTO invite (username, admin, team) VALUES (%s,%s,%s)",
+            (
+                username,
+                admin,
+                id,
+            ),
         )
         return jsonify("ok"), 200
     except Exception as err:
