@@ -39,6 +39,7 @@ function TeamView() {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
   const [adminsSet, setAdmins] = useState([]);
+  const navigate = useNavigate();
 
   const updateDimensions = () => {
     setWindowWidth(window.innerWidth);
@@ -88,7 +89,7 @@ function TeamView() {
 
     // Set form values
     localStorage.setItem("new_member", new_member);
-    var username = new_member;
+    const username = new_member;
 
     if (new_member !== "") {
       try {
@@ -129,6 +130,17 @@ function TeamView() {
       window.location.replace(window.location.href); // For alert purposes only
       console.log("Username field must be filled to invite!");
     }
+  };
+
+  //in this way i pass some parameters to the destination page
+  const handleNewEvent = () => {
+    navigate("/home/newtask", {
+      state: {
+        event: data[0].admins,
+        previousPage: window.location.pathname,
+        team: id,
+      },
+    });
   };
 
   return (
@@ -203,11 +215,8 @@ function TeamView() {
                       </Row>
                       <Row></Row>
                       <Row className="mt-3">
-                        <Link
-                          to={{
-                            pathname: "/home/newtask",
-                            state: { previousPage: window.location.pathname },
-                          }}
+                        <button
+                          onClick={handleNewEvent}
                           className="btn"
                           style={{
                             textDecoration: "inherit",
@@ -219,7 +228,7 @@ function TeamView() {
                           }}
                         >
                           New Event
-                        </Link>
+                        </button>
                       </Row>
                     </Col>
                   </Row>
