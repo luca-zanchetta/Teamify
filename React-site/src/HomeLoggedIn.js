@@ -12,7 +12,6 @@ import Notifications from "./components/Notifications";
 import Profile from "./components/Profile";
 import Alert from "./components/Alert.tsx";
 import Task from "./components/Task.js";
-import EditTask from "./components/EditTask.js";
 import PopUp from "./components/PopUp.js";
 
 import WebSocketComponent from "./components/WebSocketComponent";

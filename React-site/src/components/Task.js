@@ -31,7 +31,6 @@ function Task({ task }: Props) {
   };
 
   const handleComplete = async () => {
-    const status = task.state;
     try {
       const response = await axios.put(
         `http://localhost:5000/home/completetask/${task.id}`
