@@ -16,9 +16,7 @@ socketio = SocketIO(
 )
 
 connected_clients = []
-teams = (
-    []
-)  # List of teams; each team is of the following format: [name, [member1, member2, ..., member10]]
+teams = [] # List of teams; each team is of the following format: [name, [member1, member2, ..., member10]]
 
 # DB setup
 conn = get_connection()
@@ -51,6 +49,7 @@ def handle_initial_data(username):
     
     if insert == True:
         connected_clients.append(new_client)
+        join_room(username)
         print('[INFO] Client connected: '+str(username))
 
 
@@ -72,8 +71,10 @@ def handle_disconnect():
             break
 
     username = disconnected_client[0]
-    print("[INFO] Client disconnected: " + username)
-    connected_clients.remove(disconnected_client)
+    if username is not None:
+        print("[INFO] Client disconnected: " + str(username))
+        connected_clients.remove(disconnected_client)
+        leave_room(username)
 
 
 ############################ REST APIs ##################################
@@ -784,12 +785,15 @@ def invite():
         try:
             curr.execute(query_notification, params_notification)
             print('[INFO] /invite: Invite notification registered.')
+            print(username)
+            socketio.emit('invite_notification', '', room=username)
+            
             return jsonify("ok"), 200
         except Exception as err:
             print('[ERROR] Invite notification not registered. Err = '+str(err))
             return jsonify("ko"), 400
     except Exception as err:
-        print('[ERROR] User not invited.')
+        print('[ERROR] User not invited. Err = '+str(err))
         return jsonify("ko"), 400
 
 
@@ -880,4 +884,4 @@ def reject_invite():
 
 if __name__ == "__main__":
     # app.run(debug=True, host="localhost", port=5000)
-    socketio.run(app, host="localhost", port=5000)
+    socketio.run(app, host="localhost", port=5000, debug=True)

@@ -1,30 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import io from 'socket.io-client';
 
-// const socket = new WebSocket('ws://localhost:5000');
-// const username = localStorage.getItem('LoggedUser');
+import user from "../icons/user.png";
 
-// socket.addEventListener('connect', () => {
-//   console.log('[INFO] Connected to the WebSocket server.');
-
-//   // Send to the server the username of the logged user
-//   socket.emit('initial_data', username);
-// });
-
-// // Receive messages from the server
-// socket.addEventListener('message', (message) => {
-//   // setMessages((prevMessages) => [...prevMessages, message]);
-//   console.log('[INFO] Received message: '+message);
-// });
-
-// export default socket;
-
-const WebSocketComponent = () => {
-  const [messages, setMessages] = useState([]);
-  const [inputMessage, setInputMessage] = useState('');
-  const [socket, setSocket] = useState(null);
-
+const WebSocketComponent =  forwardRef((props, ref) => {
   const username = localStorage.getItem('LoggedUser');
+
+  const sendMessage = () => {
+    console.log('CHIAMATA');
+  };
+
+  useImperativeHandle(ref, () => ({
+    sendMessage:sendMessage,
+  }));
 
   useEffect(() => {
     // New WebSocket connection at start
@@ -43,7 +31,15 @@ const WebSocketComponent = () => {
       console.log('[INFO] Received message: '+message);
     });
 
-    setSocket(newSocket);
+
+    // Notifications from the server
+    newSocket.on('invite_notification', (message) => {
+      // setMessages((prevMessages) => [...prevMessages, message]);
+      console.log('[INFO] Received notification: '+message);
+      var bellIcon = document.getElementById('bell');
+      bellIcon.src = user;
+    });
+
 
     // Chiudi la connessione WebSocket quando il componente viene smontato
     return () => {
@@ -53,29 +49,10 @@ const WebSocketComponent = () => {
     };
   }, []);
 
-  const sendMessage = () => {
-    if (socket && inputMessage.trim() !== '') {
-      socket.emit('message', "ciao");
-      setInputMessage('');
-    }
-  };
+  return (
+    <div></div>
+  );
 
-//   return (
-//     <div>
-//       <h1>WebSocket Example</h1>
-//       <div>
-//         {messages.map((message, index) => (
-//           <div key={index}>{message}</div>
-//         ))}
-//       </div>
-//       <input
-//         type="text"
-//         value={inputMessage}
-//         onChange={(e) => setInputMessage(e.target.value)}
-//       />
-//       <button onClick={sendMessage}>Send</button>
-//     </div>
-//   );
-};
+});
 
-export default WebSocketComponent;
+export {WebSocketComponent};

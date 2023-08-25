@@ -52,11 +52,14 @@ function Notifications() {
 
   function toggleShow() {
     setShow(!show);
+    show_notifications();
+    var bellIcon = document.getElementById('bell');
+    bellIcon.src = bell;
   }
 
   return (
     <div className="UserIcon" style={{ paddingRight: "1%", marginRight: "2%" }}>
-      <img src={bell} onClick={toggleShow}></img>
+      <img src={bell} onClick={toggleShow} id='bell'></img>
       {show && (
         <>
           <div id="NotificationDrop">
