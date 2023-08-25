@@ -9,11 +9,10 @@ import Notifications from "./components/Notifications";
 import axios from "axios";
 
 function Teams() {
-
   const teamCreated = localStorage.getItem("teamCreated_alert") === "true";
   const handleTeamCreated = () => {
-    localStorage.setItem("teamCreated_alert", "false")
-  };  
+    localStorage.setItem("teamCreated_alert", "false");
+  };
 
   const username = localStorage.getItem("LoggedUser");
   const navigate = useNavigate();
@@ -57,12 +56,10 @@ function Teams() {
   useEffect(() => {
     const timeout = setTimeout(() => {
       handleTeamCreated();
-    }, 1000)
+    }, 1000);
 
-    return () => clearTimeout(timeout)
-
-  }, [])
-
+    return () => clearTimeout(timeout);
+  }, []);
 
   return (
     <div className="App">
@@ -88,11 +85,11 @@ function Teams() {
       <div className="SideContainer overflow-auto">
         <NavBar></NavBar>
         <div className="container">
-        {teamCreated && (
-        <Alert onClick={handleTeamCreated} state="success">
-          Team created
-        </Alert>
-      )}
+          {teamCreated && (
+            <Alert onClick={handleTeamCreated} state="success">
+              Team created
+            </Alert>
+          )}
           <div className="row mt-4 mb-2" style={{ textAlign: "left" }}>
             <div className="col">
               <h1>Teams</h1>
@@ -107,7 +104,7 @@ function Teams() {
                 width="25"
                 height="25"
                 fill="currentColor"
-                class="bi bi-arrow-90deg-left"
+                className="bi bi-arrow-90deg-left"
                 viewBox="0 0 16 16"
               >
                 <path
@@ -154,10 +151,12 @@ function Teams() {
           </div>
           <div className="mt-5 pb-5" style={{ textAlign: "right" }}>
             <Link
-            to="/home/createteam"
-            style={{ color: "inherit", textDecoration: "inherit" }}
-            className="btn btn-light"
-          >Create team</Link>
+              to="/home/createteam"
+              style={{ color: "inherit", textDecoration: "inherit" }}
+              className="btn btn-light"
+            >
+              Create team
+            </Link>
           </div>
         </div>
       </div>

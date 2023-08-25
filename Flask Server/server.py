@@ -426,7 +426,6 @@ def team_details():
         (id,),
     )
     teamData = curr.fetchone()
-    print(teamData)
 
     curr.execute(
         "SELECT username FROM joinTeam WHERE team = %s",
@@ -436,7 +435,6 @@ def team_details():
     members2=[]
     for member in members:
         members2.append(member[0])
-    print(members2)
     
     curr.execute(
         "SELECT admin FROM manage WHERE team = %s",
@@ -446,13 +444,11 @@ def team_details():
     admins2=[]
     for admin in admins:
         admins2.append(admin[0])
-    print(admins2)
 
     diff = []
     for element in members2:
         if element not in admins2:
             diff.append(element)
-    print(diff)
 
     result=[]
     result.append(
@@ -750,15 +746,19 @@ def invite():
     id = data["id"]
     admin = data["admin"]
 
-    curr.execute(
+    
+    try:
+        curr.execute(
         "INSERT INTO invite (username, admin, team) VALUES (%s,%s,%s)",
         (
             username,
             admin,
             id,
         ),
-    )
-    return jsonify("ok"), 200
+        )
+        return jsonify("ok"), 200
+    except Exception as err:
+        return jsonify("ko"), 400
 
 
 # given username, check invites of user

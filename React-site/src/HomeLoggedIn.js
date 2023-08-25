@@ -126,7 +126,10 @@ function HomeLoggedIn() {
                   </div>
                   <div className="row d-flex justify-content-center align-items-center">
                     <Link
-                      to="/home/newtask"
+                      to={{
+                        pathname: "/home/newtask",
+                        state: { previousPage: window.location.pathname },
+                      }}
                       className="btn"
                       style={{
                         textDecoration: "inherit",
