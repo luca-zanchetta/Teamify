@@ -49,7 +49,7 @@ def get_teams():
         query_retrieve_members = "SELECT user FROM joinTeam WHERE team = %s"
         
         for team in retrieved_teams:
-            params = (team[0])
+            params = (team[0],)
             curr.execute(query_retrieve_members, params)
                 
             retrieved_users = curr.fetchall()

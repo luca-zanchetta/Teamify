@@ -11,7 +11,6 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link, useNavigate, Navigate } from "react-router-dom";
 import UserIcon from "./components/UserIcon";
-import axios from "axios";
 
 var endpoint = "http://localhost:5000/teamGivenID";
 

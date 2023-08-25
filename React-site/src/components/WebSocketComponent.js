@@ -6,19 +6,20 @@ const WebSocketComponent = () => {
   const [inputMessage, setInputMessage] = useState('');
   const [socket, setSocket] = useState(null);
 
+  const username = localStorage.getItem('LoggedUser');
+
   useEffect(() => {
-    // Stabilisci la connessione WebSocket quando il componente si monta
-    const newSocket = io('http://localhost:5000');  // Sostituisci con l'URL del tuo server
+    // New WebSocket connection at start
+    const newSocket = io('http://localhost:5000');
 
     newSocket.on('connect', () => {
       console.log('[INFO] Connected to the WebSocket server.');
 
       // Send to the server the username of the logged user
-      const username = localStorage.getItem('LoggedUser');
       newSocket.emit('initial_data', username);
     });
 
-    // Ricevi i messaggi dal server
+    // Receive messages from the server
     newSocket.on('message', (message) => {
       // setMessages((prevMessages) => [...prevMessages, message]);
       console.log('[INFO] Received message: '+message);
@@ -28,7 +29,7 @@ const WebSocketComponent = () => {
 
     // Chiudi la connessione WebSocket quando il componente viene smontato
     return () => {
-      if (newSocket) {
+      if (newSocket && !username) {
         newSocket.disconnect();
       }
     };

@@ -36,9 +36,20 @@ def handle_connect():
 
 @socketio.on('initial_data')
 def handle_initial_data(username):
-    print('[INFO] Client connected: '+str(username))
+    insert = True  # Check whether the request has been sent multiple times
+    
     new_client = (username, request.sid)
-    connected_clients.append(new_client)
+    if len(connected_clients) == 0:
+        insert = True
+    else:
+        for client in connected_clients:
+            (user, req_id) = client
+            if user == username:
+                insert = False
+    
+    if insert == True:
+        connected_clients.append(new_client)
+        print('[INFO] Client connected: '+str(username))
 
 
 @socketio.on('message')
