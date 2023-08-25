@@ -18,6 +18,8 @@ const endpoint = "http://localhost:5000/home/newtask";
 
 function NewTask() {
   const location = useLocation();
+  const previousPage = location.state?.previousPage || "/home"; // a way to get the page i'm coming from
+  console.log(previousPage);
   const [modify, setModify] = useState(false);
   const [task, setTask] = useState([]);
   const [id, setId] = useState(0);
@@ -30,15 +32,25 @@ function NewTask() {
   const [type, setType] = useState("personal");
   const [duration, setDuration] = useState("");
   const [selectedSlots, setSelectedSlots] = useState([]);
-
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const navigate = useNavigate();
-
   const problem = sessionStorage.getItem("error_alert") === "true";
   const [error, setError] = useState("");
 
   const handleClosure = () => {
     sessionStorage.setItem("error_alert", false);
   };
+
+  const updateDimensions = () => {
+    setWindowWidth(window.innerWidth);
+  };
+
+  useEffect(() => {
+    window.addEventListener("resize", updateDimensions);
+    return () => {
+      window.removeEventListener("resize", updateDimensions);
+    };
+  }, []);
 
   const handleSelectSlot = useCallback((slotInfo) => {
     const date_start = formatDate(slotInfo.slots[0]);
@@ -113,7 +125,7 @@ function NewTask() {
           // If task has been successfully created, then redirect the user to the Home page.
           console.log(response.status);
           if (response.status === 200) {
-            navigate("/home");
+            navigate(previousPage);
             sessionStorage.setItem("new_task", true);
           } else {
             console.log("error");
@@ -167,7 +179,7 @@ function NewTask() {
           }
         );
         if (response.status == 200) {
-          navigate("/home");
+          navigate(previousPage);
           // TODO: add alert
         }
         console.log(response.data.message); // Display the response message
@@ -192,6 +204,7 @@ function NewTask() {
       setModify(false);
     }
   }, [location.state]);
+
   return (
     <div>
       <div className="App">
@@ -218,10 +231,13 @@ function NewTask() {
         )}
 
         <div className="SignUpBackground">
-          <div className="container" style={{ Display: "flex" }}>
-            <div className="row" style={{ Display: "flex" }}>
+          <div className="container" style={{ flex: 1 }}>
+            <div className="row">
               <div className="col-sm">
-                <div className="CardL">
+                <div
+                  className="CardL"
+                  style={{ flex: 1, paddingRight: "17px" }}
+                >
                   <div className="CardHeading">
                     {(modify && "Modify task") || "Create new task"}
                   </div>
@@ -304,7 +320,7 @@ function NewTask() {
                 <div className="CardL">
                   <WeeklyCalendar
                     height={470}
-                    width={800}
+                    width={(windowWidth * 50) / 100}
                     handleSelectSlot={handleSelectSlot}
                     slotPropGetter={slotStyleGetter}
                   />

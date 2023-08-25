@@ -255,8 +255,8 @@ includes = """CREATE TABLE includes (
     )
 )"""
 try:
-    cur.execute(dropManage)
-    cur.execute(manage)
+    cur.execute(dropIncludes)
+    cur.execute(includes)
     conn.commit()
 
     print("[INFO] Table 'manage' successfully created.")
