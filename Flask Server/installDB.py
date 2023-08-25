@@ -259,7 +259,7 @@ try:
     cur.execute(includes)
     conn.commit()
 
-    print("[INFO] Table 'manage' successfully created.")
+    print("[INFO] Table 'includes' successfully created.")
 except Exception as err:
     print("Error: ", err)
     exit()

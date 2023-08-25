@@ -10,10 +10,14 @@ from flask_socketio import SocketIO, emit, join_room, leave_room
 # Server setup
 app = Flask(__name__)
 CORS(app)
-socketio = SocketIO(app, cors_allowed_origins="http://localhost:3000", async_mode='eventlet')
+socketio = SocketIO(
+    app, cors_allowed_origins="http://localhost:3000", async_mode="eventlet"
+)
 
 connected_clients = []
-teams = []  # List of teams; each team is of the following format: [name, [member1, member2, ..., member10]]
+teams = (
+    []
+)  # List of teams; each team is of the following format: [name, [member1, member2, ..., member10]]
 
 # DB setup
 conn = get_connection()
@@ -24,17 +28,17 @@ if conn is None:
 
 
 ############################ WEBSOCKET ROUTES ############################
-@socketio.on('connect')
+@socketio.on("connect")
 def handle_connect():
     global teams
-    
+
     # If it is the initial state, then retrieve all the database information about teams
     if len(connected_clients) == 0:
         teams = get_teams()
-        print('[INFO] Teams retrieved successfully.')
+        print("[INFO] Teams retrieved successfully.")
 
 
-@socketio.on('initial_data')
+@socketio.on("initial_data")
 def handle_initial_data(username):
     insert = True  # Check whether the request has been sent multiple times
     
@@ -52,25 +56,24 @@ def handle_initial_data(username):
         print('[INFO] Client connected: '+str(username))
 
 
-@socketio.on('message')
+@socketio.on("message")
 def handle_message(message):
-    print(f'[INFO] Recieved message: {message}')
-    
+    print(f"[INFO] Recieved message: {message}")
+
     # Now send the message to all the connected clients
-    emit('message', message, broadcast=True)
+    emit("message", message, broadcast=True)
 
 
-@socketio.on('disconnect')
+@socketio.on("disconnect")
 def handle_disconnect():
     for client in connected_clients:
         if client[1] == request.sid:
             disconnected_client = client
             break
-    
+
     username = disconnected_client[0]
-    print('[INFO] Client disconnected: '+username)
+    print("[INFO] Client disconnected: " + username)
     connected_clients.remove(disconnected_client)
-    
 
 
 ############################ REST APIs ##################################
@@ -192,6 +195,9 @@ def delete_account(user):
     return jsonify("ok"), 200
 
 
+############################ TASK APIs ##################################
+
+
 # New Task API
 @app.route("/home/newtask", methods=["POST"])
 def create_new_task():
@@ -294,7 +300,7 @@ def complete_task(task_id):
         print("[ERROR] /updatetask: ", err)
         return jsonify({"message": "Update failed"}), 400
 
-    return jsonify({"message": "Task completed successfully"}), 200
+    return jsonify({"message": "Task change successfully"}, change), 200
 
 
 # Get all tasks API
@@ -394,6 +400,9 @@ def get_tasks_events():
     return jsonify(tasks_list), 200
 
 
+############################ END TASK APIs ##################################
+
+
 # Get the list of teams releted to a certain user
 @app.route("/home/teams", methods=["GET"])
 def team_list():
@@ -426,7 +435,8 @@ def team_list():
 
     return jsonify(teams), 200
 
-#team details given team id
+
+# team details given team id
 @app.route("/teamDetails", methods=["GET"])
 def team_details():
     curr = conn.cursor()
@@ -443,7 +453,7 @@ def team_details():
         (id,),
     )
     members = curr.fetchall()
-    members2=[]
+    members2 = []
     for member in members:
         members2.append(member[0])
     
@@ -452,7 +462,7 @@ def team_details():
         (id,),
     )
     admins = curr.fetchall()
-    admins2=[]
+    admins2 = []
     for admin in admins:
         admins2.append(admin[0])
 
@@ -461,14 +471,20 @@ def team_details():
         if element not in admins2:
             diff.append(element)
 
-    result=[]
+    result = []
     result.append(
-            {"teamName": teamData[0], "description": teamData[1], "members": diff, "admins": admins2}
-        )
+        {
+            "teamName": teamData[0],
+            "description": teamData[1],
+            "members": diff,
+            "admins": admins2,
+        }
+    )
 
     return jsonify(result), 200
 
-#Create a team
+
+# Create a team
 @app.route("/home/newteam", methods=["POST"])
 def team_create():
     curr = conn.cursor()
@@ -564,6 +580,25 @@ def team_given_id():
     name = str(name).strip()
 
     return jsonify({"name":name, "status":200})
+
+
+# Get list of members included in a certain event
+@app.route("/home/event/members", methods=["GET"])
+def members_given_event():
+    curr = conn.cursor()
+    # Fetch the ID of the last inserted task
+    event_id = request.args.get("eventId")  # get back the params from the request
+    curr.execute(
+        "SELECT username FROM includes WHERE event = %s",
+        (event_id,),
+    )
+    members = curr.fetchall()
+
+    member_list = []
+    for member in members:
+        member_list.append({"member": member[0]})
+
+    return jsonify(member_list), 200
 
 
 # Display user information
@@ -694,30 +729,6 @@ def modify_password():
 
     print("[ERROR] /home/modify-password: Username not found.")
     return jsonify({"message": "User not found.", "status": 404})
-
-
-# Delete user account (cascade on all its foreign keys!)
-# @app.route("/home/delete-account", methods=['POST'])
-# def delete_account():
-#     data = request.get_json()
-#     curr = conn.cursor()
-
-#     username = data['username']
-#     if username != "":
-#         query = "DELETE FROM member WHERE username = %s"
-#         params = (username,)
-
-#         try:
-#             curr.execute(query, params)
-#         except Exception as err:
-#             print("[ERROR] /home/delete-account: ", err)
-#             return jsonify("ko"), 400
-
-#         print("[INFO] /home/delete-account: User was successfully removed.")
-#         return jsonify("ok"), 200   # Here we should redirect to /login at the frontend!
-
-#     print("[ERROR] /home/delete-account: Username not found.")
-#     return jsonify("ko"), 404
 
 
 # Display user notifications
@@ -859,4 +870,4 @@ def reject_invite():
 
 if __name__ == "__main__":
     # app.run(debug=True, host="localhost", port=5000)
-    socketio.run(app, host='localhost', port=5000, debug=True)
+    socketio.run(app, host="localhost", port=5000, debug=True)
