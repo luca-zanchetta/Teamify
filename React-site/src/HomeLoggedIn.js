@@ -137,6 +137,7 @@ useEffect(() => {
 
   const handleSelectEvent = useCallback((event) => {
     setTask(event);
+    console.log(event)
   });
 
   return (
