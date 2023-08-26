@@ -84,7 +84,7 @@ function TeamView() {
     // Set form values
     localStorage.setItem("new_member", new_member);
     const username = new_member;
-    const admin = localStorage.getItem("username");
+    const admin = localStorage.getItem("LoggedUser");
 
     if (new_member !== "") {
       try {

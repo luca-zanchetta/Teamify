@@ -78,6 +78,6 @@ def decrypt_username(encryptedUsername):
     key = b'em45E0z!UA56MOw19Og4EkBUnW35qYB%'
     cipher = AES.new(key, AES.MODE_ECB)
     # Decrypt the encrypted string
-    decrypted_string = unpad(cipher.decrypt(base64.b64decode(encryptedUsername + b'==')), AES.block_size)
+    decrypted_string = unpad(cipher.decrypt(base64.b64decode(encryptedUsername)), AES.block_size)
     # Print the original and decrypted strings
     return decrypted_string.decode().strip()

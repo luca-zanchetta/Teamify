@@ -778,9 +778,9 @@ def invite():
     curr = conn.cursor()
 
     username = data["username"]
-    username=decrypt_username(username)
     id = data["id"]
     admin = data["admin"]
+    admin=decrypt_username(admin)
 
     query_invite = "INSERT INTO invite (username, admin, team) VALUES (%s,%s,%s)"
     params_invite = (username, admin, id,)
