@@ -7,12 +7,14 @@ import WeeklyCalendar from "./components/WeeklyCalendar.js";
 import Alert from "./components/Alert.tsx";
 import { Container } from "./css/Navigator.css";
 import { Accordion, Col, Row } from "react-bootstrap";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { Link, useNavigate, Navigate } from "react-router-dom";
 import UserIcon from "./components/UserIcon";
 import Notifications from "./components/Notifications";
 import WebSocketComponent from "./components/WebSocketComponent";
+import Task from "./components/Task.js";
+import PopUp from "./components/PopUp.js";
 
 var endpoint = "http://localhost:5000/teamGivenID";
 
@@ -41,7 +43,9 @@ function TeamView() {
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
   const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState(false);
-
+  const [task, setTask] = useState([]);
+  const showDeletePopUp = localStorage.getItem("delete") === "true";
+  const task_id = localStorage.getItem("task_to_delete");
   const updateDimensions = () => {
     setWindowWidth(window.innerWidth);
   };
@@ -63,7 +67,7 @@ function TeamView() {
         if (response.data[0].description == "")
           response.data[0].description = "This team has no description"; //changing the field description
         setData(response.data);
-        setIsAdmin(response.data[0].admins.includes(username))
+        setIsAdmin(response.data[0].admins.includes(username));
       })
       .catch((error) => console.log(error));
   }, [isAdmin]);
@@ -138,6 +142,20 @@ function TeamView() {
     });
   };
 
+  const handleNewTask = () => {
+    navigate("/home/newtask", {
+      state: {
+        previousPage: window.location.pathname,
+        team: id,
+      },
+    });
+  };
+
+  const handleSelectEvent = useCallback((event) => {
+    setTask(event);
+    console.log(event);
+  });
+
   return (
     <div className="App">
       {/* <WebSocketComponent></WebSocketComponent> */}
@@ -176,6 +194,8 @@ function TeamView() {
               </Alert>
             )}
           </div>
+          {task.id !== undefined && <Task task={task} />}
+          {showDeletePopUp && <PopUp type="task" task_id={task_id} />}
           <div className="mb-5 mt-5">
             <h1>{data.map((item) => item.teamName)}</h1>
           </div>
@@ -190,16 +210,14 @@ function TeamView() {
                         <WeeklyCalendar
                           width={(windowWidth * 60) / 100}
                           height={570}
+                          handleSelectEvent={handleSelectEvent}
                         />
                       </div>
                     </Col>
                     <Col style={{ marginLeft: "60px" }}>
                       <Row style={{ marginTop: "200px" }}>
-                        <Link
-                          to={{
-                            pathname: "/home/newtask",
-                            state: { previousPage: window.location.pathname },
-                          }}
+                        <button
+                          onClick={handleNewTask}
                           className="btn"
                           style={{
                             textDecoration: "inherit",
@@ -208,7 +226,7 @@ function TeamView() {
                           }}
                         >
                           New Task
-                        </Link>
+                        </button>
                       </Row>
                       <Row></Row>
                       <Row className="mt-3">
@@ -266,35 +284,36 @@ function TeamView() {
                         ))}
                       </div>
                     ))}
-                    {isAdmin && (<form onSubmit={handleSubmit}>
-                      <div className="row">
-                        <div className="col-10">
-                          <div className="InputEntry">
-                            <div className="InputLabel">
-                              Invite a new member{" "}
-                            </div>
+                    {isAdmin && (
+                      <form onSubmit={handleSubmit}>
+                        <div className="row">
+                          <div className="col-10">
+                            <div className="InputEntry">
+                              <div className="InputLabel">
+                                Invite a new member{" "}
+                              </div>
 
+                              <input
+                                className="InputField"
+                                type="string"
+                                id="member_field"
+                                placeholder="Insert the username"
+                                onChange={(event) =>
+                                  setNewMember(event.target.value)
+                                }
+                              ></input>
+                            </div>
+                          </div>
+                          <div className="col-2" style={{ marginTop: 35 }}>
                             <input
-                              className="InputField"
-                              type="string"
-                              id="member_field"
-                              placeholder="Insert the username"
-                              onChange={(event) =>
-                                setNewMember(event.target.value)
-                              }
+                              className="personalized-button mt-3"
+                              type="submit"
+                              value={"Add"}
+                              id="NewMember"
                             ></input>
                           </div>
                         </div>
-                        <div className="col-2" style={{ marginTop: 35 }}>
-                          <input
-                            className="personalized-button mt-3"
-                            type="submit"
-                            value={"Add"}
-                            id="NewMember"
-                          ></input>
-                        </div>
-                      </div>
-                    </form>
+                      </form>
                     )}
                   </div>
                 </Accordion.Body>

@@ -15,7 +15,6 @@ function Task({ task }: Props) {
   const endpoint = "http://localhost:5000/home/event/members";
   const username = localStorage.getItem("LoggedUser");
   const navigate = useNavigate();
-  const [updatedTask, setUpdatedTask] = useState([]);
   const [members, setMembers] = useState([]);
   const formattedTime = formatTime(task.end);
   const [completeButton, setButtonText] = useState("Complete");
@@ -23,6 +22,7 @@ function Task({ task }: Props) {
   const toggleAccordion = () => {
     setIsExpanded(!isExpanded);
   };
+  console.log(task.member);
   const handleDelete = async () => {
     if (task.member === username) {
       localStorage.setItem("task_to_delete", task.id);
@@ -73,7 +73,8 @@ function Task({ task }: Props) {
         })
         .then((response) => {
           const res = response.data;
-          setMembers(res);
+          console.log(res[0]);
+          setMembers(res[0]);
         })
         .catch((error) => {
           console.error("Error fetching team data:", error);
@@ -132,7 +133,7 @@ function Task({ task }: Props) {
           <div className="accordion mb-3">
             <div className="accordion-header" onClick={toggleAccordion}>
               <button className="btn btn-light" type="button">
-                Group Members
+                Event Members
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
@@ -146,16 +147,17 @@ function Task({ task }: Props) {
               </button>
             </div>
             {isExpanded && (
-              <div className="accordion-content">
+              <div
+                className="accordion-content overflow-auto"
+                style={{ maxHeight: "75px" }}
+              >
                 <ul>
-                  {members.length === 0 ? (
-                    <div>
-                      <li> You </li>
-                    </div>
-                  ) : (
-                    members.map((member, index) => (
-                      <li key={index}>{member}</li>
-                    ))
+                  {Object.values(members).map((member, index) =>
+                    member == username ? (
+                      <li>You</li>
+                    ) : (
+                      <li key={member}>{member}</li>
+                    )
                   )}
                 </ul>
               </div>
@@ -262,7 +264,7 @@ function Task({ task }: Props) {
                     >
                       <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
                       <path
-                        fill-rule="evenodd"
+                        fillRule="evenodd"
                         d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"
                       />
                     </svg>
