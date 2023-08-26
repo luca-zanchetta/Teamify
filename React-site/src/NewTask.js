@@ -22,7 +22,8 @@ const endpoint = "http://localhost:5000/home/newtask";
 function NewTask() {
   const location = useLocation();
   const [previousPage, setPreviousPage] = useState("/home"); // a way to get the page i'm coming from
-  const username = localStorage.getItem("LoggedUser");
+  const decryptedUsername = localStorage.getItem("username");
+
   const [modify, setModify] = useState(false);
   const [task, setTask] = useState([]);
   const [id, setId] = useState(0);
@@ -107,7 +108,7 @@ function NewTask() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const userFromLocal = localStorage.getItem("LoggedUser");
+    const userFromLocal = localStorage.getItem("username");
     if (userFromLocal == "") {
       navigate("/login");
       alert("Not auth");
@@ -350,10 +351,10 @@ function NewTask() {
                             <Form.Check
                               key={member.id}
                               type="checkbox"
-                              label={member === username ? "You" : member}
+                              label={member === decryptedUsername ? "You" : member}
                               id={`member-${member.id}`}
-                              disabled={member === username}
-                              checked={member === username}
+                              disabled={member === decryptedUsername}
+                              checked={member === decryptedUsername}
                               // Implement logic to handle member selection/unselection
                             />
                           ))}

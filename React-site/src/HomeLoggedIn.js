@@ -35,6 +35,7 @@ useEffect(() => {
 }, []);
 
   const username = localStorage.getItem("LoggedUser");
+  const decryptedusername = localStorage.getItem("username");
   const ProfileData = localStorage.getItem("ProfileData") === "true";
   const navigate = useNavigate();
   const [task, setTask] = useState([]);
@@ -51,6 +52,15 @@ useEffect(() => {
     return () => {
       window.removeEventListener("resize", updateDimensions);
     };
+  }, []);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      handleLogin();
+      handleDataUpdate();
+    }, 1000);
+
+    return () => clearTimeout(timeout);
   }, []);
 
   if (!username) {
@@ -153,7 +163,7 @@ useEffect(() => {
       </div>
       {login_200 && (
         <Alert onClick={handleLogin} state="success">
-          Welcome {username}!
+          Welcome {decryptedusername}!
         </Alert>
       )}
       {new_task && (

@@ -100,7 +100,9 @@ function Login() {
         // If the login has been successfully performed, then redirect the user to the homepage.
         if (response.status === 200) {
           sessionStorage.setItem("sign_up_alert", false);
-          localStorage.setItem("LoggedUser", username); // Set a session variable
+          const responseData = response.data;
+          const encryptedUsername = responseData.encryptedUsername;
+          localStorage.setItem("LoggedUser", encryptedUsername); // Set a session variable
           sessionStorage.setItem("login_alert", "true");
           navigate("/home");
           window.location.replace(window.location.href);

@@ -36,7 +36,7 @@ function TeamView() {
   const id = queryParameters.get("id");
   const endpoint1 = "http://localhost:5000/teamDetails";
   const endpoint2 = "http://localhost:5000/invite";
-  const username = localStorage.getItem("LoggedUser");
+  const decryptedUsername = localStorage.getItem("username");
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
   const navigate = useNavigate();
@@ -63,7 +63,7 @@ function TeamView() {
         if (response.data[0].description == "")
           response.data[0].description = "This team has no description"; //changing the field description
         setData(response.data);
-        setIsAdmin(response.data[0].admins.includes(username))
+        setIsAdmin(response.data[0].admins.includes(decryptedUsername))
       })
       .catch((error) => console.log(error));
   }, [isAdmin]);
@@ -88,7 +88,7 @@ function TeamView() {
 
     if (new_member !== "") {
       try {
-        // Send a POST request to the /login endpoint of the Flask server
+        // Send a POST request to the endpoint of the Flask server
         const response = await axios
           .post(endpoint2, {
             username,

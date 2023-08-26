@@ -17,6 +17,8 @@ function UserInfo() {
   const [email, setEmail] = useState("");
   const [birth, setBirth] = useState("");
   const username = localStorage.getItem("LoggedUser");
+  const decryptedusername = localStorage.getItem("username");
+
 
   const [password, setPassword] = useState("");
   const [editFlag, setEdit] = useState(false);
@@ -196,7 +198,7 @@ function UserInfo() {
             <img src={face}></img>
           </div>
           <div className="ProfileInfos">
-            <h2>{username}</h2>
+            <h2>{decryptedusername}</h2>
           </div>
         </div>
       </div>

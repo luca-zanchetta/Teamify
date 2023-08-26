@@ -1,5 +1,9 @@
 from datetime import datetime, timedelta
 from DBConnection import get_connection
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad, unpad
+import base64
+
 
 def get_current_week_range():
     today = datetime.now()
@@ -59,3 +63,21 @@ def get_teams():
                 teams.append([team[1], []])
     
     return teams
+
+def encrypt_username(username):
+    # Input string to be encrypted (padding to adjust length)
+    input_string = username.rjust(32)
+    # Secret key (pw)
+    key = b'em45E0z!UA56MOw19Og4EkBUnW35qYB%'
+    # Encrypt the string
+    cipher = AES.new(key, AES.MODE_ECB)
+    encrypted_string = cipher.encrypt(pad(input_string.encode(), AES.block_size))
+    return base64.b64encode(encrypted_string).decode()
+    
+def decrypt_username(encryptedUsername):
+    key = b'em45E0z!UA56MOw19Og4EkBUnW35qYB%'
+    cipher = AES.new(key, AES.MODE_ECB)
+    # Decrypt the encrypted string
+    decrypted_string = unpad(cipher.decrypt(base64.b64decode(encryptedUsername + b'==')), AES.block_size)
+    # Print the original and decrypted strings
+    return decrypted_string.decode().strip()

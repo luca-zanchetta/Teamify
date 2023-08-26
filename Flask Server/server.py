@@ -3,7 +3,7 @@ from hashlib import sha256
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from DBConnection import get_connection
-from support import get_current_week_range, convert_date, get_teams
+from support import get_current_week_range, convert_date, get_teams, encrypt_username, decrypt_username
 from flask_socketio import SocketIO, emit, join_room, leave_room
 import datetime
 
@@ -41,6 +41,7 @@ def handle_connect():
 
 @socketio.on("initial_data")
 def handle_initial_data(username):
+    username=decrypt_username(username)
     insert = True  # Check whether the request has been sent multiple times
     
     new_client = (username, request.sid)
@@ -86,6 +87,7 @@ def login():
     curr = conn.cursor()
 
     username = data["username"]
+    encryptedUsername=encrypt_username(username)
     password = data["password"]
     encoded_password = sha256(str(password).encode("utf-8")).hexdigest()
 
@@ -107,7 +109,7 @@ def login():
         return jsonify("not found"), 404
 
     print("[INFO] /login: Login performed.")
-    return jsonify("ok"), 200
+    return jsonify({"encryptedUsername":encryptedUsername}), 200
 
 
 # Signup API
@@ -173,9 +175,10 @@ def reset():
 @app.route("/home/delete-account/<string:user>", methods=["DELETE"])
 def delete_account(user):
     curr = conn.cursor()
+    username=decrypt_username(user)
     # removal the task connected to the user
     query_task = "DELETE FROM task WHERE member = %s"
-    param_task = (user,)
+    param_task = (username,)
     try:
         curr.execute(query_task, param_task)
     except Exception as err:
@@ -184,7 +187,7 @@ def delete_account(user):
 
     # remove the user
     query_member = "DELETE FROM member WHERE username = %s"
-    param_member = (user,)
+    param_member = (username,)
     try:
         curr.execute(query_member, param_member)
     except Exception as err:
@@ -218,6 +221,7 @@ def create_new_task():
     time = request.json["time"]
     description = request.json["description"]
     member = request.json["user"]
+    member=decrypt_username(member)
     duration = request.json["duration"]
 
     curr.execute(
@@ -248,6 +252,7 @@ def create_new_task():
 def update_task(task_id, local_user):
     print(request.json)
     curr = conn.cursor()
+    username=decrypt_username(local_user)
 
     data = request.get_json()
     title = data.get("title")
@@ -262,7 +267,7 @@ def update_task(task_id, local_user):
         return jsonify({"message": "Task not found"}), 404
 
     update_query = "UPDATE task SET title = %s, date = %s, time = %s, description = %s, member = %s, duration = %s WHERE id = %s"
-    update_values = (title, date, time, description, local_user, duration, task_id)
+    update_values = (title, date, time, description, username, duration, task_id)
 
     try:
         curr.execute(update_query, update_values)
@@ -309,6 +314,7 @@ def get_tasks():
     curr = conn.cursor()
     # Fetch the ID of the last inserted task
     local_user = request.args.get("user")  # get back the params from the request
+    local_user=decrypt_username(local_user)
     curr.execute(
         "SELECT title, description, date, time, duration, id, status,type FROM task WHERE member = %s",
         (local_user,),
@@ -377,6 +383,7 @@ def get_tasks_events():
     curr = conn.cursor()
     # Fetch the ID of the last inserted task
     local_user = request.args.get("user")  # get back the params from the request
+    local_user=decrypt_username(local_user)
     local_team = request.args.get("team")  # da gestire dopo l'implementazione dei team
 
     curr.execute(
@@ -409,6 +416,7 @@ def team_list():
     curr = conn.cursor()
     # Fetch the ID of the last inserted task
     user = request.args.get("user")
+    user=decrypt_username(user)
     curr.execute(
         "SELECT team id, name, description FROM joinTeam JOIN team ON team.id=joinTeam.team WHERE username = %s ORDER BY name",
         (user,),
@@ -491,6 +499,7 @@ def team_create():
 
     data = request.get_json()
     username = data["username"]
+    username=decrypt_username(username)
     name = data["name"]
     description = data["description"]
 
@@ -608,6 +617,7 @@ def show_personal_info():
     curr = conn.cursor()
 
     username = data["username"]
+    username=decrypt_username(username)
     if username != "":
         query = "SELECT name, surname, birth_date, email, password FROM member WHERE username = %s"
         params = (username,)
@@ -645,6 +655,7 @@ def modify_personal_info():
     curr = conn.cursor()
 
     username = data["username"]
+    username=decrypt_username(username)
     name = data["new_name"]
     surname = data["new_surname"]
     birth_date = data["new_birth"]
@@ -681,6 +692,7 @@ def modify_password():
     curr = conn.cursor()
 
     username = data["username"]
+    username=decrypt_username(username)
     old_password = data["old_password"]
     new_password = data["new_password"]
 
@@ -739,6 +751,7 @@ def get_notifications():
     records = []
 
     username = data["username"]
+    username=decrypt_username(username)
     if username != "":
         query = (
             "SELECT id, date, content, type, read FROM notification WHERE username = %s"
@@ -765,6 +778,7 @@ def invite():
     curr = conn.cursor()
 
     username = data["username"]
+    username=decrypt_username(username)
     id = data["id"]
     admin = data["admin"]
 
@@ -798,6 +812,7 @@ def invite():
 def check_invites():
     curr = conn.cursor()
     username = request.args.get("username")
+    username=decrypt_username(username)
     curr.execute(
         "SELECT admin, team id, name, description FROM invite JOIN team on team.id=invite.team WHERE username = %s ORDER BY name",
         (username,),
@@ -822,6 +837,7 @@ def accept_invite():
     curr = conn.cursor()
     data = request.get_json()
     username = data["username"]
+    username=decrypt_username(username)
     id = data["id"]
     curr.execute(
         "SELECT * from invite WHERE username=%s AND team=%s",
@@ -855,6 +871,7 @@ def reject_invite():
     curr = conn.cursor()
     data = request.get_json()
     username = data["username"]
+    username=decrypt_username(username)
     id = data["id"]
     curr.execute(
         "SELECT * from invite WHERE username=%s AND team=%s",

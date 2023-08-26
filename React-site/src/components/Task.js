@@ -13,7 +13,7 @@ interface Props {
 }
 function Task({ task }: Props) {
   const endpoint = "http://localhost:5000/home/event/members";
-  const username = localStorage.getItem("LoggedUser");
+  const decryptedUsername = localStorage.getItem("username"); 
   const navigate = useNavigate();
   const [updatedTask, setUpdatedTask] = useState([]);
   const [members, setMembers] = useState([]);
@@ -24,12 +24,14 @@ function Task({ task }: Props) {
     setIsExpanded(!isExpanded);
   };
   const handleDelete = async () => {
-    if (task.member === username) {
+    if (task.member === decryptedUsername) {
       localStorage.setItem("task_to_delete", task.id);
       localStorage.setItem("delete", true);
       window.location.reload();
     } else {
       alert("Not authorized");
+      console.log(task.member);
+      console.log(decryptedUsername);
       //TODO: change it with a better allert
     }
   };
