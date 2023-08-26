@@ -17,6 +17,23 @@ import PopUp from "./components/PopUp.js";
 import {WebSocketComponent} from "./components/WebSocketComponent";
 
 function HomeLoggedIn() {
+//rimozione alert
+useEffect(() => {
+  const timeout = setTimeout(() => {
+    handleWrongPassword8();
+    handleDataUpdate();
+    handleDataUpdateErr();
+    handleRightPassword();
+    handleWrongPassword();
+    handleDifferentPasswords();
+    handleDb();
+    handlePasswordSameAsOld();
+    handleFields();
+  }, 1000);
+
+  return () => clearTimeout(timeout);
+}, []);
+
   const username = localStorage.getItem("LoggedUser");
   const ProfileData = localStorage.getItem("ProfileData") === "true";
   const navigate = useNavigate();
@@ -87,13 +104,27 @@ function HomeLoggedIn() {
   }
 
   // Handler for new password not long enough
+  const differentPasswords = sessionStorage.getItem("differentPasswords_alert") === "true";
+  const handleDifferentPasswords = () => {
+    sessionStorage.setItem("differentPasswords_alert", "false");
+  }
+
+  const db = sessionStorage.getItem("db_alert") === "true";
+  const handleDb = () => {
+    sessionStorage.setItem("db_alert", "false");
+  }
+  const passwordSameAsOld = sessionStorage.getItem("passwordSameAsOld_alert") === "true";
+  const handlePasswordSameAsOld = () => {
+    sessionStorage.setItem("passwordSameAsOld_alert", "false");
+  }
+  const fields = sessionStorage.getItem("fields_alert") === "true";
+  const handleFields = () => {
+    sessionStorage.setItem("fields_alert", "false");
+  }
   const wrongPassword8 = sessionStorage.getItem("password8_alert") === "true";
   const handleWrongPassword8 = () => {
     sessionStorage.setItem("password8_alert", "false");
   }
-
-  // ALERT DI MATTEO QUI
-
   /* END ALERT SECTION */
 
   const handleSelectEvent = useCallback((event) => {
@@ -160,7 +191,26 @@ function HomeLoggedIn() {
         </Alert>
       )}
 
-      {/* ALERT DI MATTEO QUI */}
+      {fields && (
+              <Alert onClick={handleFields} state="danger">
+                You must fill all the fields to change your password
+              </Alert>
+            )}
+      {passwordSameAsOld && (
+              <Alert onClick={handlePasswordSameAsOld} state="danger">
+                Your new password can't be the same as the old password
+              </Alert>
+            )}
+      {db && (
+              <Alert onClick={handleDb} state="danger">
+                Error updating password
+              </Alert>
+            )}
+      {differentPasswords && (
+              <Alert onClick={handleDifferentPasswords} state="danger">
+                You inserted two different new passwords, make sure to retry without typos
+              </Alert>
+            )}
       
       <div className="SideContainer">
         <NavBar></NavBar>

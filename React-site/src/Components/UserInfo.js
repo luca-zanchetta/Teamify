@@ -90,7 +90,8 @@ function UserInfo() {
 
       if (old_password === "" || new_password === "" || new_password_2 === "") {
         // MATTEO: Sostituisci alert con console.log; poi, guarda come ho fatto io negli altri alert e replica
-        alert("All the fields must be filled!");
+        sessionStorage.setItem("fields_alert", "true");
+        window.location.replace(window.location.href);
       } 
       else if (old_password !== new_password && new_password === new_password_2) {
         if(new_password.length >= 8) {
@@ -119,7 +120,8 @@ function UserInfo() {
               window.location.replace(window.location.href);
             } 
             else if (response.data.status === 500) {
-              alert(response.data.message);   // Error during password update
+              sessionStorage.setItem("db_alert", "true");
+              window.location.replace(window.location.href);
             } 
             else if (response.data.status === 400) {
               console.log(response.data.message);
@@ -141,9 +143,11 @@ function UserInfo() {
         old_password === new_password ||
         old_password === new_password_2
       ) {
-        alert("The new password cannot be equal to the previous one!");
+        sessionStorage.setItem("passwordSameAsOld_alert", "true");
+        window.location.replace(window.location.href);
       } else if (new_password !== new_password_2) {
-        alert("The newly inserted passwords do not match!");
+        sessionStorage.setItem("differentPasswords_alert", "true");
+        window.location.replace(window.location.href);
       }
     }
   };
