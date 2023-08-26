@@ -4,7 +4,7 @@ import "./css/Homepage.css";
 import WeeklyCalendar from "./components/WeeklyCalendar.js";
 import { Container } from "./css/Navigator.css";
 import { Link, useNavigate, Navigate } from "react-router-dom";
-import React, { useCallback, useState, useEffect } from "react";
+import React, { useCallback, useState, useEffect, useRef } from "react";
 import NavBar from "./components/NavBar";
 import TopBar from "./components/TopBar";
 import UserIcon from "./components/UserIcon";
@@ -14,7 +14,7 @@ import Alert from "./components/Alert.tsx";
 import Task from "./components/Task.js";
 import PopUp from "./components/PopUp.js";
 
-import WebSocketComponent from "./components/WebSocketComponent";
+import {WebSocketComponent} from "./components/WebSocketComponent";
 
 function HomeLoggedIn() {
 //rimozione alert
@@ -42,6 +42,8 @@ useEffect(() => {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const showDeletePopUp = localStorage.getItem("delete") === "true";
   const task_id = localStorage.getItem("task_to_delete");
+
+  const webSocketRef = useRef(null);
 
   const updateDimensions = () => {
     setWindowWidth(window.innerWidth);
@@ -143,7 +145,7 @@ useEffect(() => {
   return (
     <div className="App">
       {!username && <Navigate to="/login" />}
-      <WebSocketComponent></WebSocketComponent>
+      <WebSocketComponent ref={webSocketRef} />
       <div className="TopBar">
         <div className="BarHeading">
           <Link

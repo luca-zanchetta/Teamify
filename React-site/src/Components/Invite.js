@@ -1,5 +1,5 @@
-import React from "react";
-import { Navigate } from "react-router-dom";
+import {React, useEffect, useState} from "react";
+import { Navigate, useLocation, useNavigate, Link } from "react-router-dom";
 import TopBar from "./TopBar";
 import UserIcon from "./UserIcon";
 import Notifications from "./Notifications";
@@ -7,29 +7,125 @@ import Alert from "./Alert.tsx";
 import placeholder from "../img/placeholder_profile.jpeg";
 import "../css/Invite.css";
 
-interface Props {
-  description: string; //the message the user will see
-  handleAcceptance: () => void;
-  handleReject: () => void; //when you call Invite you can pass the handle function
-  team?: string; //name of the team, question marks means optional
-  admin: string; //the person that invite you
-  event_title?: string;
-}
+import axios from "axios";
 
-function Invite({
-  description,
-  team,
-  admin,
-  event_title,
-  handleAcceptance,
-  handleReject,
-}) {
+var endpointAcceptTeam = "http://localhost:5000/acceptInvite";
+var endpointRejectTeam = "http://localhost:5000/rejectInvite";
+
+function Invite() {
   const username = localStorage.getItem("LoggedUser");
+  const location = useLocation();
+  const [admin, setAdmin] = useState("");
+  const [team, setTeam] = useState("");
+  const [event_title, setEventTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [teamId, setTeamId] = useState("");
+
+  const navigate = useNavigate();
+
+  async function handleReject() {
+    if(team) {
+      try {
+        // Send a POST request to the corresponding endpoint of the Flask server
+        const response = await axios
+          .post(endpointRejectTeam, {
+            username,
+            teamId,
+            admin,
+          })
+          .catch(function (error) {
+            if (error.response) {
+              // Print error data
+              console.log("Data: " + error.response.data);
+              console.log("Status: " + error.response.status);
+              console.log("Headers: " + error.response.headers);
+            }
+          });
+  
+        if (response.data.status === 200) {
+          navigate("/home");
+        }
+      } catch (error) {
+        // Request failed
+        console.log("[ERROR] Request failed: " + error);
+      }
+    }
+    else if(event_title) {
+      console.log("event title: TO DO");
+    }
+  };
+  
+  async function handleAcceptance() {
+    if(team) {
+      try {
+        // Send a POST request to the corresponding endpoint of the Flask server
+        const response = await axios
+          .post(endpointAcceptTeam, {
+            username,
+            teamId,
+          })
+          .catch(function (error) {
+            if (error.response) {
+              // Print error data
+              console.log("Data: " + error.response.data);
+              console.log("Status: " + error.response.status);
+              console.log("Headers: " + error.response.headers);
+            }
+          });
+  
+        if (response.data.status === 200) {
+          if(team) {
+            alert('You are now part of team '+team+'!');
+          }
+          else if(event_title) {
+            alert('You have joined the event '+event_title+'!');
+          }
+          navigate("/home");
+        }
+      } catch (error) {
+        // Request failed
+        console.log("[ERROR] Request failed: " + error);
+      }
+    }
+    else if(event_title) {
+      console.log("event title: TO DO");
+    }
+  };
+
+  const ToggleDisplayAgenda = () => {
+    localStorage.setItem("ProfileData", "false");
+    navigate("home");
+  };
+
+  useEffect(() => {
+    if (location.state) {
+      if (location.state.description) {
+        setDescription(location.state.description);
+      }
+      if (location.state.admin) {
+        setAdmin(location.state.admin);
+      }
+      if (location.state.team) {
+        setTeam(location.state.team);
+      }
+      if (location.state.id) {
+        setTeamId(location.state.id);
+      }
+    }
+  }, [location.state]);
   return (
     <div className="App">
       {!username && <Navigate to="/login" />}
       <div className="TopBar">
-        <div className="BarHeading">Teamify</div>
+        <div className="BarHeading">
+        <Link
+            to="/"
+            style={{ color: "inherit", textDecoration: "inherit" }}
+            onClick={ToggleDisplayAgenda}
+          >
+            Teamify
+        </Link>
+        </div>
         <div className="MenuOptions">
           <TopBar></TopBar>
         </div>
