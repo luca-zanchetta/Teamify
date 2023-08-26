@@ -448,7 +448,7 @@ def get_tasks_events():
                 "SELECT title, description, date, time, duration, id, member, type FROM task WHERE id = %s",
                 (eventid[0],),
             )
-
+        # TODO: send invite when add members
         events = curr.fetchall()
         # here i get also the id of event i need another query to retrieve event
         for event in events:
