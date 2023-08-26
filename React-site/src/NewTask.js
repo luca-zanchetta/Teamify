@@ -106,7 +106,7 @@ function NewTask() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const userFromLocal = localStorage.getItem("username");
+    const userFromLocal = localStorage.getItem("LoggedUser");
     if (userFromLocal == "") {
       navigate("/login");
       alert("Not auth");
@@ -172,18 +172,15 @@ function NewTask() {
     } else if (buttonId == "Edit") {
       console.log("edit");
       try {
-        const response = await axios.put(
-          `http://localhost:5000/home/updatetask/${
-            task.id
-          }/${localStorage.getItem("LoggedUser")}`,
-          {
+          const response = await axios.post("http://localhost:5000/home/updatetask", {
+            local_user: userFromLocal,
+            task_id: task.id,
             title: title,
             description: description,
             date: date,
             time: time,
-            duration: duration, //parameters to pass
-          }
-        );
+            duration: duration, //parameters to pas
+          });
         if (response.status == 200) {
           navigate(previousPage);
           // TODO: add alert

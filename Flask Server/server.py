@@ -173,9 +173,11 @@ def reset():
 
 
 # Delete account
-@app.route("/home/delete-account/<string:user>", methods=["DELETE"])
-def delete_account(user):
+@app.route("/home/delete-account", methods=["POST"])
+def delete_account():
     curr = conn.cursor()
+    data = request.get_json()
+    user = data["username"]
     username=decrypt_username(user)
     # removal the task connected to the user
     query_task = "DELETE FROM task WHERE member = %s"
@@ -291,13 +293,16 @@ def create_new_task():
 
 
 # Modify a task API
-@app.route("/home/updatetask/<int:task_id>/<string:local_user>", methods=["PUT"])
-def update_task(task_id, local_user):
+@app.route("/home/updatetask", methods=["POST"])
+def update_task():
+    data = request.get_json()
+    username = data["local_user"]
+    task_id = data["task_id"]
+
     print(request.json)
     curr = conn.cursor()
-    username=decrypt_username(local_user)
+    username=decrypt_username(username)
 
-    data = request.get_json()
     title = data.get("title")
     date = data.get("date")
     time = data.get("time")
@@ -307,6 +312,7 @@ def update_task(task_id, local_user):
     curr.execute("SELECT * FROM task WHERE id = %s", (task_id,))
     existing_task = curr.fetchone()
     if not existing_task:
+        print (existing_task)
         return jsonify({"message": "Task not found"}), 404
 
     update_query = "UPDATE task SET title = %s, date = %s, time = %s, description = %s, member = %s, duration = %s WHERE id = %s"

@@ -14,29 +14,32 @@ function PopUp({ type, task_id }: Props) {
     if (type === "account") {
       const decryptedUsername = localStorage.getItem("username");
       const username = localStorage.getItem("LoggedUser");
+      
 
 
-      const endpoint = `http://localhost:5000/home/delete-account/${username}`;
+      const endpoint = `http://localhost:5000/home/delete-account`;
 
       // Mak a DELETE request
-      fetch(endpoint, {
-        method: "DELETE",
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          if (data === "ok") {
-            console.log("Account deleted successfully");
-            localStorage.clear();
-            sessionStorage.clear();
-            navigate("/login");
-            window.location.replace(window.location.href);
-          } else {
-            console.error("Failed to delete account");
-          }
-        })
-        .catch((error) => {
-          console.error("Error:", error);
+
+
+      try {
+        // Send a POST request to the /newtask endpoint of the Flask server
+        const response = await axios.post(endpoint, {
+          username:username,
         });
+        // If task has been successfully created, then redirect the user to the Home page.
+        console.log(response.status);
+        if (response.status === 200) {
+          console.log("Account deleted successfully");
+          localStorage.clear();
+          sessionStorage.clear();
+          navigate("/login");
+          window.location.replace(window.location.href);
+        }
+      } catch (error) {
+          // There is at least one mandatory field that has not been filled
+          console.log("ERROR", error);
+        }
     } else if (type === "task") {
       console.log("delete");
       try {

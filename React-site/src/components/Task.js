@@ -14,6 +14,7 @@ interface Props {
 function Task({ task }: Props) {
   const endpoint = "http://localhost:5000/home/event/members";
   const decryptedUsername = localStorage.getItem("username"); 
+  const username=localStorage.getItem("LoggedUser");
   const navigate = useNavigate();
   const [members, setMembers] = useState([]);
   const formattedTime = formatTime(task.end);
@@ -155,7 +156,7 @@ function Task({ task }: Props) {
               >
                 <ul>
                   {Object.values(members).map((member, index) =>
-                    member == username ? (
+                    member == decryptedUsername ? (
                       <li>You</li>
                     ) : (
                       <li key={member}>{member}</li>
