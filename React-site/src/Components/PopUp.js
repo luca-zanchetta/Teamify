@@ -13,8 +13,10 @@ function PopUp({ type, task_id }: Props) {
   const handleConfirmation = async () => {
     if (type === "account") {
       const decryptedUsername = localStorage.getItem("username");
+      const username = localStorage.getItem("LoggedUser");
 
-      const endpoint = `http://localhost:5000/home/delete-account/${decryptedUsername}`;
+
+      const endpoint = `http://localhost:5000/home/delete-account/${username}`;
 
       // Mak a DELETE request
       fetch(endpoint, {
