@@ -759,6 +759,34 @@ def get_notifications():
     return jsonify({"message": "Username not found.", "status": 404})
 
 
+# Read the notification
+app.route("/readNotification", methods=['POST'])
+def read_notification():
+    data = request.get_json()
+    curr = conn.cursor()
+
+    id = data['notification_id']
+
+    query_exists = "SELECT read FROM notification WHERE id = %s"
+    params = (id,)
+
+    curr.execute(query_exists, params)
+    try:
+        (read,) = curr.fetchone()
+        if read == 'false':
+            query_read = "UPDATE notification SET read = true WHERE id = %s"
+            try:
+                curr.execute(query_read, params)
+                print('[INFO] /readNotification: The notification has been read successfully.')
+                return jsonify({"message":"The notification has been read successfully.", "status":200}), 200
+            except Exception as err:
+                print('[ERROR] /readNotification: The notification has not been read successfully. Err: '+str(err))
+                return jsonify({"message":"The notification has not been read successfully.", "status":400}), 400
+    except Exception as err:
+        print('[ERROR] /readNotification: The notification does not exist. Err: '+str(err))
+        return jsonify({"message":"The notification does not exist.", "status":500}), 500
+
+
 # given team id and username, invites the user to the team
 @app.route("/invite", methods=["POST"])
 def invite():
@@ -798,10 +826,12 @@ def invite():
 
 
 # given username, check invites of user
-@app.route("/checkInvites", methods=["GET"])
+@app.route("/checkInvites", methods=["POST"])
 def check_invites():
     curr = conn.cursor()
-    username = request.args.get("username")
+    data = request.get_json()
+
+    username = data['username']
     curr.execute(
         "SELECT admin, team id, name, description FROM invite JOIN team on team.id=invite.team WHERE username = %s ORDER BY name",
         (username,),
@@ -817,7 +847,7 @@ def check_invites():
                 "team_description": invite[3],
             }
         )
-    return jsonify(invitesJson), 200
+    return jsonify({"invites":invitesJson, "status":200})
 
 
 # given team id and username, user accepts invite and therefore joins team
@@ -826,7 +856,7 @@ def accept_invite():
     curr = conn.cursor()
     data = request.get_json()
     username = data["username"]
-    id = data["id"]
+    id = data["teamId"]
     curr.execute(
         "SELECT * from invite WHERE username=%s AND team=%s",
         (
@@ -849,7 +879,7 @@ def accept_invite():
                 id,
             ),
         )
-        return jsonify("ok"), 200
+        return jsonify({"message":"ok", "status":200})
     else:
         return jsonify("ko"), 400
 

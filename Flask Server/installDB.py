@@ -252,6 +252,7 @@ includes = """CREATE TABLE includes (
     CHECK (
         state = 'accepted'
         OR state = 'rejected'
+        OR state = 'pending'
     )
 )"""
 try:
