@@ -23,9 +23,32 @@ function Invite() {
 
   const navigate = useNavigate();
 
-  const handleReject = () => {
+  async function handleReject() {
     if(team) {
-      console.log("team");
+      try {
+        // Send a POST request to the corresponding endpoint of the Flask server
+        const response = await axios
+          .post(endpointRejectTeam, {
+            username,
+            teamId,
+            admin,
+          })
+          .catch(function (error) {
+            if (error.response) {
+              // Print error data
+              console.log("Data: " + error.response.data);
+              console.log("Status: " + error.response.status);
+              console.log("Headers: " + error.response.headers);
+            }
+          });
+  
+        if (response.data.status === 200) {
+          navigate("/home");
+        }
+      } catch (error) {
+        // Request failed
+        console.log("[ERROR] Request failed: " + error);
+      }
     }
     else if(event_title) {
       console.log("event title: TO DO");
@@ -51,7 +74,12 @@ function Invite() {
           });
   
         if (response.data.status === 200) {
-          alert('You are now part of team '+team+'!');
+          if(team) {
+            alert('You are now part of team '+team+'!');
+          }
+          else if(event_title) {
+            alert('You have joined the event '+event_title+'!');
+          }
           navigate("/home");
         }
       } catch (error) {

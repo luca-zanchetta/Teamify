@@ -10,7 +10,7 @@ import datetime
 
 # Server setup
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
 socketio = SocketIO(
     app, cors_allowed_origins="http://localhost:3000", async_mode="eventlet"
 )
@@ -762,10 +762,15 @@ def get_notifications():
 # Read the notification
 app.route("/readNotification", methods=['POST'])
 def read_notification():
+    print("ciao")
     data = request.get_json()
     curr = conn.cursor()
 
+    print("ciao")
+
     id = data['notification_id']
+
+    print("ciao")
 
     query_exists = "SELECT read FROM notification WHERE id = %s"
     params = (id,)
@@ -778,13 +783,14 @@ def read_notification():
             try:
                 curr.execute(query_read, params)
                 print('[INFO] /readNotification: The notification has been read successfully.')
-                return jsonify({"message":"The notification has been read successfully.", "status":200}), 200
             except Exception as err:
                 print('[ERROR] /readNotification: The notification has not been read successfully. Err: '+str(err))
                 return jsonify({"message":"The notification has not been read successfully.", "status":400}), 400
     except Exception as err:
         print('[ERROR] /readNotification: The notification does not exist. Err: '+str(err))
         return jsonify({"message":"The notification does not exist.", "status":500}), 500
+    
+    return jsonify({"message":"The notification has been read successfully.", "status":200}), 200
 
 
 # given team id and username, invites the user to the team
@@ -813,7 +819,6 @@ def invite():
         try:
             curr.execute(query_notification, params_notification)
             print('[INFO] /invite: Invite notification registered.')
-            print(username)
             socketio.emit('invite_notification', '', room=username)
             
             return jsonify("ok"), 200
@@ -888,8 +893,11 @@ def accept_invite():
 def reject_invite():
     curr = conn.cursor()
     data = request.get_json()
+
     username = data["username"]
-    id = data["id"]
+    id = data["teamId"]
+    admin = data['admin']
+
     curr.execute(
         "SELECT * from invite WHERE username=%s AND team=%s",
         (
@@ -905,7 +913,14 @@ def reject_invite():
                 id,
             ),
         )
-        return jsonify("ok"), 200
+
+        # If the user refuses my message, I get notified
+        query_notification = "INSERT INTO notification (date, content, type, read, username) VALUES (%s,%s,%s,%s,%s)"
+        params_notification = (datetime.datetime.now(), f'{username} has not accepted your invite.', 'message', False, admin,)
+        curr.execute(query_notification, params_notification)
+        socketio.emit('message_notification', '', room=admin)
+
+        return jsonify({"message":"ok", "status":200})
     else:
         return jsonify("ko"), 400
 

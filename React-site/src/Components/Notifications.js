@@ -1,15 +1,12 @@
 import "../css/Navigator.css";
 
 import bell from "../icons/bell.png";
-import team from "../icons/team.png";
 import event from "../icons/event.png";
 import alarm from "../icons/alarm.png";
 
 import { Link, useNavigate, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
-
-import Invite from "./Invite";
 
 var endpoint = "http://localhost:5000/home/notifications";
 var endpointReadNotification = "http://localhost:5000/readNotification";
@@ -21,10 +18,6 @@ function Notifications() {
   const [notifications, setNotifications] = useState([]);
   const [displayNotifications, setDisplayNotifications] = useState(true);
   const [notification_id, setNotificationId] = useState(0);
-  const [invites, setInvites] = useState([]);
-  const [admin, setAdmin] = useState("");
-  const [teamName, setTeamName] = useState("");
-  const [teamDescription, setTeamDescription] = useState("");
 
   const navigate = useNavigate();
 
@@ -48,6 +41,12 @@ function Notifications() {
       if (response.data.status === 200) {
         setNotifications(response.data.notifications);
         setDisplayNotifications(true);
+        for(let i = 0; i < response.data.notifications.length; i++) {
+          if(response.data.notifications[i][4] === false) {
+            var bellIcon = document.getElementById('bell');
+            bellIcon.src = alarm;
+          }
+        }
       } else if (response.data.status === 201) {
         setDisplayNotifications(false);
       }
@@ -60,17 +59,14 @@ function Notifications() {
   // The following function will be executed only one time at the beginning of the building of the page
   useEffect(() => {
     show_notifications();
-    for(let i = 0; i < notifications.length; i++) {
-      if(notifications[i][4] === false) {
-        var bellIcon = document.getElementById('bell');
-        bellIcon.src = alarm;
-      }
-    }
   }, []);
 
   function toggleShow() {
     setShow(!show);
     show_notifications();
+
+    var bellIcon = document.getElementById('bell');
+    bellIcon.src = bell;
 
     for(let i = 0; i < notifications.length; i++) {
       if(notifications[i][4] === false) {
@@ -127,28 +123,28 @@ function Notifications() {
       }
 
       // If I click on a non-read notification, I'm reading it
-      // try {
-      //   // Send a POST request to the corresponding endpoint of the Flask server
-      //   const response = await axios
-      //     .post(endpointReadNotification, {
-      //       notification_id,
-      //     })
-      //     .catch(function (error) {
-      //       if (error.response) {
-      //         // Print error data
-      //         console.log("Data: " + error.response.data);
-      //         console.log("Status: " + error.response.status);
-      //         console.log("Headers: " + error.response.headers);
-      //       }
-      //     });
+      try {
+        // Send a POST request to the corresponding endpoint of the Flask server
+        const response = await axios
+          .post(endpointReadNotification, {
+            notification_id,
+          })
+          .catch(function (error) {
+            if (error.response) {
+              // Print error data
+              console.log("Data: " + error.response.data);
+              console.log("Status: " + error.response.status);
+              console.log("Headers: " + error.response.headers);
+            }
+          });
   
-      //   if (response.data.status === 200) {
-      //     console.log('Notification read!');
-      //   }
-      // } catch (error) {
-      //   // Request failed
-      //   console.log("[ERROR] Request failed: " + error);
-      // }
+        if (response.data.status === 200) {
+          console.log('Notification read!');
+        }
+      } catch (error) {
+        // Request failed
+        console.log("[ERROR] Request failed: " + error);
+      }
     }
   };
 
