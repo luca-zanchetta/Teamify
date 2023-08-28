@@ -14,6 +14,7 @@ import axios from "axios";
 import moment from "moment";
 import Form from "react-bootstrap/Form";
 import { formatTime, formatDate } from "./support.js";
+import Notifications from "./components/Notifications";
 
 import { address, flask_port } from "./components/Endpoint";
 
@@ -153,7 +154,7 @@ function NewTask() {
             console.log("ERROR FROM NEW TASK", error);
             sessionStorage.setItem("error_alert", true);
             setError(
-              "All the fields must be filled and must must respect the type constraints"
+              "All the fields must be filled and must respect the type constraints"
             );
           }
         }
@@ -168,7 +169,7 @@ function NewTask() {
           title
         );
         setError(
-          "All the fields must be filled and must must respect the type constraints"
+          "All the fields must be filled and must respect the type constraints"
         );
       }
     } else if (buttonId == "Edit") {
@@ -243,6 +244,7 @@ function NewTask() {
             <TopBar></TopBar>
           </div>
           <div className="Buttons">
+            <Notifications></Notifications>
             <UserIcon></UserIcon>
           </div>
         </div>
@@ -358,7 +360,7 @@ function NewTask() {
                               label={member === decryptedUsername ? "You" : member}
                               id={`member-${member.id}`}
                               disabled={member === decryptedUsername}
-                              checked={member === decryptedUsername}
+                              defaultChecked={member === decryptedUsername}
                               onChange={(event) =>
                                 setEventMembers(event.target.value)
                               }

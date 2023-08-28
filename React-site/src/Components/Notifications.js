@@ -58,6 +58,29 @@ function Notifications() {
     }
   };
 
+  async function read_notification(notification_id) {
+    // If I click on a non-read notification, I'm reading it
+    try {
+      // Send a POST request to the corresponding endpoint of the Flask server
+      const response_2 = await axios.post("http://localhost:5000/readNotification", {
+        notification_id,
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+        
+        if (response_2 && response_2.data && response_2.data.status === 200) {
+          console.log('Notification read!');
+        } else {
+          console.log('Invalid response:', response_2);
+        }
+    } catch (error) {
+      // Request failed
+      console.log("[ERROR] Request failed: " + error);
+    }
+  }
+
   // The following function will be executed only one time at the beginning of the building of the page
   useEffect(() => {
     show_notifications();
@@ -80,75 +103,51 @@ function Notifications() {
 
   // Handle user notifications
   async function handleNotification(notification) {
-    // Handlers for the notification types, only if it is the first time I am reading the notification
-    if(notification[4] === false) {
-      switch(notification[3]) {
-        case 'invite':
-          try {
-            // Send a POST request to the corresponding endpoint of the Flask server
-            const response = await axios
-              .post(endpointCheckInvites, {
-                username,
-              })
-              .catch(function (error) {
-                if (error.response) {
-                  // Print error data
-                  console.log("Data: " + error.response.data);
-                  console.log("Status: " + error.response.status);
-                  console.log("Headers: " + error.response.headers);
-                }
-              });
+    // Handlers for the notification types
+    switch(notification[3]) {
+      case 'invite':
+        try {
+          // Send a POST request to the corresponding endpoint of the Flask server
+          const response = await axios
+            .post(endpointCheckInvites, {
+              username,
+            })
+            .catch(function (error) {
+              if (error.response) {
+                // Print error data
+                console.log("Data: " + error.response.data);
+                console.log("Status: " + error.response.status);
+                console.log("Headers: " + error.response.headers);
+              }
+            });
       
-            if (response.data.status === 200) {
-              navigate("/invite", { state: { description: response.data.invites[0].team_description, admin:response.data.invites[0].admin, team:response.data.invites[0].team_name, id:response.data.invites[0].id } });
-            }
-          } catch (error) {
-            // Request failed
-            console.log("[ERROR] Request failed: " + error);
+          if (response.data.status === 200) {
+            read_notification(notification[0]);
+            navigate("/invite", { state: { description: response.data.invites[0].team_description, admin:response.data.invites[0].admin, team:response.data.invites[0].team_name, id:response.data.invites[0].id } });
           }
-          break;
-        
-        case 'message':
-          break;
-
-        case 'survey':
-          break;
-
-        case 'event':
-          break;
-
-        case 'admin':
-          break;
-        
-        default:
-          console.log('The notification has been read!');
-      }
-
-      // If I click on a non-read notification, I'm reading it
-      try {
-        // Send a POST request to the corresponding endpoint of the Flask server
-        const response = await axios
-          .post(endpointReadNotification, {
-            notification_id,
-          })
-          .catch(function (error) {
-            if (error.response) {
-              // Print error data
-              console.log("Data: " + error.response.data);
-              console.log("Status: " + error.response.status);
-              console.log("Headers: " + error.response.headers);
-            }
-          });
-  
-        if (response.data.status === 200) {
-          console.log('Notification read!');
+        } catch (error) {
+          // Request failed
+          console.log("[ERROR] Request failed: " + error);
         }
-      } catch (error) {
-        // Request failed
-        console.log("[ERROR] Request failed: " + error);
-      }
+        break;
+        
+      case 'message':
+        read_notification(notification[0]);
+        break;
+
+      case 'survey':
+        break;
+
+      case 'event':
+        break;
+
+      case 'admin':
+        break;
+        
+      default:
+        console.log('Not the right case!');
     }
-  };
+  }
 
   return (
     <div className="UserIcon" style={{ paddingRight: "1%", marginRight: "2%" }}>

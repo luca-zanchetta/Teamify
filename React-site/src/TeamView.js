@@ -69,6 +69,7 @@ function TeamView() {
         if (response.data[0].description == "")
           response.data[0].description = "This team has no description"; //changing the field description
         setData(response.data);
+        console.log(response.data[0]['members'])
         setIsAdmin(response.data[0].admins.includes(decryptedUsername))
       })
       .catch((error) => console.log(error));
@@ -137,7 +138,7 @@ function TeamView() {
   const handleNewEvent = () => {
     navigate("/home/newtask", {
       state: {
-        event: data[0].admins,
+        event: data[0].members,
         previousPage: window.location.pathname,
         team: id,
       },

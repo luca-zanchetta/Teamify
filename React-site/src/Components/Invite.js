@@ -76,12 +76,6 @@ function Invite() {
           });
   
         if (response.data.status === 200) {
-          if(team) {
-            alert('You are now part of team '+team+'!');
-          }
-          else if(event_title) {
-            alert('You have joined the event '+event_title+'!');
-          }
           navigate("/home");
         }
       } catch (error) {
@@ -166,9 +160,9 @@ function Invite() {
           </div>
           <div className="align-content-center text-center">
             <div className="mt-3 invite-container">
-              <div className="mt-2">{team || event_title}</div>
+              <div className="mt-2">{team || event_title || "No team/event available"}</div>
               <div className="mt-2">
-                {description || "Here the description"}
+                {description || "No description available"}
               </div>
               <br />
               <div className="row text-center">

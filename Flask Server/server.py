@@ -13,10 +13,22 @@ import time
 
 # Server setup
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
+CORS(app)
 socketio = SocketIO(
     app, cors_allowed_origins="http://localhost:3000", async_mode="eventlet"
 )
+
+# Middleware per gestire le richieste preflight OPTIONS
+@app.before_request
+def before_request():
+    if request.method == "OPTIONS":
+        headers = {
+            "Access-Control-Allow-Origin": "http://localhost:3000",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE",
+            "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept",
+            "Access-Control-Allow-Credentials": "true"
+        }
+        return ("", 200, headers)
 
 connected_clients = []
 teams = [] # List of teams; each team is of the following format: [name, [member1, member2, ..., member10]]
@@ -900,17 +912,12 @@ def get_notifications():
 
 
 # Read the notification
-app.route("/readNotification", methods=['POST'])
+@app.route("/readNotification", methods=['POST'])
 def read_notification():
-    print("ciao")
     data = request.get_json()
     curr = conn.cursor()
 
-    print("ciao")
-
     id = data['notification_id']
-
-    print("ciao")
 
     query_exists = "SELECT read FROM notification WHERE id = %s"
     params = (id,)
@@ -918,7 +925,8 @@ def read_notification():
     curr.execute(query_exists, params)
     try:
         (read,) = curr.fetchone()
-        if read == 'false':
+        print(read)
+        if read == False:
             query_read = "UPDATE notification SET read = true WHERE id = %s"
             try:
                 curr.execute(query_read, params)
@@ -972,10 +980,12 @@ def invite():
 
 
 # given username, check invites of user
-@app.route("/checkInvites", methods=["GET"])
+@app.route("/checkInvites", methods=["POST"])
 def check_invites():
     curr = conn.cursor()
-    username = request.args.get("username")
+    data = request.get_json()
+
+    username = data['username']
     username=decrypt_username(username)
     curr.execute(
         "SELECT admin, team id, name, description FROM invite JOIN team on team.id=invite.team WHERE username = %s ORDER BY name",
@@ -992,7 +1002,7 @@ def check_invites():
                 "team_description": invite[3],
             }
         )
-    return jsonify(invitesJson), 200
+    return jsonify({"invites":invitesJson, "status":200})
 
 
 # given team id and username, user accepts invite and therefore joins team
