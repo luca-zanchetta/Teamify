@@ -15,6 +15,7 @@ import Task from "./components/Task.js";
 import PopUp from "./components/PopUp.js";
 
 import {WebSocketComponent} from "./components/WebSocketComponent";
+import Chat from "./components/chat";
 
 function HomeLoggedIn() {
 //rimozione alert
@@ -144,6 +145,7 @@ useEffect(() => {
 
   return (
     <div className="App">
+      <Chat></Chat>
       {!username && <Navigate to="/login" />}
       <WebSocketComponent ref={webSocketRef} />
       <div className="TopBar">
