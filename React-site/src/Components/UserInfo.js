@@ -6,10 +6,12 @@ import "../css/Profile.css";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
+import { address, flask_port } from "./Endpoint";
+
 // Flask server endpoints
-var endpoint = "http://localhost:5000/home/profile";
-var endpoint_modify_info = "http://localhost:5000/home/modify-info";
-var endpoint_modify_password = "http://localhost:5000/home/modify-password";
+var endpoint = address+flask_port+"/home/profile";
+var endpoint_modify_info = address+flask_port+"/home/modify-info";
+var endpoint_modify_password = address+flask_port+"/home/modify-password";
 
 function UserInfo() {
   const [name, setName] = useState("");

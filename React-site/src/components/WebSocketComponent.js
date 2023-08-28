@@ -3,6 +3,8 @@ import io from 'socket.io-client';
 
 import alarm from "../icons/alarm.png";
 
+import { address, flask_port } from './Endpoint';
+
 const WebSocketComponent =  forwardRef((props, ref) => {
   const username = localStorage.getItem('LoggedUser');
 
@@ -16,7 +18,7 @@ const WebSocketComponent =  forwardRef((props, ref) => {
 
   useEffect(() => {
     // New WebSocket connection at start
-    const newSocket = io('http://localhost:5000');
+    const newSocket = io(address+flask_port);
 
     newSocket.on('connect', () => {
       console.log('[INFO] Connected to the WebSocket server.');

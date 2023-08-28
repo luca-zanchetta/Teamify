@@ -5,7 +5,9 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import React, { useEffect, useState} from "react";
 import axios from "axios";
 
-var endpoint = "http://localhost:5000/reset";
+import { address, flask_port } from "./components/Endpoint";
+
+var endpoint = address+flask_port+"/reset";
 
 function ResetRequest() {
   // Form data

@@ -15,7 +15,9 @@ import moment from "moment";
 import Form from "react-bootstrap/Form";
 import { formatTime, formatDate } from "./support.js";
 
-const endpoint = "http://localhost:5000/home/newtask";
+import { address, flask_port } from "./components/Endpoint";
+
+const endpoint = address+flask_port+"/home/newtask";
 
 //TODO: nella mia versione c'è la back arrow, va modificata la pagina di destinazione con Previous Page
 
@@ -172,7 +174,7 @@ function NewTask() {
     } else if (buttonId == "Edit") {
       console.log("edit");
       try {
-          const response = await axios.post("http://localhost:5000/home/updatetask", {
+          const response = await axios.post(address+flask_port+"/home/updatetask", {
             local_user: userFromLocal,
             task_id: task.id,
             title: title,

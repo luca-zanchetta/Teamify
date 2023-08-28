@@ -9,8 +9,10 @@ import "../css/Invite.css";
 
 import axios from "axios";
 
-var endpointAcceptTeam = "http://localhost:5000/acceptInvite";
-var endpointRejectTeam = "http://localhost:5000/rejectInvite";
+import {address, flask_port} from "./Endpoint";
+
+let endpointAcceptTeam = address+flask_port+"/acceptInvite";
+let endpointRejectTeam = address+flask_port+"/rejectInvite";
 
 function Invite() {
   const username = localStorage.getItem("LoggedUser");

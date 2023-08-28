@@ -8,11 +8,13 @@ import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 
+import { address, flask_port } from "./Endpoint";
+
 interface Props {
   task: Object;
 }
 function Task({ task }: Props) {
-  const endpoint = "http://localhost:5000/home/event/members";
+  const endpoint = address+flask_port+"/home/event/members";
   const decryptedUsername = localStorage.getItem("username"); 
   const username=localStorage.getItem("LoggedUser");
   const navigate = useNavigate();
@@ -40,7 +42,7 @@ function Task({ task }: Props) {
   const handleComplete = async () => {
     try {
       const response = await axios.put(
-        `http://localhost:5000/home/completetask/${task.id}`
+        address+flask_port+`/home/completetask/${task.id}`
       );
 
       console.log(response.data.message); // Display the response message

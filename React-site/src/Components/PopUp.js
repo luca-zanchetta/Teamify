@@ -3,6 +3,8 @@ import "../css/confirmation.css";
 import { handleRevert } from "./Profile";
 import axios from "axios";
 
+import { address, flask_port } from "./Endpoint";
+
 interface Props {
   type: string;
   task_id?: integer;
@@ -17,7 +19,7 @@ function PopUp({ type, task_id }: Props) {
       
 
 
-      const endpoint = `http://localhost:5000/home/delete-account`;
+      const endpoint = address+flask_port+`/home/delete-account`;
 
       // Mak a DELETE request
 
@@ -44,7 +46,7 @@ function PopUp({ type, task_id }: Props) {
       console.log("delete");
       try {
         const response = await axios.delete(
-          `http://localhost:5000/home/deletetask/${task_id}`
+          address+flask_port+`/home/deletetask/${task_id}`
         );
         if (response.status === 200) {
           localStorage.setItem("delete", false);

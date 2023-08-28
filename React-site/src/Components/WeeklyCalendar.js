@@ -11,8 +11,10 @@ import moment from "moment";
 import "../css/Calendar.css";
 import axios from "axios";
 
-var endpoint1 = "http://localhost:5000/tasks";
-var endpoint2 = "http://localhost:5000/teamview";
+import { address, flask_port } from "./Endpoint";
+
+var endpoint1 = address+flask_port+"/tasks";
+var endpoint2 = address+flask_port+"/teamview";
 
 const localizer = momentLocalizer(moment);
 

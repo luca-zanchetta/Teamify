@@ -8,9 +8,11 @@ import { Link, useNavigate, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-var endpoint = "http://localhost:5000/home/notifications";
-var endpointReadNotification = "http://localhost:5000/readNotification";
-var endpointCheckInvites = "http://localhost:5000/checkInvites";
+import { address, flask_port } from "./Endpoint";
+
+var endpoint = address+flask_port+"/home/notifications";
+var endpointReadNotification = address+flask_port+"/readNotification";
+var endpointCheckInvites = address+flask_port+"/checkInvites";
 
 function Notifications() {
   const [show, setShow] = useState(false);

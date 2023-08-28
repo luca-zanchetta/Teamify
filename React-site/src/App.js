@@ -14,13 +14,15 @@ import Teams from "./Teams";
 import Task from "./NewTask.js";
 import CreateTeam from "./CreateTeam";
 
+import { address, flask_port } from "./components/Endpoint";
+
 function App() {
   //data è la variabile dello stato, setData è la funzione per settare il suo valore
   const [data, setData] = useState([{}]);
   //use effect viene usato per ottenere la route di interesse. La response delle api
   //viene converita in json e poi caricate dentro la variabili data
   useEffect(() => {
-    fetch("http://localhost:5000")
+    fetch(address+flask_port)
       .then((res) => res.json())
       .then((data) => {
         setData(data);

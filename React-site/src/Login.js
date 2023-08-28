@@ -6,7 +6,9 @@ import { Link, useNavigate, Navigate } from "react-router-dom";
 import React, { useState, useEffect } from 'react';
 import axios from "axios";
 
-var endpoint = "http://localhost:5000/login";
+import { address, flask_port } from "./components/Endpoint";
+
+var endpoint = address+flask_port+"/login";
 const loggedIn = localStorage.getItem("LoggedUser");
 
 function Login() {

@@ -8,7 +8,9 @@ import event from "../icons/event.png";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-var endpoint = "http://localhost:5000/home/notifications";
+import { address, flask_port } from "./Endpoint";
+
+var endpoint = address+flask_port+"/home/notifications";
 
 function ProfileNotifications() {
   const username = localStorage.getItem("LoggedUser");

@@ -11,6 +11,8 @@ import UserIcon from "./components/UserIcon";
 import Notifications from "./components/Notifications";
 import axios from "axios";
 
+import { address, flask_port } from "./components/Endpoint";
+
 function CreateTeam() {
   useEffect(() => {
     //useEffect viene chiamato a fine render del component
@@ -23,7 +25,7 @@ function CreateTeam() {
 
   const username = localStorage.getItem("LoggedUser");
   const navigate = useNavigate();
-  const endpoint = "http://localhost:5000/home/newteam";
+  const endpoint = address+flask_port+"/home/newteam";
   const [teams, setTeams] = useState([]);
 
   const ToggleDisplayAgenda = () => {

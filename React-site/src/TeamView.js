@@ -16,7 +16,9 @@ import WebSocketComponent from "./components/WebSocketComponent";
 import Task from "./components/Task.js";
 import PopUp from "./components/PopUp.js";
 
-var endpoint = "http://localhost:5000/teamGivenID";
+import { address, flask_port } from "./components/Endpoint";
+
+var endpoint = address+flask_port+"/teamGivenID";
 
 function TeamView() {
   const inviteOk = sessionStorage.getItem("invite_alert") === "true";
@@ -36,8 +38,8 @@ function TeamView() {
   const [new_member, setNewMember] = useState("");
   const queryParameters = new URLSearchParams(window.location.search);
   const id = queryParameters.get("id");
-  const endpoint1 = "http://localhost:5000/teamDetails";
-  const endpoint2 = "http://localhost:5000/invite";
+  const endpoint1 = address+flask_port+"/teamDetails";
+  const endpoint2 = address+flask_port+"/invite";
   const decryptedUsername = localStorage.getItem("username");
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);

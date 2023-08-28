@@ -6,7 +6,9 @@ import Alert from "./components/Alert.tsx";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-var endpoint = "http://localhost:5000/resetRequest";
+import { address, flask_port } from "./components/Endpoint";
+
+var endpoint = address+flask_port+"/resetRequest";
 
 function Reset() {
   // Form data
