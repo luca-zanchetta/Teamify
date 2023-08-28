@@ -5,6 +5,7 @@ import Login from "./Login";
 import SignUp from "./SignUp";
 import Home from "./Home";
 import Reset from "./Reset";
+import ResetRequest from "./ResetRequest";
 import HomeLoggedIn from "./HomeLoggedIn";
 import NewTask from "./NewTask";
 import TeamView from "./TeamView";
@@ -33,6 +34,7 @@ function App() {
         <Route path="login" element={<Login />} />
         <Route path="signup" element={<SignUp />} />
         <Route path="reset" element={<Reset />} />
+        <Route path="resetRequest" element={<ResetRequest />} />
         <Route path="home" element={<HomeLoggedIn />} />
         <Route path="home/newtask" element={<NewTask />} />
         <Route path="teamview" element={<TeamView />} />

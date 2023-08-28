@@ -10,12 +10,18 @@ var endpoint = "http://localhost:5000/login";
 const loggedIn = localStorage.getItem("LoggedUser");
 
 function Login() {
+
   useEffect(() => {
-    //useEffect viene chiamato a fine render del component
-    handleMissingFields();
-    handleRequestFailed();
-    handleWrongPwd();
-    handleUsernameNotFound();
+    const timeout = setTimeout(() => {
+      handleMissingFields();
+      handleRequestFailed();
+      handleWrongPwd();
+      handleUsernameNotFound();
+      sessionStorage.setItem("reset_success", "false");
+      sessionStorage.setItem("reset_done", "false");
+    }, 1000);
+
+    return () => clearTimeout(timeout);
   }, []);
 
 
@@ -31,6 +37,8 @@ function Login() {
   const handleClosure = () => {
     sessionStorage.setItem("sign_up_alert", "false");
   };
+  const reset_success= sessionStorage.getItem("reset_success")==="true";
+  const reset_done= sessionStorage.getItem("reset_done")==="true";
 
   // Handler for missing fields error
   const missingFields = sessionStorage.getItem("fields_alert") === "true";
@@ -143,6 +151,18 @@ function Login() {
           Successfully signed up!
         </Alert>
       )}
+      {reset_success && (
+        <Alert onClick={handleClosure} state="success">
+          Password reset request has been sent on your email!
+        </Alert>
+      )}
+      {reset_done && (
+        <Alert onClick={handleClosure} state="success">
+          The password has been changed!
+        </Alert>
+      )}
+
+    
 
       {requestFailed && (
         <Alert onClick={handleRequestFailed} state="danger">
@@ -197,7 +217,7 @@ function Login() {
               <input type="submit" value={"Login"} id="Login"></input>
             </form>
             <div className="Link" style={{ fontSize: "small" }}>
-              <Link to="/reset">Forgot password?</Link>
+              <Link to="/resetRequest">Forgot password?</Link>
             </div>
           </div>
         </div>

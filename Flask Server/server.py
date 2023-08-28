@@ -174,7 +174,7 @@ def reset_request():
     mail = Mail(app)
 
     msg = Message('Password Reset', sender = 'teamify@libero.it', recipients = [email])
-    msg.body = "You have requested to recover your password, here you can proceed with the recovery: http://localhost:5000/reset?encryptedUsername="+encryptedUsername
+    msg.body = "You have requested to recover your password, here you can proceed with the recovery: http://localhost:3000/reset?encryptedUsername="+encryptedUsername
     mail.send(msg)
     #time.sleep(80)
 
@@ -186,6 +186,8 @@ def reset():
     curr = conn.cursor()
 
     encryptedUsername = data["encryptedUsername"]
+    encryptedUsername=encryptedUsername.replace(' ', '+')
+    print(encryptedUsername)
     username=decrypt_username(encryptedUsername)
     new_password = data["password"]
     new_encoded_password = sha256(str(new_password).encode("utf-8")).hexdigest()

@@ -1,17 +1,18 @@
 import "./css/App.css";
 import "./css/Login.css";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState} from "react";
 import axios from "axios";
 
 var endpoint = "http://localhost:5000/reset";
 
-function Reset() {
+function ResetRequest() {
   // Form data
-  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [password_again, setPasswordAgain] = useState("");
+  const search = useLocation().search;
+  const encryptedUsername = new URLSearchParams(search).get('encryptedUsername');
 
   // For redirecting
   const navigate = useNavigate();
@@ -20,16 +21,17 @@ function Reset() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (username !== "" && password !== "" && password_again !== "") {
+    if (password !== "" && password_again !== "") {
       if (password === password_again) {
         if (password.length >= 8) {
           try {
             // Send a POST request to the /reset endpoint of the Flask server
-            const response = await axios.post(endpoint, { username, password });
+            const response = await axios.post(endpoint, { encryptedUsername, password });
 
             // If the reset has been successfully performed, then redirect the user to the Login page.
             // Sarebbe più carino un avviso di successo o qualcosa di simile
             if (response.status === 200) {
+              sessionStorage.setItem("reset_done", "true");
               navigate("/login");
             } else if (response.status === 400) {
               alert(
@@ -78,16 +80,6 @@ function Reset() {
           <div className="CardHeading">Reset your password</div>
           <form onSubmit={handleSubmit}>
             <div className="InputEntry">
-              <div className="InputLabel">Username</div>
-              <input
-                className="InputField"
-                type="text"
-                placeholder="Enter your username"
-                id="username"
-                onChange={(event) => setUsername(event.target.value)}
-              ></input>
-            </div>
-            <div className="InputEntry">
               <div className="InputLabel">
                 New Password (at least 8 characters)
               </div>
@@ -110,7 +102,7 @@ function Reset() {
               ></input>
             </div>
             <hr />
-            <input type="submit" value={"Register"} id="Login"></input>
+            <input type="submit" value={"Change"} id="Login"></input>
           </form>
         </div>
       </div>
@@ -118,4 +110,4 @@ function Reset() {
   );
 }
 
-export default Reset;
+export default ResetRequest;
