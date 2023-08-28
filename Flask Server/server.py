@@ -6,6 +6,9 @@ from DBConnection import get_connection
 from support import get_current_week_range, convert_date, get_teams, encrypt_username, decrypt_username
 from flask_socketio import SocketIO, emit, join_room, leave_room
 import datetime
+from flask_mail import Mail, Message
+import time
+
 
 
 # Server setup
@@ -140,13 +143,50 @@ def signup():
     return jsonify("ok"), 200
 
 
+# Reset request API
+@app.route("/resetRequest", methods=["POST"])
+def reset_request():
+    data = request.get_json()
+    curr = conn.cursor()
+
+    username = data["username"]
+    encryptedUsername=encrypt_username(username)
+
+    # Does that user exist?
+    query_exists = "SELECT email FROM member WHERE username = %s"
+    param_exists = (username,)
+    curr.execute(query_exists, param_exists)
+    email = curr.fetchone()
+    if str(email) == "":
+        print("[ERROR] /reset: User not found.")
+        return jsonify("ko"), 404
+    email=email[0]
+    # The user exists; therefore, I can update his/her credentials.
+    
+    mail= Mail(app)
+
+    app.config['MAIL_SERVER']='smtp.libero.it'
+    app.config['MAIL_PORT'] = 465
+    app.config['MAIL_USERNAME'] = 'teamify@libero.it'
+    app.config['MAIL_PASSWORD'] = 'Ciaociao1@'
+    app.config['MAIL_USE_TLS'] = False
+    app.config['MAIL_USE_SSL'] = True
+    mail = Mail(app)
+
+    msg = Message('Password Reset', sender = 'teamify@libero.it', recipients = [email])
+    msg.body = "You have requested to recover your password, here you can proceed with the recovery: http://localhost:5000/reset?encryptedUsername="+encryptedUsername
+    mail.send(msg)
+    #time.sleep(80)
+
+    return jsonify("ok"), 200
 # Reset password API
 @app.route("/reset", methods=["POST"])
 def reset():
     data = request.get_json()
     curr = conn.cursor()
 
-    username = data["username"]
+    encryptedUsername = data["encryptedUsername"]
+    username=decrypt_username(encryptedUsername)
     new_password = data["password"]
     new_encoded_password = sha256(str(new_password).encode("utf-8")).hexdigest()
 
