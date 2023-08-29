@@ -13,6 +13,7 @@ import { address, flask_port } from "./Endpoint";
 var endpoint = address+flask_port+"/home/notifications";
 var endpointReadNotification = address+flask_port+"/readNotification";
 var endpointCheckInvites = address+flask_port+"/checkInvites";
+var endpointCheckEventInvites = address+flask_port+"/checkEventInvites";
 
 function Notifications() {
   const [show, setShow] = useState(false);
@@ -62,7 +63,7 @@ function Notifications() {
     // If I click on a non-read notification, I'm reading it
     try {
       // Send a POST request to the corresponding endpoint of the Flask server
-      const response_2 = await axios.post("http://localhost:5000/readNotification", {
+      const response_2 = await axios.post(endpointReadNotification, {
         notification_id,
       }, {
         headers: {
@@ -139,6 +140,48 @@ function Notifications() {
         break;
 
       case 'event':
+        read_notification(notification[0]);
+        try {
+          // Send a POST request to the corresponding endpoint of the Flask server
+          const response = await axios
+            .post(endpointCheckEventInvites, {
+              username,
+            })
+            .catch(function (error) {
+              if (error.response) {
+                // Print error data
+                console.log("Data: " + error.response.data);
+                console.log("Status: " + error.response.status);
+                console.log("Headers: " + error.response.headers);
+              }
+            });
+      
+          if (response.data.status === 200) {
+            const content = notification[2];
+            for(let i = 0; i<response.data.invites.length; i++) {
+              // I check whether the event title is present in the event notification that I have selected,
+              // so that I can link the event with the notification to answer
+              var event_title = response.data.invites[i].event_title;
+              var regex = new RegExp(`\\b${event_title}\\b`);
+
+              // The event title is present in the notification content
+              if(regex.test(content)) {
+                navigate("/invite", { state: { 
+                  event_id: response.data.invites[i].event_id, 
+                  team_id: response.data.invites[i].team_id,
+                  member: response.data.invites[i].member,
+                  state: response.data.invites[i].state,
+                  event_title: response.data.invites[i].event_title,
+                  description: response.data.invites[i].event_description,  
+                  admin: response.data.invites[i].admin,
+                } });
+              }
+            }
+          }
+        } catch (error) {
+          // Request failed
+          console.log("[ERROR] Request failed: " + error);
+        }
         break;
 
       case 'admin':
@@ -155,7 +198,7 @@ function Notifications() {
       {show && (
         <>
           <div id="NotificationDrop">
-            {displayNotifications && notifications.map((notification, index) => (
+            {displayNotifications && notifications.slice().reverse().map((notification, index) => (
               <div key={index} className="NotificationEntry" style={{ width: "100%" }} onClick={() => handleNotification(notification)}>
               <div className="NotificationIcon">
                 <img src={event} alt="Event Icon" />
