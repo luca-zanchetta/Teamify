@@ -234,7 +234,7 @@ includes = """CREATE TABLE includes (
     event INT,
     team INT,
     username VARCHAR(100),
-    state VARCHAR(50) NOT NULL,
+    state VARCHAR(50) NOT NULL DEFAULT 'pending',
     CONSTRAINT includes_pkey
         PRIMARY KEY(event, team, username),
     CONSTRAINT fk_username

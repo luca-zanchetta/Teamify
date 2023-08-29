@@ -748,6 +748,81 @@ def team_given_id():
     return jsonify({"name": name, "status": 200})
 
 
+# get the list of members of a certain team given an event id
+@app.route("/home/team/member", methods=["GET"])
+def team_members_given_event_id():
+    curr = conn.cursor()
+    # Fetch the ID of the last inserted task
+    eventID = request.args.get("id")  # get back the params from the request
+    curr.execute(
+        "SELECT team FROM includes WHERE event = %s",
+        (eventID,),
+    )
+    (team_id,) = curr.fetchone()
+    team_id = str(team_id).strip()
+    curr.execute(
+        "SELECT username FROM joinTeam WHERE team = %s",
+        (team_id,),
+    )
+    members = curr.fetchall()
+
+    member_list = []
+    for member in members:
+        member_list.append({"member": member[0]})
+
+    print(member_list)
+
+    return jsonify({"member_list": member_list, "status": 200})
+
+
+# edit member API
+@app.route("/home/team/event/editmember", methods=["POST"])
+def edit_member_event():
+    curr = conn.cursor()
+    data = request.get_json()  # Fetch the ID of the last inserted task
+    event_id = data["id"]  # get back the params from the request
+    new_members = data["members"]
+    admin = data["admin"]
+    new_set = []
+    for member in new_members:
+        if member != "member":
+            new_set.append(member)
+
+    curr.execute(
+        "SELECT username, team FROM includes WHERE event = %s",
+        (event_id,),
+    )
+    members = curr.fetchall()
+    member_list = []
+    for member in members:
+        member_list.append(member[0])
+        team_id = member[1]
+
+    for member in member_list:
+        if member not in new_set and member != admin:
+            query_member = "DELETE FROM includes WHERE username = %s"
+            param_member = (member,)
+            try:
+                curr.execute(query_member, param_member)
+            except Exception as err:
+                print("[ERROR] /home/team/event/editmember:", err)
+                return jsonify("ko"), 400
+
+    for member in new_set:
+        if member not in member_list:
+            query_member = "INSERT INTO includes (event,team,username) VALUES(%s,%s,%s)"
+            param_member = (event_id, team_id, member)
+            try:
+                curr.execute(query_member, param_member)
+            except Exception as err:
+                print("[ERROR] /home/team/event/editmemeber: (insert:)", err)
+                return jsonify("ko"), 400
+
+    # TODO: here we must send the invites
+
+    return jsonify({"member_list": member_list, "status": 200})
+
+
 # Get list of members included in a certain event the one that accepted
 @app.route("/home/event/members", methods=["get"])
 def members_given_event():
