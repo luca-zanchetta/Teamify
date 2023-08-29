@@ -21,4 +21,7 @@ Open the git folder with vs code:
 - pip install psycopg2
 - pip install flask_socketio
 - pip install eventlet
+- pip install flask_mail
+- pip install pycryptodome
+- pip install crypto
 - python ./server.py to launch the server
