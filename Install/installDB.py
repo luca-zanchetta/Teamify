@@ -3,8 +3,6 @@ from DBConnection import get_connection, user, psw
 from hashlib import sha256
 
 # Create connection
-host="localhost"
-docker="db"
 conn = psycopg2.connect(host="localhost", port=5432, user=user, password=psw)
 conn.set_session(autocommit=True)
 if not conn:
@@ -245,6 +243,141 @@ try:
     conn.commit()
 
     print("[INFO] Table 'includes' successfully created.")
+except Exception as err:
+    print("Error: ", err)
+    exit()
+
+
+# Table 'survey'
+survey = """CREATE TABLE survey (
+    id SERIAL PRIMARY KEY,
+    text VARCHAR(500) NOT NULL,
+    due_date DATE NOT NULL
+)"""
+try:
+    cur.execute(survey)
+    conn.commit()
+
+    print("[INFO] Table 'survey' successfully created.")
+except Exception as err:
+    print("Error: ", err)
+    exit()
+
+
+# Table 'sended_by'
+sendedBy = """CREATE TABLE sended_by (
+    admin VARCHAR(100) NOT NULL,
+    team INT NOT NULL,
+    survey INT PRIMARY KEY,
+    CONSTRAINT fk_survey
+        FOREIGN KEY(survey)
+            REFERENCES survey(id)
+            ON DELETE CASCADE,
+    CONSTRAINT fk_admin_team
+        FOREIGN KEY(admin, team)
+            REFERENCES manage(admin, team)
+            ON DELETE CASCADE
+)"""
+try:
+    cur.execute(sendedBy)
+    conn.commit()
+
+    print("[INFO] Table 'sended_by' successfully created.")
+except Exception as err:
+    print("Error: ", err)
+    exit()
+
+
+# Table 'option'
+option = """CREATE TABLE option (
+    survey INT NOT NULL,
+    id SERIAL PRIMARY KEY,
+    text VARCHAR(500) NOT NULL,
+    counter INT NOT NULL DEFAULT 0,
+    CONSTRAINT fk_survey
+        FOREIGN KEY(survey)
+            REFERENCES survey(id)
+            ON DELETE CASCADE
+)"""
+try:
+    cur.execute(option)
+    conn.commit()
+
+    print("[INFO] Table 'option' successfully created.")
+except Exception as err:
+    print("Error: ", err)
+    exit()
+
+
+# Table 'vote'
+vote = """CREATE TABLE vote (
+    option INT,
+    username VARCHAR(100),
+    CONSTRAINT pk_vote
+        PRIMARY KEY(option, username),
+    CONSTRAINT fk_option
+        FOREIGN KEY(option)
+            REFERENCES option(id)
+            ON DELETE CASCADE,
+    CONSTRAINT fk_username
+        FOREIGN KEY(username)
+            REFERENCES member(username)
+            ON DELETE CASCADE
+)"""
+try:
+    cur.execute(vote)
+    conn.commit()
+
+    print("[INFO] Table 'vote' successfully created.")
+except Exception as err:
+    print("Error: ", err)
+    exit()
+
+
+# Table 'message'
+message = """CREATE TABLE message (
+    id SERIAL PRIMARY KEY,
+    date DATE NOT NULL,
+    content TEXT NOT NULL,
+    sender VARCHAR(100) NOT NULL,
+    team INT NOT NULL,
+    CONSTRAINT fk_team
+        FOREIGN KEY(team)
+            REFERENCES team(id)
+            ON DELETE CASCADE,
+    CONSTRAINT fk_sender
+        FOREIGN KEY(sender)
+            REFERENCES member(username)
+            ON DELETE CASCADE
+)"""
+try:
+    cur.execute(message)
+    conn.commit()
+
+    print("[INFO] Table 'message' successfully created.")
+except Exception as err:
+    print("Error: ", err)
+    exit()
+
+
+# Table 'add'
+add = """CREATE TABLE add (
+    personal_task INT PRIMARY KEY,
+    username VARCHAR(100) NOT NULL,
+    CONSTRAINT fk_username
+        FOREIGN KEY(username)
+            REFERENCES member(username)
+            ON DELETE CASCADE,
+    CONSTRAINT fk_task
+        FOREIGN KEY(personal_task)
+            REFERENCES task(id)
+            ON DELETE CASCADE
+)"""
+try:
+    cur.execute(add)
+    conn.commit()
+
+    print("[INFO] Table 'add' successfully created.")
 except Exception as err:
     print("Error: ", err)
     exit()
