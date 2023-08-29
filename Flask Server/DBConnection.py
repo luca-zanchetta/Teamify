@@ -5,7 +5,7 @@ psw="postgres"
 
 def get_connection():
     try:
-        conn = psycopg2.connect(host="localhost", port=5432, dbname="teamify", user=user, password=psw)
+        conn = psycopg2.connect(host="db", port=5432, dbname="teamify", user=user, password=psw)
         return conn
     
     except:
