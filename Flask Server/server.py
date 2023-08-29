@@ -493,7 +493,7 @@ def get_tasks_events():
     local_team = request.args.get("team")  # da gestire dopo l'implementazione dei team
 
     curr.execute(
-        "SELECT title, description, date, time, duration, id, member, type FROM task WHERE member = %s",
+        "SELECT title, description, date, time, duration, id, member, type,status FROM task WHERE member = %s",
         (local_user,),
     )
     tasks = curr.fetchall()
@@ -513,7 +513,9 @@ def get_tasks_events():
                 "id": task[5],
                 "description": task[1],
                 "member": task[6],
+                "status": task[8],
                 "type": task[7],
+                "duration": task[4],
             }
         )
 
@@ -530,7 +532,7 @@ def get_tasks_events():
         for eventid in events_ids:
             print("ID\n", eventid[0])
             curr.execute(
-                "SELECT title, description, date, time, duration, id, member, type FROM task WHERE id = %s",
+                "SELECT title, description, date, time, duration, id, member, type,status FROM task WHERE id = %s",
                 (eventid[0],),
             )
         # TODO: send invite when add members
@@ -549,15 +551,16 @@ def get_tasks_events():
             tasks_list.append(
                 {
                     "title": event[0],
+                    "description": event[1],
                     "start": start_date,
                     "end": new_end_date,
+                    "duration": event[4],
                     "id": event[5],
-                    "description": event[1],
                     "member": event[6],
                     "type": event[7],
+                    "status": event[8],
                 }
             )
-
     return jsonify(tasks_list), 200
 
 
@@ -942,7 +945,6 @@ def read_notification():
     curr.execute(query_exists, params)
     try:
         (read,) = curr.fetchone()
-        print(read)
         if read == False:
             query_read = "UPDATE notification SET read = true WHERE id = %s"
             try:
