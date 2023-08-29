@@ -38,9 +38,7 @@ def before_request():
 
 
 connected_clients = []
-teams = (
-    []
-)  # List of teams; each team is of the following format: [name, [member1, member2, ..., member10]]
+teams = []  # List of teams; each team is of the following format: [name, [member1, member2, ..., member10]]
 
 # DB setup
 conn = get_connection()
@@ -303,6 +301,14 @@ def create_new_task():
     team_id = request.json["teamId"]
     event_members = request.json["members"]
 
+    # Team name given the id (it is useful for the notifications)
+    query_team_name = "SELECT name FROM team WHERE id = %s"
+    params_team_name = (team_id,)
+    curr.execute(query_team_name, params_team_name)
+    (team_name,) = curr.fetchone()
+    team_name = str(team_name).strip()
+
+
     curr.execute(
         "SELECT username FROM member where username= %s ORDER BY username DESC LIMIT 1",
         (member,),
@@ -327,7 +333,8 @@ def create_new_task():
 
         return jsonify({"message": "Task created successfully", "id": new_id}), 200
 
-    else:
+
+    else:   # Shared task
         query = "INSERT INTO task (id, title, date, time, description, member, duration,type) VALUES (%s, %s, %s, %s, %s, %s, %s,%s)"
         values = (new_id, title, date, time, description, member, duration, type_task)
 
@@ -337,7 +344,7 @@ def create_new_task():
             print("[ERROR] /new_task: ", err)
             return jsonify("ko"), 400
 
-        # here i includes the user that creates the event
+        # here i include the user that creates the event
         query_inclues = (
             "INSERT INTO includes (event,team,username,state) VALUES (%s,%s,%s,%s)"
         )
@@ -350,16 +357,24 @@ def create_new_task():
             return jsonify("ko"), 400
 
         for person in event_members:
-            query_inclues_member = (
-                "INSERT INTO includes (event,team,username,state) VALUES (%s,%s,%s,%s)"
-            )
+            query_inclues_member = "INSERT INTO includes (event,team,username,state) VALUES (%s,%s,%s,%s)"
             params_includes_member = (new_id, team_id, person, "pending")
             try:
                 curr.execute(query_inclues_member, params_includes_member)
             except Exception as err:
                 print("[ERROR] /new_event (event member): ", err)
                 return jsonify("ko"), 400
-
+            
+            if person != member:
+                query_notification = "INSERT INTO notification (date, content, type, read, username) VALUES (%s,%s,%s,%s,%s)"
+                params_notification = (datetime.datetime.now(), f"{member} of team {team_name} has invited you to join the event '{title}'.", "event", False, person,)
+                try:
+                    curr.execute(query_notification, params_notification)
+                    socketio.emit("event_notification", "", room=person)
+                except Exception as err:
+                    print("[ERROR] /home/newtask: "+err)
+                    return jsonify("ko"), 400
+                
         return jsonify({"message": "Task created successfully", "id": new_id}), 200
 
 
@@ -1058,6 +1073,40 @@ def check_invites():
     return jsonify({"invites": invitesJson, "status": 200})
 
 
+# Given username, check event invites of the user
+@app.route("/checkEventInvites", methods=["POST"])
+def check_event_invites():
+    curr = conn.cursor()
+    data = request.get_json()
+
+    username = data["username"]
+    username = decrypt_username(username)
+    curr.execute(
+        """
+        SELECT includes.event, includes.team, includes.username, includes.state, task.title, task.description, task.member
+        FROM includes JOIN task ON task.id=includes.event 
+        WHERE username = %s
+        AND includes.state = 'pending'
+        """,
+        (username,),
+    )
+    invites = curr.fetchall()
+    invitesJson = []
+    for invite in invites:
+        invitesJson.append(
+            {
+                "event_id": invite[0],
+                "team_id": invite[1],
+                "member": invite[2],
+                "state": invite[3],
+                "event_title": invite[4],
+                "event_description": invite[5],
+                "admin": invite[6],
+            }
+        )
+    return jsonify({"invites": invitesJson, "status": 200})
+
+
 # given team id and username, user accepts invite and therefore joins team
 @app.route("/acceptInvite", methods=["POST"])
 def accept_invite():
@@ -1091,6 +1140,35 @@ def accept_invite():
         return jsonify({"message": "ok", "status": 200})
     else:
         return jsonify("ko"), 400
+
+
+@app.route("/acceptEventInvite", methods=['POST'])
+def accept_event_invite():
+    curr = conn.cursor()
+    data = request.get_json()
+
+    username = data['username']
+    username = decrypt_username(username)
+    event_id = data['event_id']
+    team_id = data['teamId']
+
+    query_update_event_invite = """
+    UPDATE includes 
+    SET state = 'accepted' 
+    WHERE username = %s 
+    AND event = %s
+    AND team = %s
+    """
+    params_update_event_invite = (username, event_id, team_id)
+
+    try:
+        curr.execute(query_update_event_invite, params_update_event_invite)
+        print('[INFO] Event acceptance successfully updated!')
+    except Exception as err:
+        print('[ERROR] /acceptEventInvite: '+err)
+        return jsonify({"message":"Update of event acceptance failed.", "status":500})
+    
+    return jsonify({"message":"Event successfully joined!", "status":200})
 
 
 @app.route("/rejectInvite", methods=["POST"])
@@ -1134,6 +1212,49 @@ def reject_invite():
         return jsonify({"message": "ok", "status": 200})
     else:
         return jsonify("ko"), 400
+
+
+@app.route("/rejectEventInvite", methods=['POST'])
+def reject_event_invite():
+    curr = conn.cursor()
+    data = request.get_json()
+
+    username = data['username']
+    username = decrypt_username(username)
+    event_id = data['event_id']
+    team_id = data['teamId']
+    admin = data['admin']
+    event_name = data['event_title']
+
+    query_update_event_invite = """
+    UPDATE includes 
+    SET state = 'rejected' 
+    WHERE username = %s 
+    AND event = %s
+    AND team = %s
+    """
+    params_update_event_invite = (username, event_id, team_id)
+
+    try:
+        curr.execute(query_update_event_invite, params_update_event_invite)
+        print('[INFO] Event acceptance successfully updated!')
+
+        # If the user refuses my message, I get notified
+        query_notification = "INSERT INTO notification (date, content, type, read, username) VALUES (%s,%s,%s,%s,%s)"
+        params_notification = (
+            datetime.datetime.now(),
+            f"{username} will not join the event {event_name}.",
+            "message",
+            False,
+            admin,
+        )
+        curr.execute(query_notification, params_notification)
+        socketio.emit("message_notification", "", room=admin)
+    except Exception as err:
+        print('[ERROR] /acceptEventInvite: '+err)
+        return jsonify({"message":"Update of event acceptance failed.", "status":500})
+    
+    return jsonify({"message":"Event successfully rejected.", "status":200})
 
 
 ############################ END REST APIs ####################################
