@@ -18,7 +18,7 @@ import Notifications from "./components/Notifications";
 
 import { address, flask_port } from "./components/Endpoint";
 
-const endpoint = address+flask_port+"/home/newtask";
+const endpoint = address + flask_port + "/home/newtask";
 
 //TODO: nella mia versione c'è la back arrow, va modificata la pagina di destinazione con Previous Page
 
@@ -175,7 +175,9 @@ function NewTask() {
     } else if (buttonId == "Edit") {
       console.log("edit");
       try {
-          const response = await axios.post(address+flask_port+"/home/updatetask", {
+        const response = await axios.post(
+          address + flask_port + "/home/updatetask",
+          {
             local_user: userFromLocal,
             task_id: task.id,
             title: title,
@@ -183,7 +185,8 @@ function NewTask() {
             date: date,
             time: time,
             duration: duration, //parameters to pas
-          });
+          }
+        );
         if (response.status == 200) {
           navigate(previousPage);
           // TODO: add alert
@@ -357,12 +360,22 @@ function NewTask() {
                             <Form.Check
                               key={member.id}
                               type="checkbox"
-                              label={member === decryptedUsername ? "You" : member}
+                              label={
+                                member === decryptedUsername ? "You" : member
+                              }
                               id={`member-${member.id}`}
                               disabled={member === decryptedUsername}
                               defaultChecked={member === decryptedUsername}
                               onChange={(event) =>
-                                setEventMembers(event.target.value)
+                                setEventMembers((prevMembers) => {
+                                  if (event.target.checked) {
+                                    return [...prevMembers, member];
+                                  } else {
+                                    return prevMembers.filter(
+                                      (prevMember) => prevMember !== member
+                                    );
+                                  }
+                                })
                               }
                             />
                           ))}
