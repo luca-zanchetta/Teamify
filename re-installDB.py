@@ -3,6 +3,8 @@ from DBConnection import get_connection, user, psw
 from hashlib import sha256
 
 # Create connection
+host="localhost"
+docker="db"
 conn = psycopg2.connect(host="localhost", port=5432, user=user, password=psw)
 conn.set_session(autocommit=True)
 if not conn:

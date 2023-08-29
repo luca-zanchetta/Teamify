@@ -7,7 +7,7 @@ services:
     ports:
       - "5000:5000"
     depends_on:
-      - db
+      - install-db
   frontend:
     build:
       context: ./React-site
@@ -24,5 +24,11 @@ services:
     #volumes è un modo per salvare i dati di postgres fuori dal container, così se viene eliminato o altri danni, i dati permangono.
     volumes:
       - db-data:/var/lib/postgresql/data
+  install-db:
+    build:
+      context: ./Install
+      dockerfile: Dockerfile-install-db
+    depends_on:
+      - db
 volumes:
   db-data:

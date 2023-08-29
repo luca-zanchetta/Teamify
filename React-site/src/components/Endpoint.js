@@ -1,4 +1,6 @@
-export let addressLocal = "http://localhost:";    // Pay attention that I have inserted the ':' after 'localhost'
+export let address2 = "http://localhost:";    // Pay attention that I have inserted the ':' after 'localhost'
 export let react_port = "3000";
 export let flask_port = "5000";
-export let address= "http://backend"
+export let address= "http://backend:"
+
+//switch address by changing variable names of address and address2
