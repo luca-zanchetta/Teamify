@@ -13,14 +13,14 @@ import { Link, useNavigate, useLocation, navigate } from "react-router-dom";
 import axios from "axios";
 import moment from "moment";
 import Form from "react-bootstrap/Form";
-import { formatTime, formatDate } from "./support.js";
 import Notifications from "./components/Notifications";
+import { formatTime, formatDate, objectToArray } from "./support.js";
 
 import { address, flask_port } from "./components/Endpoint";
 
-const endpoint = address+flask_port+"/home/newtask";
+const endpoint = address + flask_port + "/home/newtask";
 
-//TODO: nella mia versione c'è la back arrow, va modificata la pagina di destinazione con Previous Page
+// TODO: alert post modifica
 
 function NewTask() {
   const location = useLocation();
@@ -44,6 +44,8 @@ function NewTask() {
   const [team_members, setMembers] = useState([]);
   const [team, setTeam] = useState(0);
   const [eventMembers, setEventMembers] = useState([]);
+  const [modifyEvent, setModifyEvent] = useState(false);
+  const endpoint2 = address + flask_port + "/home/event/members";
 
   const handleClosure = () => {
     sessionStorage.setItem("error_alert", false);
@@ -64,7 +66,6 @@ function NewTask() {
   const handleSelectSlot = useCallback((slotInfo) => {
     const date_start = formatDate(slotInfo.slots[0]);
     const time = formatTime(slotInfo.slots[0]);
-    console.log(date_start, time);
     const duration = (slotInfo.slots.length - 1) * 30; //get duration
 
     //get objects related to data, time and duration and change the value inside them
@@ -132,7 +133,6 @@ function NewTask() {
             teamId: team,
           });
           // If task has been successfully created, then redirect the user to the Home page.
-          console.log(response.status);
           if (response.status === 200) {
             navigate(previousPage);
             sessionStorage.setItem("new_task", true);
@@ -173,9 +173,10 @@ function NewTask() {
         );
       }
     } else if (buttonId == "Edit") {
-      console.log("edit");
       try {
-          const response = await axios.post(address+flask_port+"/home/updatetask", {
+        const response = await axios.post(
+          address + flask_port + "/home/updatetask",
+          {
             local_user: userFromLocal,
             task_id: task.id,
             title: title,
@@ -183,7 +184,8 @@ function NewTask() {
             date: date,
             time: time,
             duration: duration, //parameters to pas
-          });
+          }
+        );
         if (response.status == 200) {
           navigate(previousPage);
           // TODO: add alert
@@ -196,7 +198,8 @@ function NewTask() {
   };
 
   const handleBack = () => {
-    navigate("/home");
+    console.log(previousPage);
+    navigate(previousPage);
   };
 
   //check if i'm going to modify the task and so i passed it or not
@@ -211,6 +214,25 @@ function NewTask() {
         setDescription(t.description);
         setDuration(t.duration);
         setModify(true);
+        setPreviousPage(location.state.previousPage);
+        if (location.state.modify) {
+          setModifyEvent(true);
+          const r = objectToArray(Object.values(location.state.members));
+          setMembers(r);
+          axios
+            .get(endpoint2, {
+              params: {
+                eventId: t.id,
+              },
+            })
+            .then((response) => {
+              const res = response.data;
+              setEventMembers(res[0]);
+            })
+            .catch((error) => {
+              console.error("Error fetching team data:", error);
+            });
+        }
       } else {
         setModify(false);
       }
@@ -288,7 +310,8 @@ function NewTask() {
                   }}
                 >
                   <div className="CardHeading">
-                    {(modify && "Modify task") ||
+                    {(modify && !modifyEvent && "Edit Task") ||
+                      (modifyEvent && "Edit Event") ||
                       (isEvent && "Create a new Event") ||
                       "Create new task"}
                   </div>
@@ -299,7 +322,8 @@ function NewTask() {
                         className="InputField"
                         type="text"
                         placeholder={
-                          (modify && task.title) || "Enter a new title"
+                          ((modify || modifyEvent) && task.title) ||
+                          "Enter a new title"
                         }
                         id="task"
                         onChange={(event) => setTitle(event.target.value)}
@@ -311,7 +335,7 @@ function NewTask() {
                         className="InputField"
                         type="text"
                         placeholder={
-                          (modify && task.description) ||
+                          ((modify || modifyEvent) && task.description) ||
                           "Enter a description if you want"
                         }
                         id="description"
@@ -344,29 +368,65 @@ function NewTask() {
                         className="InputField"
                         type="number"
                         id="duration"
-                        placeholder={(modify && task.duration) || "0"}
+                        placeholder={
+                          modify || (modifyEvent && task.duration) || "0"
+                        }
                         value={duration}
                         onChange={(event) => setDuration(event.target.value)}
                       ></input>
                     </div>
-                    {isEvent && (
+                    {(isEvent || modifyEvent) && (
                       <div className="InputEntry">
-                        <div className="InputLabel">Add members</div>
-                        <div className="container" style={{ overflow: "auto" }}>
-                          {team_members.map((member) => (
-                            <Form.Check
-                              key={member.id}
-                              type="checkbox"
-                              label={member === decryptedUsername ? "You" : member}
-                              id={`member-${member.id}`}
-                              disabled={member === decryptedUsername}
-                              defaultChecked={member === decryptedUsername}
-                              onChange={(event) =>
-                                setEventMembers(event.target.value)
-                              }
-                            />
-                          ))}
+                        <div className="InputLabel">
+                          {(modifyEvent && "Modify members") || "Add members"}
                         </div>
+                        {isEvent && (
+                          <div
+                            className="container"
+                            style={{ overflow: "auto" }}
+                          >
+                            {team_members.map((member) => (
+                              <Form.Check
+                                key={member.id}
+                                type="checkbox"
+                                label={
+                                  typeof member === "object"
+                                    ? member.member
+                                    : member
+                                }
+                                id={`member-${member.id}`}
+                                disabled={member === decryptedUsername}
+                                defaultChecked={member === decryptedUsername}
+                                onChange={(event) =>
+                                  setEventMembers(event.target.value)
+                                }
+                              />
+                            ))}
+                          </div>
+                        )}
+                        {modifyEvent && (
+                          <div
+                            className="container"
+                            style={{ overflow: "auto" }}
+                          >
+                            {team_members.map((member) => (
+                              <Form.Check
+                                key={member.id}
+                                type="checkbox"
+                                label={member}
+                                id={`member-${member.id}`}
+                                disabled={member === decryptedUsername}
+                                defaultChecked={
+                                  member === decryptedUsername ||
+                                  eventMembers.includes(member)
+                                }
+                                onChange={(event) =>
+                                  setEventMembers(event.target.value)
+                                }
+                              />
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
                     {(!modify && !isEvent && (
@@ -378,7 +438,7 @@ function NewTask() {
                         style={{ marginTop: "50px" }}
                       ></input>
                     )) ||
-                      (modify && (
+                      ((modify || modifyEvent) && (
                         <input
                           className="personalized-button"
                           type="submit"

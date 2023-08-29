@@ -3,12 +3,17 @@ from hashlib import sha256
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from DBConnection import get_connection
-from support import get_current_week_range, convert_date, get_teams, encrypt_username, decrypt_username
+from support import (
+    get_current_week_range,
+    convert_date,
+    get_teams,
+    encrypt_username,
+    decrypt_username,
+)
 from flask_socketio import SocketIO, emit, join_room, leave_room
 import datetime
 from flask_mail import Mail, Message
 import time
-
 
 
 # Server setup
@@ -31,7 +36,9 @@ def before_request():
         return ("", 200, headers)
 
 connected_clients = []
-teams = [] # List of teams; each team is of the following format: [name, [member1, member2, ..., member10]]
+teams = (
+    []
+)  # List of teams; each team is of the following format: [name, [member1, member2, ..., member10]]
 
 # DB setup
 conn = get_connection()
@@ -54,7 +61,7 @@ def handle_connect():
 
 @socketio.on("initial_data")
 def handle_initial_data(username):
-    username=decrypt_username(username)
+    username = decrypt_username(username)
     insert = True  # Check whether the request has been sent multiple times
 
     new_client = (username, request.sid)
@@ -62,11 +69,11 @@ def handle_initial_data(username):
         (user, req_id) = client
         if user == username:
             insert = False
-    
+
     if insert == True:
         connected_clients.append(new_client)
         join_room(username)
-        print('[INFO] Client connected: '+str(username))
+        print("[INFO] Client connected: " + str(username))
 
 
 @socketio.on("message")
@@ -79,7 +86,10 @@ def handle_message(message):
 
 @socketio.on("disconnect")
 def handle_disconnect():
-    disconnected_client = (None, None,)
+    disconnected_client = (
+        None,
+        None,
+    )
 
     for client in connected_clients:
         if client[1] == request.sid:
@@ -103,7 +113,7 @@ def login():
     curr = conn.cursor()
 
     username = data["username"]
-    encryptedUsername=encrypt_username(username)
+    encryptedUsername = encrypt_username(username)
     password = data["password"]
     encoded_password = sha256(str(password).encode("utf-8")).hexdigest()
 
@@ -125,7 +135,7 @@ def login():
         return jsonify("not found"), 404
 
     print("[INFO] /login: Login performed.")
-    return jsonify({"encryptedUsername":encryptedUsername}), 200
+    return jsonify({"encryptedUsername": encryptedUsername}), 200
 
 
 # Signup API
@@ -162,7 +172,7 @@ def reset_request():
     curr = conn.cursor()
 
     username = data["username"]
-    encryptedUsername=encrypt_username(username)
+    encryptedUsername = encrypt_username(username)
 
     # Does that user exist?
     query_exists = "SELECT email FROM member WHERE username = %s"
@@ -172,25 +182,30 @@ def reset_request():
     if str(email) == "":
         print("[ERROR] /reset: User not found.")
         return jsonify("ko"), 404
-    email=email[0]
+    email = email[0]
     # The user exists; therefore, I can update his/her credentials.
-    
-    mail= Mail(app)
 
-    app.config['MAIL_SERVER']='smtp.libero.it'
-    app.config['MAIL_PORT'] = 465
-    app.config['MAIL_USERNAME'] = 'teamify@libero.it'
-    app.config['MAIL_PASSWORD'] = 'Ciaociao1@'
-    app.config['MAIL_USE_TLS'] = False
-    app.config['MAIL_USE_SSL'] = True
     mail = Mail(app)
 
-    msg = Message('Password Reset', sender = 'teamify@libero.it', recipients = [email])
-    msg.body = "You have requested to recover your password, here you can proceed with the recovery: http://localhost:3000/reset?encryptedUsername="+encryptedUsername
+    app.config["MAIL_SERVER"] = "smtp.libero.it"
+    app.config["MAIL_PORT"] = 465
+    app.config["MAIL_USERNAME"] = "teamify@libero.it"
+    app.config["MAIL_PASSWORD"] = "Ciaociao1@"
+    app.config["MAIL_USE_TLS"] = False
+    app.config["MAIL_USE_SSL"] = True
+    mail = Mail(app)
+
+    msg = Message("Password Reset", sender="teamify@libero.it", recipients=[email])
+    msg.body = (
+        "You have requested to recover your password, here you can proceed with the recovery: http://localhost:3000/reset?encryptedUsername="
+        + encryptedUsername
+    )
     mail.send(msg)
-    #time.sleep(80)
+    # time.sleep(80)
 
     return jsonify("ok"), 200
+
+
 # Reset password API
 @app.route("/reset", methods=["POST"])
 def reset():
@@ -198,9 +213,9 @@ def reset():
     curr = conn.cursor()
 
     encryptedUsername = data["encryptedUsername"]
-    encryptedUsername=encryptedUsername.replace(' ', '+')
+    encryptedUsername = encryptedUsername.replace(" ", "+")
     print(encryptedUsername)
-    username=decrypt_username(encryptedUsername)
+    username = decrypt_username(encryptedUsername)
     new_password = data["password"]
     new_encoded_password = sha256(str(new_password).encode("utf-8")).hexdigest()
 
@@ -232,7 +247,7 @@ def delete_account():
     curr = conn.cursor()
     data = request.get_json()
     user = data["username"]
-    username=decrypt_username(user)
+    username = decrypt_username(user)
     # removal the task connected to the user
     query_task = "DELETE FROM task WHERE member = %s"
     param_task = (username,)
@@ -278,7 +293,7 @@ def create_new_task():
     time = request.json["time"]
     description = request.json["description"]
     member = request.json["user"]
-    member=decrypt_username(member)
+    member = decrypt_username(member)
     duration = request.json["duration"]
     type_task = request.json["type"]
 
@@ -355,7 +370,7 @@ def update_task():
 
     print(request.json)
     curr = conn.cursor()
-    username=decrypt_username(username)
+    username = decrypt_username(username)
 
     title = data.get("title")
     date = data.get("date")
@@ -366,7 +381,7 @@ def update_task():
     curr.execute("SELECT * FROM task WHERE id = %s", (task_id,))
     existing_task = curr.fetchone()
     if not existing_task:
-        print (existing_task)
+        print(existing_task)
         return jsonify({"message": "Task not found"}), 404
 
     update_query = "UPDATE task SET title = %s, date = %s, time = %s, description = %s, member = %s, duration = %s WHERE id = %s"
@@ -417,7 +432,7 @@ def get_tasks():
     curr = conn.cursor()
     # Fetch the ID of the last inserted task
     local_user = request.args.get("user")  # get back the params from the request
-    local_user=decrypt_username(local_user)
+    local_user = decrypt_username(local_user)
     curr.execute(
         "SELECT title, description, date, time, duration, id, status, type, member FROM task WHERE member = %s",
         (local_user,),
@@ -472,11 +487,11 @@ def get_tasks_events():
     curr = conn.cursor()
     # Fetch the ID of the last inserted task
     local_user = request.args.get("user")  # get back the params from the request
-    local_user=decrypt_username(local_user)
+    local_user = decrypt_username(local_user)
     local_team = request.args.get("team")  # da gestire dopo l'implementazione dei team
 
     curr.execute(
-        "SELECT title, description, date, time, duration, id, member, type FROM task WHERE member = %s",
+        "SELECT title, description, date, time, duration, id, member, type,status FROM task WHERE member = %s",
         (local_user,),
     )
     tasks = curr.fetchall()
@@ -496,7 +511,9 @@ def get_tasks_events():
                 "id": task[5],
                 "description": task[1],
                 "member": task[6],
+                "status": task[8],
                 "type": task[7],
+                "duration": task[4],
             }
         )
 
@@ -513,7 +530,7 @@ def get_tasks_events():
         for eventid in events_ids:
             print("ID\n", eventid[0])
             curr.execute(
-                "SELECT title, description, date, time, duration, id, member, type FROM task WHERE id = %s",
+                "SELECT title, description, date, time, duration, id, member, type,status FROM task WHERE id = %s",
                 (eventid[0],),
             )
         # TODO: send invite when add members
@@ -532,15 +549,16 @@ def get_tasks_events():
             tasks_list.append(
                 {
                     "title": event[0],
+                    "description": event[1],
                     "start": start_date,
                     "end": new_end_date,
+                    "duration": event[4],
                     "id": event[5],
-                    "description": event[1],
                     "member": event[6],
                     "type": event[7],
+                    "status": event[8],
                 }
             )
-
     return jsonify(tasks_list), 200
 
 
@@ -553,7 +571,7 @@ def team_list():
     curr = conn.cursor()
     # Fetch the ID of the last inserted task
     user = request.args.get("user")
-    user=decrypt_username(user)
+    user = decrypt_username(user)
     curr.execute(
         "SELECT team id, name, description FROM joinTeam JOIN team ON team.id=joinTeam.team WHERE username = %s ORDER BY name",
         (user,),
@@ -636,7 +654,7 @@ def team_create():
 
     data = request.get_json()
     username = data["username"]
-    username=decrypt_username(username)
+    username = decrypt_username(username)
     name = data["name"]
     description = data["description"]
 
@@ -757,7 +775,7 @@ def show_personal_info():
     curr = conn.cursor()
 
     username = data["username"]
-    username=decrypt_username(username)
+    username = decrypt_username(username)
     if username != "":
         query = "SELECT name, surname, birth_date, email, password FROM member WHERE username = %s"
         params = (username,)
@@ -795,7 +813,7 @@ def modify_personal_info():
     curr = conn.cursor()
 
     username = data["username"]
-    username=decrypt_username(username)
+    username = decrypt_username(username)
     name = data["new_name"]
     surname = data["new_surname"]
     birth_date = data["new_birth"]
@@ -832,7 +850,7 @@ def modify_password():
     curr = conn.cursor()
 
     username = data["username"]
-    username=decrypt_username(username)
+    username = decrypt_username(username)
     old_password = data["old_password"]
     new_password = data["new_password"]
 
@@ -891,7 +909,7 @@ def get_notifications():
     records = []
 
     username = data["username"]
-    username=decrypt_username(username)
+    username = decrypt_username(username)
     if username != "":
         query = (
             "SELECT id, date, content, type, read FROM notification WHERE username = %s"
@@ -925,20 +943,43 @@ def read_notification():
     curr.execute(query_exists, params)
     try:
         (read,) = curr.fetchone()
-        print(read)
         if read == False:
             query_read = "UPDATE notification SET read = true WHERE id = %s"
             try:
                 curr.execute(query_read, params)
-                print('[INFO] /readNotification: The notification has been read successfully.')
+                print(
+                    "[INFO] /readNotification: The notification has been read successfully."
+                )
             except Exception as err:
-                print('[ERROR] /readNotification: The notification has not been read successfully. Err: '+str(err))
-                return jsonify({"message":"The notification has not been read successfully.", "status":400}), 400
+                print(
+                    "[ERROR] /readNotification: The notification has not been read successfully. Err: "
+                    + str(err)
+                )
+                return (
+                    jsonify(
+                        {
+                            "message": "The notification has not been read successfully.",
+                            "status": 400,
+                        }
+                    ),
+                    400,
+                )
     except Exception as err:
-        print('[ERROR] /readNotification: The notification does not exist. Err: '+str(err))
-        return jsonify({"message":"The notification does not exist.", "status":500}), 500
-    
-    return jsonify({"message":"The notification has been read successfully.", "status":200}), 200
+        print(
+            "[ERROR] /readNotification: The notification does not exist. Err: "
+            + str(err)
+        )
+        return (
+            jsonify({"message": "The notification does not exist.", "status": 500}),
+            500,
+        )
+
+    return (
+        jsonify(
+            {"message": "The notification has been read successfully.", "status": 200}
+        ),
+        200,
+    )
 
 
 # given team id and username, invites the user to the team
@@ -950,32 +991,42 @@ def invite():
     username = data["username"]
     id = data["id"]
     admin = data["admin"]
-    admin=decrypt_username(admin)
+    admin = decrypt_username(admin)
 
     query_invite = "INSERT INTO invite (username, admin, team) VALUES (%s,%s,%s)"
-    params_invite = (username, admin, id,)
+    params_invite = (
+        username,
+        admin,
+        id,
+    )
 
     curr.execute("SELECT name FROM team WHERE id = %s", (id,))
     (name,) = curr.fetchone()
     name = str(name).strip()
 
     query_notification = "INSERT INTO notification (date, content, type, read, username) VALUES (%s,%s,%s,%s,%s)"
-    params_notification = (datetime.datetime.now(), f'{admin} has invited you to join team {name}.', 'invite', False, username,)
-    
+    params_notification = (
+        datetime.datetime.now(),
+        f"{admin} has invited you to join team {name}.",
+        "invite",
+        False,
+        username,
+    )
+
     try:
         curr.execute(query_invite, params_invite)
-        print('[INFO] /invite: User invited successfully.')
+        print("[INFO] /invite: User invited successfully.")
         try:
             curr.execute(query_notification, params_notification)
-            print('[INFO] /invite: Invite notification registered.')
-            socketio.emit('invite_notification', '', room=username)
-            
+            print("[INFO] /invite: Invite notification registered.")
+            socketio.emit("invite_notification", "", room=username)
+
             return jsonify("ok"), 200
         except Exception as err:
-            print('[ERROR] Invite notification not registered. Err = '+str(err))
+            print("[ERROR] Invite notification not registered. Err = " + str(err))
             return jsonify("ko"), 400
     except Exception as err:
-        print('[ERROR] User not invited. Err = '+str(err))
+        print("[ERROR] User not invited. Err = " + str(err))
         return jsonify("ko"), 400
 
 
@@ -1011,7 +1062,7 @@ def accept_invite():
     curr = conn.cursor()
     data = request.get_json()
     username = data["username"]
-    username=decrypt_username(username)
+    username = decrypt_username(username)
     id = data["teamId"]
     curr.execute(
         "SELECT * from invite WHERE username=%s AND team=%s",
@@ -1035,7 +1086,7 @@ def accept_invite():
                 id,
             ),
         )
-        return jsonify({"message":"ok", "status":200})
+        return jsonify({"message": "ok", "status": 200})
     else:
         return jsonify("ko"), 400
 
@@ -1046,9 +1097,9 @@ def reject_invite():
     data = request.get_json()
 
     username = data["username"]
-    username=decrypt_username(username)
+    username = decrypt_username(username)
     id = data["teamId"]
-    admin = data['admin']
+    admin = data["admin"]
 
     curr.execute(
         "SELECT * from invite WHERE username=%s AND team=%s",
@@ -1068,11 +1119,17 @@ def reject_invite():
 
         # If the user refuses my message, I get notified
         query_notification = "INSERT INTO notification (date, content, type, read, username) VALUES (%s,%s,%s,%s,%s)"
-        params_notification = (datetime.datetime.now(), f'{username} has not accepted your invite.', 'message', False, admin,)
+        params_notification = (
+            datetime.datetime.now(),
+            f"{username} has not accepted your invite.",
+            "message",
+            False,
+            admin,
+        )
         curr.execute(query_notification, params_notification)
-        socketio.emit('message_notification', '', room=admin)
+        socketio.emit("message_notification", "", room=admin)
 
-        return jsonify({"message":"ok", "status":200})
+        return jsonify({"message": "ok", "status": 200})
     else:
         return jsonify("ko"), 400
 

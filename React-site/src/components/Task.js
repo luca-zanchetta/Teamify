@@ -14,18 +14,19 @@ interface Props {
   task: Object;
 }
 function Task({ task }: Props) {
-  const endpoint = address+flask_port+"/home/event/members";
-  const decryptedUsername = localStorage.getItem("username"); 
-  const username=localStorage.getItem("LoggedUser");
+  const endpoint = address + flask_port + "/home/event/members";
+  const decryptedUsername = localStorage.getItem("username");
+  const username = localStorage.getItem("LoggedUser");
   const navigate = useNavigate();
   const [members, setMembers] = useState([]);
   const formattedTime = formatTime(task.end);
   const [completeButton, setButtonText] = useState("Complete");
   const [isExpanded, setIsExpanded] = useState(false);
+
   const toggleAccordion = () => {
     setIsExpanded(!isExpanded);
   };
-  console.log(task.member);
+
   const handleDelete = async () => {
     if (task.member === decryptedUsername) {
       localStorage.setItem("task_to_delete", task.id);
@@ -42,7 +43,7 @@ function Task({ task }: Props) {
   const handleComplete = async () => {
     try {
       const response = await axios.put(
-        address+flask_port+`/home/completetask/${task.id}`
+        address + flask_port + `/home/completetask/${task.id}`
       );
 
       console.log(response.data.message); // Display the response message
@@ -61,9 +62,16 @@ function Task({ task }: Props) {
 
   //in this way you can pass the props through the navigate
   const handleEdit = () => {
-    navigate("/home/tasks/edittask", { state: { task: task } });
+    const modify = task.type === "event" ? "event" : "personal";
+    navigate("/home/tasks/edittask", {
+      state: {
+        task: task,
+        modify: modify,
+        members: members,
+        previousPage: window.location.href,
+      },
+    });
   };
-
   const handleClosure = () => {
     window.location.reload();
   };
@@ -78,7 +86,6 @@ function Task({ task }: Props) {
         })
         .then((response) => {
           const res = response.data;
-          console.log(res[0]);
           setMembers(res[0]);
         })
         .catch((error) => {
