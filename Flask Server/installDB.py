@@ -266,4 +266,151 @@ except Exception as err:
     exit()
 
 
+# Table 'survey'
+dropSurvey= "DROP TABLE IF EXISTS survey CASCADE"
+survey = """CREATE TABLE survey (
+    id SERIAL PRIMARY KEY,
+    text VARCHAR(500) NOT NULL,
+    due_date DATE NOT NULL
+)"""
+try:
+    cur.execute(dropSurvey)
+    cur.execute(survey)
+    conn.commit()
+
+    print("[INFO] Table 'survey' successfully created.")
+except Exception as err:
+    print("Error: ", err)
+    exit()
+
+
+# Table 'sended_by'
+dropSendedBy= "DROP TABLE IF EXISTS sended_by CASCADE"
+sendedBy = """CREATE TABLE sended_by (
+    admin VARCHAR(100) NOT NULL,
+    team INT NOT NULL,
+    survey INT PRIMARY KEY,
+    CONSTRAINT fk_survey
+        FOREIGN KEY(survey)
+            REFERENCES survey(id)
+            ON DELETE CASCADE,
+    CONSTRAINT fk_admin_team
+        FOREIGN KEY(admin, team)
+            REFERENCES manage(admin, team)
+            ON DELETE CASCADE
+)"""
+try:
+    cur.execute(dropSendedBy)
+    cur.execute(sendedBy)
+    conn.commit()
+
+    print("[INFO] Table 'sended_by' successfully created.")
+except Exception as err:
+    print("Error: ", err)
+    exit()
+
+
+# Table 'option'
+dropOption= "DROP TABLE IF EXISTS option CASCADE"
+option = """CREATE TABLE option (
+    survey INT NOT NULL,
+    id SERIAL PRIMARY KEY,
+    text VARCHAR(500) NOT NULL,
+    counter INT NOT NULL DEFAULT 0,
+    CONSTRAINT fk_survey
+        FOREIGN KEY(survey)
+            REFERENCES survey(id)
+            ON DELETE CASCADE
+)"""
+try:
+    cur.execute(dropOption)
+    cur.execute(option)
+    conn.commit()
+
+    print("[INFO] Table 'option' successfully created.")
+except Exception as err:
+    print("Error: ", err)
+    exit()
+
+
+# Table 'vote'
+dropVote= "DROP TABLE IF EXISTS vote CASCADE"
+vote = """CREATE TABLE vote (
+    option INT,
+    username VARCHAR(100),
+    CONSTRAINT pk_vote
+        PRIMARY KEY(option, username),
+    CONSTRAINT fk_option
+        FOREIGN KEY(option)
+            REFERENCES option(id)
+            ON DELETE CASCADE,
+    CONSTRAINT fk_username
+        FOREIGN KEY(username)
+            REFERENCES member(username)
+            ON DELETE CASCADE
+)"""
+try:
+    cur.execute(dropVote)
+    cur.execute(vote)
+    conn.commit()
+
+    print("[INFO] Table 'vote' successfully created.")
+except Exception as err:
+    print("Error: ", err)
+    exit()
+
+
+# Table 'message'
+dropMessage= "DROP TABLE IF EXISTS message CASCADE"
+message = """CREATE TABLE message (
+    id SERIAL PRIMARY KEY,
+    date DATE NOT NULL,
+    content TEXT NOT NULL,
+    sender VARCHAR(100) NOT NULL,
+    team INT NOT NULL,
+    CONSTRAINT fk_team
+        FOREIGN KEY(team)
+            REFERENCES team(id)
+            ON DELETE CASCADE,
+    CONSTRAINT fk_sender
+        FOREIGN KEY(sender)
+            REFERENCES member(username)
+            ON DELETE CASCADE
+)"""
+try:
+    cur.execute(dropMessage)
+    cur.execute(message)
+    conn.commit()
+
+    print("[INFO] Table 'message' successfully created.")
+except Exception as err:
+    print("Error: ", err)
+    exit()
+
+
+# Table 'add'
+dropAdd= "DROP TABLE IF EXISTS add CASCADE"
+add = """CREATE TABLE add (
+    personal_task INT PRIMARY KEY,
+    username VARCHAR(100) NOT NULL,
+    CONSTRAINT fk_username
+        FOREIGN KEY(username)
+            REFERENCES member(username)
+            ON DELETE CASCADE,
+    CONSTRAINT fk_task
+        FOREIGN KEY(personal_task)
+            REFERENCES task(id)
+            ON DELETE CASCADE
+)"""
+try:
+    cur.execute(dropAdd)
+    cur.execute(add)
+    conn.commit()
+
+    print("[INFO] Table 'add' successfully created.")
+except Exception as err:
+    print("Error: ", err)
+    exit()
+
+
 conn.close()
