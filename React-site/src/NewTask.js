@@ -13,6 +13,7 @@ import { Link, useNavigate, useLocation, navigate } from "react-router-dom";
 import axios from "axios";
 import moment from "moment";
 import Form from "react-bootstrap/Form";
+import Notifications from "./components/Notifications";
 import { formatTime, formatDate, objectToArray } from "./support.js";
 
 import { address, flask_port } from "./components/Endpoint";
@@ -45,6 +46,7 @@ function NewTask() {
   const [eventMembers, setEventMembers] = useState([]);
   const [modifyEvent, setModifyEvent] = useState(false);
   const endpoint2 = address + flask_port + "/home/event/members";
+  console.log("PREVIOUS PAGE", previousPage);
 
   const handleClosure = () => {
     sessionStorage.setItem("error_alert", false);
@@ -133,7 +135,7 @@ function NewTask() {
           });
           // If task has been successfully created, then redirect the user to the Home page.
           if (response.status === 200) {
-            navigate(previousPage);
+            window.location.replace(previousPage);
             sessionStorage.setItem("new_task", true);
           } else {
             console.log("error");
@@ -153,7 +155,7 @@ function NewTask() {
             console.log("ERROR FROM NEW TASK", error);
             sessionStorage.setItem("error_alert", true);
             setError(
-              "All the fields must be filled and must must respect the type constraints"
+              "All the fields must be filled and must respect the type constraints"
             );
           }
         }
@@ -168,7 +170,7 @@ function NewTask() {
           title
         );
         setError(
-          "All the fields must be filled and must must respect the type constraints"
+          "All the fields must be filled and must respect the type constraints"
         );
       }
     } else if (buttonId == "Edit") {
@@ -186,7 +188,23 @@ function NewTask() {
           }
         );
         if (response.status == 200) {
-          navigate(previousPage);
+          if (task.type === "event") {
+            try {
+              const response = await axios.post(
+                address + flask_port + "/home/team/event/editmember",
+                {
+                  id: task.id,
+                  members: eventMembers,
+                  team: team,
+                  admin: task.member,
+                }
+              );
+            } catch (error) {
+              console.error("Error:", error);
+            }
+          }
+          console.log(previousPage);
+          window.location.replace(previousPage);
           // TODO: add alert
         }
         console.log(response.data.message); // Display the response message
@@ -198,7 +216,7 @@ function NewTask() {
 
   const handleBack = () => {
     console.log(previousPage);
-    navigate(previousPage);
+    window.location.replace(previousPage);
   };
 
   //check if i'm going to modify the task and so i passed it or not
@@ -216,8 +234,9 @@ function NewTask() {
         setPreviousPage(location.state.previousPage);
         if (location.state.modify) {
           setModifyEvent(true);
-          const r = objectToArray(Object.values(location.state.members));
-          setMembers(r);
+          const ob = objectToArray(Object.values(location.state.team));
+          setMembers(ob);
+
           axios
             .get(endpoint2, {
               params: {
@@ -265,6 +284,7 @@ function NewTask() {
             <TopBar></TopBar>
           </div>
           <div className="Buttons">
+            <Notifications></Notifications>
             <UserIcon></UserIcon>
           </div>
         </div>
@@ -373,60 +393,77 @@ function NewTask() {
                         onChange={(event) => setDuration(event.target.value)}
                       ></input>
                     </div>
-                    {(isEvent || modifyEvent) && (
+                    {isEvent && (
                       <div className="InputEntry">
-                        <div className="InputLabel">
-                          {(modifyEvent && "Modify members") || "Add members"}
+                        <div className="InputLabel">Add members</div>
+                        <div className="container" style={{ overflow: "auto" }}>
+                          {team_members.map((member) => (
+                            <Form.Check
+                              key={member.id}
+                              type="checkbox"
+                              label={
+                                member === decryptedUsername ? "You" : member
+                              }
+                              id={`member-${member.id}`}
+                              disabled={member === decryptedUsername}
+                              defaultChecked={member === decryptedUsername}
+                              onChange={(event) =>
+                                setEventMembers((prevMembers) => {
+                                  if (event.target.checked) {
+                                    return [...prevMembers, member];
+                                  } else {
+                                    return prevMembers.filter(
+                                      (prevMember) => prevMember !== member
+                                    );
+                                  }
+                                })
+                              }
+                            />
+                          ))}
                         </div>
-                        {isEvent && (
-                          <div
-                            className="container"
-                            style={{ overflow: "auto" }}
-                          >
-                            {team_members.map((member) => (
-                              <Form.Check
-                                key={member.id}
-                                type="checkbox"
-                                label={
-                                  typeof member === "object"
-                                    ? member.member
-                                    : member
-                                }
-                                id={`member-${member.id}`}
-                                disabled={member === decryptedUsername}
-                                defaultChecked={member === decryptedUsername}
-                                onChange={(event) =>
-                                  setEventMembers(event.target.value)
-                                }
-                              />
-                            ))}
-                          </div>
-                        )}
-                        {modifyEvent && (
-                          <div
-                            className="container"
-                            style={{ overflow: "auto" }}
-                          >
-                            {team_members.map((member) => (
-                              <Form.Check
-                                key={member.id}
-                                type="checkbox"
-                                label={member}
-                                id={`member-${member.id}`}
-                                disabled={member === decryptedUsername}
-                                checked={
-                                  member === decryptedUsername ||
-                                  eventMembers.includes(member)
-                                }
-                                onChange={(event) =>
-                                  setEventMembers(event.target.value)
-                                }
-                              />
-                            ))}
-                          </div>
-                        )}
                       </div>
                     )}
+                    {modifyEvent && (
+                      <div className="InputEntry">
+                        <div className="InputLabel">Modify members</div>
+                        <div className="container" style={{ overflow: "auto" }}>
+                          {team_members.map((member) => (
+                            <Form.Check
+                              key={member.id}
+                              type="checkbox"
+                              label={
+                                typeof member === "object"
+                                  ? member.member
+                                  : member
+                              }
+                              id={`member-${member.id}`}
+                              disabled={member.member === task.member}
+                              defaultChecked={member.member === task.member}
+                              onChange={(event) => {
+                                const memberValue =
+                                  typeof member === "object"
+                                    ? member.member
+                                    : member;
+
+                                setEventMembers((prevMembers) => {
+                                  if (event.target.checked) {
+                                    return {
+                                      ...prevMembers,
+                                      [memberValue]: true,
+                                    };
+                                  } else {
+                                    const updatedMembers = { ...prevMembers };
+                                    delete updatedMembers[memberValue];
+                                    return updatedMembers;
+                                  }
+                                });
+                              }}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     {(!modify && !isEvent && (
                       <input
                         className="personalized-button"
