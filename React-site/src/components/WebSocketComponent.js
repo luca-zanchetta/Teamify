@@ -46,7 +46,13 @@ const WebSocketComponent =  forwardRef((props, ref) => {
       console.log('[INFO] Received notification: '+message);
       var bellIcon = document.getElementById('bell');
       bellIcon.src = alarm;
-    })
+    });
+
+    newSocket.on('event_notification', (message) => {
+      console.log('[INFO] Recieved notification: '+message);
+      var bellIcon = document.getElementById('bell');
+      bellIcon.src = alarm;
+    });
 
 
     // Chiudi la connessione WebSocket quando il componente viene smontato

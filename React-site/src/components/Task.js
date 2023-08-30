@@ -7,25 +7,29 @@ import { formatTime } from "../support.js";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
-
+import { objectToArray } from "../support.js";
 import { address, flask_port } from "./Endpoint";
 
 interface Props {
   task: Object;
 }
 function Task({ task }: Props) {
-  const endpoint = address+flask_port+"/home/event/members";
-  const decryptedUsername = localStorage.getItem("username"); 
-  const username=localStorage.getItem("LoggedUser");
+  const endpoint = address + flask_port + "/home/event/members";
+  const endpoint3 = address + flask_port + "/home/team/member";
+  const decryptedUsername = localStorage.getItem("username");
+  const username = localStorage.getItem("LoggedUser");
   const navigate = useNavigate();
   const [members, setMembers] = useState([]);
+  const [teamMembers, setTeamMembers] = useState([]);
   const formattedTime = formatTime(task.end);
   const [completeButton, setButtonText] = useState("Complete");
   const [isExpanded, setIsExpanded] = useState(false);
+  const [page, setPage] = useState("");
+
   const toggleAccordion = () => {
     setIsExpanded(!isExpanded);
   };
-  console.log(task.member);
+
   const handleDelete = async () => {
     if (task.member === decryptedUsername) {
       localStorage.setItem("task_to_delete", task.id);
@@ -42,7 +46,7 @@ function Task({ task }: Props) {
   const handleComplete = async () => {
     try {
       const response = await axios.put(
-        address+flask_port+`/home/completetask/${task.id}`
+        address + flask_port + `/home/completetask/${task.id}`
       );
 
       console.log(response.data.message); // Display the response message
@@ -61,7 +65,39 @@ function Task({ task }: Props) {
 
   //in this way you can pass the props through the navigate
   const handleEdit = () => {
-    navigate("/home/tasks/edittask", { state: { task: task } });
+    const modify = task.type === "event" ? "event" : "personal";
+    if (modify === "event") {
+      axios
+        .get(endpoint3, {
+          params: {
+            id: task.id,
+          },
+        })
+        .then((response) => {
+          const res = response.data;
+          //console.log("RES meme\n", res.member_list);
+          navigate("/home/tasks/edittask", {
+            state: {
+              task: task,
+              modify: modify,
+              members: members,
+              team: res.member_list,
+              previousPage: window.location.href,
+            },
+          });
+          console.log("RES", typeof objectToArray(res.member_list));
+        })
+        .catch((error) => {
+          console.error("Error fetching team data:", error);
+        });
+    } else {
+      navigate("/home/tasks/edittask", {
+        state: {
+          task: task,
+          previousPage: window.location.href,
+        },
+      });
+    }
   };
 
   const handleClosure = () => {
@@ -78,7 +114,6 @@ function Task({ task }: Props) {
         })
         .then((response) => {
           const res = response.data;
-          console.log(res[0]);
           setMembers(res[0]);
         })
         .catch((error) => {

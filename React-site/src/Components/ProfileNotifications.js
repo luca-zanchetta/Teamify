@@ -54,7 +54,7 @@ function ProfileNotifications() {
   return (
     <div className="ProfileContent">
       {displayNotifications &&
-        notifications.map((notification, index) => (
+        notifications.slice().reverse().map((notification, index) => (
           <div
             key={index}
             className="NotificationEntry"

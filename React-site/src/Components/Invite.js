@@ -13,6 +13,8 @@ import {address, flask_port} from "./Endpoint";
 
 let endpointAcceptTeam = address+flask_port+"/acceptInvite";
 let endpointRejectTeam = address+flask_port+"/rejectInvite";
+let endpointAcceptEvent = address+flask_port+"/acceptEventInvite";
+let endpointRejectEvent = address+flask_port+"/rejectEventInvite";
 
 function Invite() {
   const username = localStorage.getItem("LoggedUser");
@@ -23,7 +25,13 @@ function Invite() {
   const [description, setDescription] = useState("");
   const [teamId, setTeamId] = useState("");
 
+  // Event management
+  const [event_id, setEventId] = useState("");
+  const [member, setMember] = useState("");
+  const [state, setState] = useState("");
+
   const navigate = useNavigate();
+
 
   async function handleReject() {
     if(team) {
@@ -53,10 +61,36 @@ function Invite() {
       }
     }
     else if(event_title) {
-      console.log("event title: TO DO");
+      try {
+        // Send a POST request to the corresponding endpoint of the Flask server
+        const response = await axios
+          .post(endpointRejectEvent, {
+            username,
+            event_id,
+            teamId,
+            admin,
+            event_title,
+          })
+          .catch(function (error) {
+            if (error.response) {
+              // Print error data
+              console.log("Data: " + error.response.data);
+              console.log("Status: " + error.response.status);
+              console.log("Headers: " + error.response.headers);
+            }
+          });
+  
+        if (response.data.status === 200) {
+          navigate("/home");
+        }
+      } catch (error) {
+        // Request failed
+        console.log("[ERROR] Request failed: " + error);
+      }
     }
   };
   
+
   async function handleAcceptance() {
     if(team) {
       try {
@@ -76,12 +110,6 @@ function Invite() {
           });
   
         if (response.data.status === 200) {
-          if(team) {
-            alert('You are now part of team '+team+'!');
-          }
-          else if(event_title) {
-            alert('You have joined the event '+event_title+'!');
-          }
           navigate("/home");
         }
       } catch (error) {
@@ -90,14 +118,39 @@ function Invite() {
       }
     }
     else if(event_title) {
-      console.log("event title: TO DO");
+      try {
+        // Send a POST request to the corresponding endpoint of the Flask server
+        const response = await axios
+          .post(endpointAcceptEvent, {
+            username,
+            event_id,
+            teamId,
+          })
+          .catch(function (error) {
+            if (error.response) {
+              // Print error data
+              console.log("Data: " + error.response.data);
+              console.log("Status: " + error.response.status);
+              console.log("Headers: " + error.response.headers);
+            }
+          });
+  
+        if (response.data.status === 200) {
+          navigate("/home");
+        }
+      } catch (error) {
+        // Request failed
+        console.log("[ERROR] Request failed: " + error);
+      }
     }
   };
+
 
   const ToggleDisplayAgenda = () => {
     localStorage.setItem("ProfileData", "false");
     navigate("home");
   };
+
 
   useEffect(() => {
     if (location.state) {
@@ -113,8 +166,26 @@ function Invite() {
       if (location.state.id) {
         setTeamId(location.state.id);
       }
+      if (location.state.event_id) {
+        setEventId(location.state.event_id);
+      }
+      if (location.state.team_id) {
+        setTeamId(location.state.team_id);
+      }
+      if (location.state.member) {
+        setMember(location.state.member);
+      }
+      if (location.state.state) {
+        setState(location.state.state);
+      }
+      if (location.state.event_title) {
+        setEventTitle(location.state.event_title);
+      }
     }
   }, [location.state]);
+
+
+  
   return (
     <div className="App">
       {!username && <Navigate to="/login" />}
@@ -166,9 +237,9 @@ function Invite() {
           </div>
           <div className="align-content-center text-center">
             <div className="mt-3 invite-container">
-              <div className="mt-2">{team || event_title}</div>
+              <div className="mt-2">{team || event_title || "No team/event available"}</div>
               <div className="mt-2">
-                {description || "Here the description"}
+                {description || "No description available"}
               </div>
               <br />
               <div className="row text-center">
