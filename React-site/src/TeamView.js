@@ -16,12 +16,11 @@ import WebSocketComponent from "./components/WebSocketComponent";
 import Task from "./components/Task.js";
 import PopUp from "./components/PopUp.js";
 import Survey from "./components/Survey";
-import "./css/Survey.css"
+import "./css/Survey.css";
 import { address, flask_port } from "./components/Endpoint";
 import Chat from "./components/chat";
 
 import CreateSurvey from "./components/CreateSurvey";
-
 
 var endpoint = address + flask_port + "/teamGivenID";
 
@@ -53,6 +52,9 @@ function TeamView() {
   const [task, setTask] = useState([]);
   const showDeletePopUp = localStorage.getItem("delete") === "true";
   const task_id = localStorage.getItem("task_to_delete");
+  const [leaveTeam, setLeaveTeam] = useState(false);
+  const [deleteTeam, setDeleteTeam] = useState(false);
+
   const updateDimensions = () => {
     setWindowWidth(window.innerWidth);
   };
@@ -167,44 +169,12 @@ function TeamView() {
     window.location.replace("/home/teams");
   };
 
-  const handleLeaveTeam = async () => {
-    try {
-      const response = await axios.delete(
-        address + flask_port + `/home/teams/leaveteam`,
-        {
-          data: null, // Send an empty data object to indicate no request body
-          params: { teamId: id, username: decryptedUsername }, // Add params if needed
-        }
-      );
-      if (response.status === 200) {
-        // If the deletion was successful, update local storage and reload the page
-        window.location.replace("/home/teams");
-        // TODO: You can add an alert here to inform the user about the successful action
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      // Handle any errors that occur during the DELETE request
-    }
+  const handleDelete = () => {
+    setDeleteTeam(true);
   };
 
-  const handleDelete = async () => {
-    try {
-      const response = await axios.delete(
-        address + flask_port + `/home/teams/deleteteam`,
-        {
-          data: null, // Send an empty data object to indicate no request body
-          params: { teamId: id }, // Add params if needed
-        }
-      );
-      if (response.status === 200) {
-        // If the deletion was successful, update local storage and reload the page
-        window.location.replace("/home/teams");
-        // TODO: You can add an alert here to inform the user about the successful action
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      // Handle any errors that occur during the DELETE request
-    }
+  const handleLeaveTeam = () => {
+    setLeaveTeam(true);
   };
 
   return (
@@ -246,7 +216,32 @@ function TeamView() {
             )}
           </div>
           {task.id !== undefined && <Task task={task} />}
-          {showDeletePopUp && <PopUp type="task" task_id={task_id} />}
+          {showDeletePopUp && (
+            <PopUp
+              type="task"
+              task_id={task_id}
+              message={"Do you want to delete this task?"}
+            />
+          )}
+          {deleteTeam && (
+            <div>
+              <PopUp
+                type="deleteTeam"
+                message={"Do you want to delete this team?"}
+                id={id}
+              />
+            </div>
+          )}
+          {leaveTeam && (
+            <div>
+              <PopUp
+                type="leaveTeam"
+                message={"Do you want to leave this team?"}
+                id={id}
+                dU={decryptedUsername}
+              />
+            </div>
+          )}
           <div className="row mt-4 mb-2" style={{ textAlign: "left" }}>
             <div className="row mb-3">
               <div className="col"></div>
@@ -451,8 +446,18 @@ function TeamView() {
                   <CreateSurvey></CreateSurvey>
                   <hr></hr>
                   <div className="Surveys">
-                    <Survey title="Esempio di titolo" description="Descrizione." votes="14" date="14/02/23" author="Prova prova" entries={[[ "50%" , "ciao", true], [ "25%" , "ciaociao", false], [ "25%" , "eheheh", false]]}>
-                    </Survey>
+                    <Survey
+                      title="Esempio di titolo"
+                      description="Descrizione."
+                      votes="14"
+                      date="14/02/23"
+                      author="Prova prova"
+                      entries={[
+                        ["50%", "ciao", true],
+                        ["25%", "ciaociao", false],
+                        ["25%", "eheheh", false],
+                      ]}
+                    ></Survey>
                   </div>
                 </Accordion.Body>
               </Accordion.Item>
