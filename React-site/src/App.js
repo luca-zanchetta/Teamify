@@ -5,7 +5,6 @@ import Login from "./Login";
 import SignUp from "./SignUp";
 import Home from "./Home";
 import Reset from "./Reset";
-import ResetRequest from "./ResetRequest";
 import HomeLoggedIn from "./HomeLoggedIn";
 import NewTask from "./NewTask";
 import TeamView from "./TeamView";
@@ -14,15 +13,13 @@ import Teams from "./Teams";
 import Task from "./NewTask.js";
 import CreateTeam from "./CreateTeam";
 
-import { address, flask_port } from "./components/Endpoint";
-
 function App() {
   //data è la variabile dello stato, setData è la funzione per settare il suo valore
   const [data, setData] = useState([{}]);
   //use effect viene usato per ottenere la route di interesse. La response delle api
   //viene converita in json e poi caricate dentro la variabili data
   useEffect(() => {
-    fetch(address+flask_port)
+    fetch("http://localhost:5000")
       .then((res) => res.json())
       .then((data) => {
         setData(data);
@@ -36,7 +33,6 @@ function App() {
         <Route path="login" element={<Login />} />
         <Route path="signup" element={<SignUp />} />
         <Route path="reset" element={<Reset />} />
-        <Route path="resetRequest" element={<ResetRequest />} />
         <Route path="home" element={<HomeLoggedIn />} />
         <Route path="home/newtask" element={<NewTask />} />
         <Route path="teamview" element={<TeamView />} />

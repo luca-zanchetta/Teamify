@@ -2,7 +2,6 @@ import "./css/App.css";
 import "./css/Homepage.css";
 
 import WeeklyCalendar from "./components/WeeklyCalendar.js";
-import { Container } from "./css/Navigator.css";
 import { Link, useNavigate, Navigate } from "react-router-dom";
 import React, { useCallback, useState, useEffect, useRef } from "react";
 import NavBar from "./components/NavBar";
@@ -15,7 +14,7 @@ import Task from "./components/Task.js";
 import PopUp from "./components/PopUp.js";
 
 import {WebSocketComponent} from "./components/WebSocketComponent";
-import Chat from "./components/chat";
+import Chat from "./components/Chat";
 
 function HomeLoggedIn() {
 //rimozione alert

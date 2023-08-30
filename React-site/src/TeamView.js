@@ -15,10 +15,9 @@ import Notifications from "./components/Notifications";
 import WebSocketComponent from "./components/WebSocketComponent";
 import Task from "./components/Task.js";
 import PopUp from "./components/PopUp.js";
+import Survey from "./components/Survey";
+import "./css/Survey.css"
 
-import { address, flask_port } from "./components/Endpoint";
-
-var endpoint = address+flask_port+"/teamGivenID";
 
 function TeamView() {
   const inviteOk = sessionStorage.getItem("invite_alert") === "true";
@@ -38,8 +37,6 @@ function TeamView() {
   const [new_member, setNewMember] = useState("");
   const queryParameters = new URLSearchParams(window.location.search);
   const id = queryParameters.get("id");
-  const endpoint1 = address+flask_port+"/teamDetails";
-  const endpoint2 = address+flask_port+"/invite";
   const decryptedUsername = localStorage.getItem("username");
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
@@ -322,7 +319,12 @@ function TeamView() {
               </Accordion.Item>
               <Accordion.Item eventKey="3">
                 <Accordion.Header>Surveys</Accordion.Header>
-                <Accordion.Body></Accordion.Body>
+                <Accordion.Body>
+                  <div className="Surveys">
+                    <Survey title="Esempio di titolo" description="Descrizione." votes="14" date="14/02/23" author="Prova prova" entries={[[ "50%" , "ciao", true], [ "25%" , "ciaociao", false], [ "25%" , "eheheh", false]]}>
+                    </Survey>
+                  </div>
+                </Accordion.Body>
               </Accordion.Item>
             </Accordion>
           </div>

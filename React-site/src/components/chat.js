@@ -2,7 +2,7 @@ import "../css/Navigator.css";
 
 import { useEffect } from "react";
 
-import "../css/chat.css"
+import "../css/Chat.css"
 import chat from "../icons/chat.png";
 import cancel from "../icons/cancel.png";
 import face from "../img/face.jpeg";
