@@ -14,6 +14,7 @@ from flask_socketio import SocketIO, emit, join_room, leave_room
 import datetime
 from flask_mail import Mail, Message
 import time
+import requests
 
 
 # Server setup
@@ -38,7 +39,9 @@ def before_request():
 
 
 connected_clients = []
-teams = []  # List of teams; each team is of the following format: [name, [member1, member2, ..., member10]]
+teams = (
+    []
+)  # List of teams; each team is of the following format: [name, [member1, member2, ..., member10]]
 
 # DB setup
 conn = get_connection()
@@ -308,7 +311,6 @@ def create_new_task():
     (team_name,) = curr.fetchone()
     team_name = str(team_name).strip()
 
-
     curr.execute(
         "SELECT username FROM member where username= %s ORDER BY username DESC LIMIT 1",
         (member,),
@@ -333,8 +335,7 @@ def create_new_task():
 
         return jsonify({"message": "Task created successfully", "id": new_id}), 200
 
-
-    else:   # Shared task
+    else:  # Shared task
         query = "INSERT INTO task (id, title, date, time, description, member, duration,type) VALUES (%s, %s, %s, %s, %s, %s, %s,%s)"
         values = (new_id, title, date, time, description, member, duration, type_task)
 
@@ -357,24 +358,32 @@ def create_new_task():
             return jsonify("ko"), 400
 
         for person in event_members:
-            query_inclues_member = "INSERT INTO includes (event,team,username,state) VALUES (%s,%s,%s,%s)"
+            query_inclues_member = (
+                "INSERT INTO includes (event,team,username,state) VALUES (%s,%s,%s,%s)"
+            )
             params_includes_member = (new_id, team_id, person, "pending")
             try:
                 curr.execute(query_inclues_member, params_includes_member)
             except Exception as err:
                 print("[ERROR] /new_event (event member): ", err)
                 return jsonify("ko"), 400
-            
+
             if person != member:
                 query_notification = "INSERT INTO notification (date, content, type, read, username) VALUES (%s,%s,%s,%s,%s)"
-                params_notification = (datetime.datetime.now(), f"{member} of team {team_name} has invited you to join the event '{title}'.", "event", False, person,)
+                params_notification = (
+                    datetime.datetime.now(),
+                    f"{member} of team {team_name} has invited you to join the event '{title}'.",
+                    "event",
+                    False,
+                    person,
+                )
                 try:
                     curr.execute(query_notification, params_notification)
                     socketio.emit("event_notification", "", room=person)
                 except Exception as err:
-                    print("[ERROR] /home/newtask: "+err)
+                    print("[ERROR] /home/newtask: " + err)
                     return jsonify("ko"), 400
-                
+
         return jsonify({"message": "Task created successfully", "id": new_id}), 200
 
 
@@ -662,25 +671,25 @@ def team_list():
 
 
 # Get joined teams from username
-@app.route("/getJoinedTeams", methods=['POST'])
+@app.route("/getJoinedTeams", methods=["POST"])
 def get_joined_teams():
     data = request.get_json()
     curr = conn.cursor()
     teams = []
 
-    username = data['username']
+    username = data["username"]
     username = decrypt_username(username)
-    query="SELECT team.name FROM joinTeam JOIN team ON joinTeam.team = team.id WHERE username = %s"
-    params=(username,)
+    query = "SELECT team.name FROM joinTeam JOIN team ON joinTeam.team = team.id WHERE username = %s"
+    params = (username,)
 
     curr.execute(query, params)
 
     teams = curr.fetchall()
     if not teams:
-        print('[INFO] No joined team.')
-        return jsonify({"message":"No joined team.", "status":201})
+        print("[INFO] No joined team.")
+        return jsonify({"message": "No joined team.", "status": 201})
 
-    return jsonify({"teams":teams, "status":200})
+    return jsonify({"teams": teams, "status": 200})
 
 
 # team details given team id
@@ -827,6 +836,7 @@ def exit_from_team():
 
     try:
         curr.execute(query_delete, param_delete)
+
         return jsonify(
             {"message": f"[INFO] /home/exitfromteam: id {team_id} successfully left"}
         )
@@ -1325,15 +1335,15 @@ def accept_invite():
         return jsonify("ko"), 400
 
 
-@app.route("/acceptEventInvite", methods=['POST'])
+@app.route("/acceptEventInvite", methods=["POST"])
 def accept_event_invite():
     curr = conn.cursor()
     data = request.get_json()
 
-    username = data['username']
+    username = data["username"]
     username = decrypt_username(username)
-    event_id = data['event_id']
-    team_id = data['teamId']
+    event_id = data["event_id"]
+    team_id = data["teamId"]
 
     query_update_event_invite = """
     UPDATE includes 
@@ -1346,12 +1356,12 @@ def accept_event_invite():
 
     try:
         curr.execute(query_update_event_invite, params_update_event_invite)
-        print('[INFO] Event acceptance successfully updated!')
+        print("[INFO] Event acceptance successfully updated!")
     except Exception as err:
-        print('[ERROR] /acceptEventInvite: '+err)
-        return jsonify({"message":"Update of event acceptance failed.", "status":500})
-    
-    return jsonify({"message":"Event successfully joined!", "status":200})
+        print("[ERROR] /acceptEventInvite: " + err)
+        return jsonify({"message": "Update of event acceptance failed.", "status": 500})
+
+    return jsonify({"message": "Event successfully joined!", "status": 200})
 
 
 @app.route("/rejectInvite", methods=["POST"])
@@ -1397,17 +1407,17 @@ def reject_invite():
         return jsonify("ko"), 400
 
 
-@app.route("/rejectEventInvite", methods=['POST'])
+@app.route("/rejectEventInvite", methods=["POST"])
 def reject_event_invite():
     curr = conn.cursor()
     data = request.get_json()
 
-    username = data['username']
+    username = data["username"]
     username = decrypt_username(username)
-    event_id = data['event_id']
-    team_id = data['teamId']
-    admin = data['admin']
-    event_name = data['event_title']
+    event_id = data["event_id"]
+    team_id = data["teamId"]
+    admin = data["admin"]
+    event_name = data["event_title"]
 
     query_update_event_invite = """
     UPDATE includes 
@@ -1420,7 +1430,7 @@ def reject_event_invite():
 
     try:
         curr.execute(query_update_event_invite, params_update_event_invite)
-        print('[INFO] Event acceptance successfully updated!')
+        print("[INFO] Event acceptance successfully updated!")
 
         # If the user refuses my message, I get notified
         query_notification = "INSERT INTO notification (date, content, type, read, username) VALUES (%s,%s,%s,%s,%s)"
@@ -1434,10 +1444,10 @@ def reject_event_invite():
         curr.execute(query_notification, params_notification)
         socketio.emit("message_notification", "", room=admin)
     except Exception as err:
-        print('[ERROR] /acceptEventInvite: '+err)
-        return jsonify({"message":"Update of event acceptance failed.", "status":500})
-    
-    return jsonify({"message":"Event successfully rejected.", "status":200})
+        print("[ERROR] /acceptEventInvite: " + err)
+        return jsonify({"message": "Update of event acceptance failed.", "status": 500})
+
+    return jsonify({"message": "Event successfully rejected.", "status": 200})
 
 
 ############################ END REST APIs ####################################
