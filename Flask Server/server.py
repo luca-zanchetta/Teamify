@@ -15,6 +15,8 @@ import datetime
 from flask_mail import Mail, Message
 import time
 import requests
+from datetime import date, datetime, timedelta
+
 
 
 # Server setup
@@ -1449,6 +1451,106 @@ def reject_event_invite():
 
     return jsonify({"message": "Event successfully rejected.", "status": 200})
 
+
+
+
+
+#POLLS
+@app.route('/vote', methods=['POST'])
+def add_vote():
+    data = request.get_json()
+    pool_id = data.get('pool_id')
+    username = data.get('username')
+    option_id = data.get('option_id')
+
+    curr = conn.cursor()
+    
+    # check if the pool exists
+    cur = curr.execute('SELECT * FROM survey WHERE id = ?', [pool_id])
+    pool = cur.fetchone()
+    if not pool:
+        return jsonify({'message': 'Pool not found'}), 400
+    
+    # check if the user has already voted
+    cur = curr.execute('SELECT * FROM vote WHERE username = ?', [username])
+    vote = cur.fetchone()
+    
+    # add or update the vote
+    if vote:
+        old_option_id = vote['option_id']
+        curr.execute('UPDATE vote SET option_id = ? WHERE username = ?', [option_id, username])
+        curr.execute('UPDATE option SET counter = counter - 1 WHERE id = ?', [old_option_id])
+    else:
+        curr.execute('INSERT INTO vote (username, option_id) VALUES (?, ?)', [username, option_id])
+    
+    # update the counter
+    curr.execute('UPDATE option SET counter = counter + 1 WHERE id = ?', [option_id])
+    
+    return jsonify({'message': 'Success'}), 200
+
+
+@app.route('/createPool', methods=['POST'])
+def create_pool():
+    data = request.get_json()
+    text = data.get('text')
+    due_date = data.get('due_date')
+    admin = data.get('admin')
+    team = data.get('team')
+    options = data.get('options')
+    
+    
+    # parse the due date
+    due_date = datetime.strptime(due_date, '%Y-%m-%d').date()
+    
+    # create the pool
+    cur = conn.cursor()
+    cur.execute('INSERT INTO survey (text, due_date) VALUES (%s, %s) RETURNING id', [text, due_date])
+    survey_id = cur.fetchone()[0]
+    
+    # update the sended_by table
+    cur.execute('INSERT INTO sended_by (admin, team, survey) VALUES (%s, %s, %s)', [admin, team, survey_id])
+    
+    # insert the options
+    for option_text in options:
+        cur.execute('INSERT INTO option (survey_id, text) VALUES (%s, %s)', [survey_id, option_text])
+    
+    curr.commit()
+    
+    return jsonify({'message': 'Success'}), 200
+
+
+@app.route('/getSurveys', methods=['GET'])
+def get_surveys():
+    team_id = request.args.get('team_id')
+    username = request.args.get('username')
+    
+    
+    # get the surveys
+    cur = conn.cursor()
+    cur.execute('SELECT survey.id, survey.text, survey.due_date FROM survey JOIN sended_by ON survey.id = sended_by.survey WHERE sended_by.team = %s AND survey.due_date > %s', [team_id, date.today()])
+    surveys = cur.fetchall()
+    
+    result = []
+    for survey in surveys:
+        survey_id, survey_text, due_date = survey
+        # get the options
+        cur.execute('SELECT id, text FROM option WHERE survey_id = %s', [survey_id])
+        options = cur.fetchall()
+        
+        # get the user's vote
+        cur.execute('SELECT option_id FROM vote WHERE username = %s AND option_id IN (SELECT id FROM option WHERE survey_id = %s)', [username, survey_id])
+        vote = cur.fetchone()
+        vote_option_id = vote[0] if vote else None
+        
+        result.append({
+            'survey_id': survey_id,
+            'survey_text': survey_text,
+            'due_date': due_date,
+            'options': [{'option_id': option[0], 'option_text': option[1]} for option in options],
+            'vote': vote_option_id
+        })
+    
+    return jsonify(result)
 
 ############################ END REST APIs ####################################
 
