@@ -17,7 +17,9 @@ import Task from "./components/Task.js";
 import PopUp from "./components/PopUp.js";
 import Survey from "./components/Survey";
 import "./css/Survey.css"
+import { address, flask_port } from "./components/Endpoint";
 
+var endpoint = address+flask_port+"/teamGivenID";
 
 function TeamView() {
   const inviteOk = sessionStorage.getItem("invite_alert") === "true";
@@ -32,7 +34,8 @@ function TeamView() {
   const handleInviteKo = () => {
     sessionStorage.setItem("inviteError_alert", "false");
   };
-
+  const endpoint1 = address+flask_port+"/teamDetails";
+  const endpoint2 = address+flask_port+"/invite";
   const [data, setData] = useState([]);
   const [new_member, setNewMember] = useState("");
   const queryParameters = new URLSearchParams(window.location.search);
