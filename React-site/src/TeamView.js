@@ -17,7 +17,10 @@ import Task from "./components/Task.js";
 import PopUp from "./components/PopUp.js";
 import Survey from "./components/Survey";
 import "./css/Survey.css"
+import { address, flask_port } from "./components/Endpoint";
+import CreateSurvey from "./components/CreateSurvey";
 
+var endpoint = address+flask_port+"/teamGivenID";
 
 function TeamView() {
   const inviteOk = sessionStorage.getItem("invite_alert") === "true";
@@ -32,6 +35,8 @@ function TeamView() {
   const handleInviteKo = () => {
     sessionStorage.setItem("inviteError_alert", "false");
   };
+  const endpoint1 = address+flask_port+"/teamDetails";
+  const endpoint2 = address+flask_port+"/invite";
 
   const [data, setData] = useState([]);
   const [new_member, setNewMember] = useState("");
@@ -320,6 +325,8 @@ function TeamView() {
               <Accordion.Item eventKey="3">
                 <Accordion.Header>Surveys</Accordion.Header>
                 <Accordion.Body>
+                  <CreateSurvey></CreateSurvey>
+                  <hr></hr>
                   <div className="Surveys">
                     <Survey title="Esempio di titolo" description="Descrizione." votes="14" date="14/02/23" author="Prova prova" entries={[[ "50%" , "ciao", true], [ "25%" , "ciaociao", false], [ "25%" , "eheheh", false]]}>
                     </Survey>

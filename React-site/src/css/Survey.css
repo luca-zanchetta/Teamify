@@ -144,3 +144,81 @@
     font-weight: bold;
     margin: .8%;
 }
+
+.SurveySectionTopBar {
+    position: sticky;
+    z-index: 1;
+    display: flex;
+    width: 100%;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.CreateSurvey {
+    height: auto;
+    display: flex;
+    padding: 1%;
+    background-color: green;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.CreateSurvey > h2 {
+    display: flex;
+    margin: 0;
+    font-size: large;
+    font-weight: bold;
+    color: white;
+    margin: 2%;
+}
+
+
+.SurveyHeader > input[type="text"]{
+    background-color: rgb(200, 200, 200);
+    border:none;
+    border-bottom: 1px solid #484848;
+    width: 50%;
+    font-size: larger;
+}
+
+.SurveyHeader > input[type="date"]{
+    background-color: rgb(200, 200, 200);
+    border:none;
+    border-bottom: 1px solid #484848;
+    width: 50%;
+    font-size: larger;
+}
+
+.option {
+    background-color: #ffffff00;
+    border: none;
+    font-size: large;
+    width: -webkit-fill-available;
+}
+
+.option:focus,textarea:focus{
+    
+    outline: none;
+    border: none;
+    border-bottom: 1px solid #484848;
+}
+
+.dot {
+    display: flex;
+    aspect-ratio: 1/1;
+    height: 25px;
+    width: 25px;
+    background-color: #3f3f3f;
+    border-radius: 50%;
+    display: inline-block;
+}
+.XIcon {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-start;
+}
+.SurveyEntry > div >img {
+    aspect-ratio: 1 / 1;
+    max-height: 20px;
+    cursor: pointer;
+}
