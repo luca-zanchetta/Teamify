@@ -2,8 +2,10 @@ import psycopg2
 from DBConnection import get_connection, user, psw
 from hashlib import sha256
 
+local="localhost"
+docker="db"
 # Create connection
-conn = psycopg2.connect(host="localhost", port=5432, user=user, password=psw)
+conn = psycopg2.connect(host=docker, port=5432, user=user, password=psw)
 conn.set_session(autocommit=True)
 if not conn:
     print("Error during db connection")
@@ -11,11 +13,9 @@ if not conn:
 
 
 # Create database
-dropDB = "DROP DATABASE IF EXISTS teamify"
 createDB = "CREATE DATABASE teamify"
 
 cur = conn.cursor()
-cur.execute(dropDB)
 
 try:
     cur.execute(createDB)
@@ -36,7 +36,6 @@ cur = conn.cursor()
 
 
 # Table 'member'
-dropMember = "DROP TABLE IF EXISTS member"
 member = """CREATE TABLE member (
     name VARCHAR(50) NOT NULL,
     surname VARCHAR(50) NOT NULL,
@@ -46,7 +45,6 @@ member = """CREATE TABLE member (
     password CHAR(256) NOT NULL
 )"""
 try:
-    cur.execute(dropMember)
     cur.execute(member)
     conn.commit()
 
@@ -71,7 +69,6 @@ except Exception as err:
 
 
 # Create task table
-dropTask = "DROP TABLE IF EXISTS task"
 task = """CREATE TABLE task (
     id SERIAL PRIMARY KEY,
     title VARCHAR(50) NOT NULL,
@@ -85,7 +82,6 @@ task = """CREATE TABLE task (
 )"""
 
 try:
-    cur.execute(dropTask)
     cur.execute(task)
     conn.commit()
     print("[INFO] Table 'task' successfully created.")
@@ -95,7 +91,6 @@ except Exception as err:
 
 
 # Table 'notification'
-dropNotification = "DROP TABLE IF EXISTS notification CASCADE"
 notification = """CREATE TABLE notification (
     id SERIAL PRIMARY KEY,
     date DATE NOT NULL,
@@ -116,7 +111,6 @@ notification = """CREATE TABLE notification (
     )
 )"""
 try:
-    cur.execute(dropNotification)
     cur.execute(notification)
     conn.commit()
 
@@ -127,7 +121,6 @@ except Exception as err:
 
 
 # Table 'team'
-dropTeam = "DROP TABLE IF EXISTS team"
 team = """CREATE TABLE team (
     id SERIAL UNIQUE,
     name VARCHAR(100) NOT NULL DEFAULT 'unnamed_team',
@@ -136,7 +129,6 @@ team = """CREATE TABLE team (
         PRIMARY KEY(name, description)
 )"""
 try:
-    cur.execute(dropTeam)
     cur.execute(team)
     conn.commit()
 
@@ -147,7 +139,6 @@ except Exception as err:
 
 
 # Table 'join'
-dropJoin = "DROP TABLE IF EXISTS joinTeam CASCADE"
 join = """CREATE TABLE joinTeam (
     username VARCHAR(100),
     team INT,
@@ -163,7 +154,6 @@ join = """CREATE TABLE joinTeam (
             ON DELETE CASCADE
 )"""
 try:
-    cur.execute(dropJoin)
     cur.execute(join)
     conn.commit()
 
@@ -174,7 +164,6 @@ except Exception as err:
 
 
 # Table 'manage'
-dropManage = "DROP TABLE IF EXISTS manage CASCADE"
 manage = """CREATE TABLE manage (
     admin VARCHAR(100),
     team INT,
@@ -190,7 +179,6 @@ manage = """CREATE TABLE manage (
             ON DELETE CASCADE
 )"""
 try:
-    cur.execute(dropManage)
     cur.execute(manage)
     conn.commit()
 
@@ -201,7 +189,6 @@ except Exception as err:
 
 
 # Table 'invite'
-dropInvite = "DROP TABLE IF EXISTS invite CASCADE"
 invite = """CREATE TABLE invite (
     username VARCHAR(100),
     admin VARCHAR(100) NOT NULL,
@@ -218,7 +205,6 @@ invite = """CREATE TABLE invite (
             ON DELETE CASCADE
 )"""
 try:
-    cur.execute(dropInvite)
     cur.execute(invite)
     conn.commit()
 
@@ -229,12 +215,11 @@ except Exception as err:
 
 
 # Table 'includes'
-dropIncludes = "DROP TABLE IF EXISTS includes CASCADE"
 includes = """CREATE TABLE includes (
     event INT,
     team INT,
     username VARCHAR(100),
-    state VARCHAR(50) NOT NULL DEFAULT 'pending',
+    state VARCHAR(50) NOT NULL,
     CONSTRAINT includes_pkey
         PRIMARY KEY(event, team, username),
     CONSTRAINT fk_username
@@ -256,7 +241,6 @@ includes = """CREATE TABLE includes (
     )
 )"""
 try:
-    cur.execute(dropIncludes)
     cur.execute(includes)
     conn.commit()
 
@@ -267,14 +251,12 @@ except Exception as err:
 
 
 # Table 'survey'
-dropSurvey= "DROP TABLE IF EXISTS survey CASCADE"
 survey = """CREATE TABLE survey (
     id SERIAL PRIMARY KEY,
     text VARCHAR(500) NOT NULL,
     due_date DATE NOT NULL
 )"""
 try:
-    cur.execute(dropSurvey)
     cur.execute(survey)
     conn.commit()
 
@@ -285,7 +267,6 @@ except Exception as err:
 
 
 # Table 'sended_by'
-dropSendedBy= "DROP TABLE IF EXISTS sended_by CASCADE"
 sendedBy = """CREATE TABLE sended_by (
     admin VARCHAR(100) NOT NULL,
     team INT NOT NULL,
@@ -300,7 +281,6 @@ sendedBy = """CREATE TABLE sended_by (
             ON DELETE CASCADE
 )"""
 try:
-    cur.execute(dropSendedBy)
     cur.execute(sendedBy)
     conn.commit()
 
@@ -311,7 +291,6 @@ except Exception as err:
 
 
 # Table 'option'
-dropOption= "DROP TABLE IF EXISTS option CASCADE"
 option = """CREATE TABLE option (
     survey INT NOT NULL,
     id SERIAL PRIMARY KEY,
@@ -323,7 +302,6 @@ option = """CREATE TABLE option (
             ON DELETE CASCADE
 )"""
 try:
-    cur.execute(dropOption)
     cur.execute(option)
     conn.commit()
 
@@ -334,7 +312,6 @@ except Exception as err:
 
 
 # Table 'vote'
-dropVote= "DROP TABLE IF EXISTS vote CASCADE"
 vote = """CREATE TABLE vote (
     option INT,
     username VARCHAR(100),
@@ -350,7 +327,6 @@ vote = """CREATE TABLE vote (
             ON DELETE CASCADE
 )"""
 try:
-    cur.execute(dropVote)
     cur.execute(vote)
     conn.commit()
 
@@ -361,7 +337,6 @@ except Exception as err:
 
 
 # Table 'message'
-dropMessage= "DROP TABLE IF EXISTS message CASCADE"
 message = """CREATE TABLE message (
     id SERIAL PRIMARY KEY,
     date DATE NOT NULL,
@@ -378,7 +353,6 @@ message = """CREATE TABLE message (
             ON DELETE CASCADE
 )"""
 try:
-    cur.execute(dropMessage)
     cur.execute(message)
     conn.commit()
 
@@ -389,7 +363,6 @@ except Exception as err:
 
 
 # Table 'add'
-dropAdd= "DROP TABLE IF EXISTS add CASCADE"
 add = """CREATE TABLE add (
     personal_task INT PRIMARY KEY,
     username VARCHAR(100) NOT NULL,
@@ -403,7 +376,6 @@ add = """CREATE TABLE add (
             ON DELETE CASCADE
 )"""
 try:
-    cur.execute(dropAdd)
     cur.execute(add)
     conn.commit()
 
