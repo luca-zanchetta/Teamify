@@ -451,8 +451,11 @@ def get_tasks():
     local_user = request.args.get("user")  # get back the params from the request
     local_user = decrypt_username(local_user)
     curr.execute(
-        "SELECT title, description, date, time, duration, id, status, type, member FROM task WHERE member = %s",
-        (local_user,),
+        "SELECT title, description, date, time, duration, id, status, type, member FROM task WHERE member = %s AND type=%s",
+        (
+            local_user,
+            "personal",
+        ),
     )
     tasks = curr.fetchall()
 
@@ -476,6 +479,48 @@ def get_tasks():
                 "member": task[8],
             }
         )
+
+    curr.execute(
+        "SELECT title, description, date, time, duration, id, status, type, member FROM task WHERE member = %s AND type=%s",
+        (
+            local_user,
+            "event",
+        ),
+    )
+    events = curr.fetchall()
+
+    for event in events:
+        curr.execute(
+            "SELECT event from includes where event=%s and state=%s",
+            (
+                event[5],
+                "accepted",
+            ),
+        )
+        exist = curr.fetchone()
+        if str(exist) != "":
+            start_date = (
+                event[2].strftime("%Y-%m-%d") + " " + event[3].strftime("%H:%M:%S")
+            )
+            end_date = (
+                event[2].strftime("%Y-%m-%d") + " " + event[3].strftime("%H:%M:%S")
+            )
+
+            new_end_date = convert_date(end_date, event[4])
+
+            tasks_list.append(
+                {
+                    "title": event[0],
+                    "start": start_date,
+                    "end": new_end_date,
+                    "description": event[1],
+                    "duration": event[4],
+                    "id": event[5],
+                    "status": event[6],
+                    "type": event[7],
+                    "member": event[8],
+                }
+            )
 
     return jsonify(tasks_list), 200
 
@@ -767,6 +812,47 @@ def members_given_team():
         member_list.append({"member": member[0]})
 
     return jsonify(member_list), 200
+
+
+# leave a team API
+@app.route("/home/teams/leaveteam", methods=["DELETE"])
+def exit_from_team():
+    team_id = request.args.get("teamId")
+    username = request.args.get("username")
+
+    curr = conn.cursor()
+
+    query_delete = "DELETE FROM joinTeam WHERE username = %s and team=%s"
+    param_delete = (username, team_id)
+
+    try:
+        curr.execute(query_delete, param_delete)
+        return jsonify(
+            {"message": f"[INFO] /home/exitfromteam: id {team_id} successfully left"}
+        )
+    except Exception as err:
+        print("[ERROR] /home/deletetask : ", err)
+        return jsonify("ko"), 400
+
+
+# delete a team API
+@app.route("/home/teams/deleteteam", methods=["DELETE"])
+def delete_team():
+    team_id = request.args.get("teamId")
+
+    curr = conn.cursor()
+
+    query_delete = "DELETE FROM team WHERE id = %s "
+    param_delete = (team_id,)
+
+    try:
+        curr.execute(query_delete, param_delete)
+        return jsonify(
+            {"message": f"[INFO] /home/deleteteam: id {team_id} successfully delete"}
+        )
+    except Exception as err:
+        print("[ERROR] /home/deleteteam : ", err)
+        return jsonify("ko"), 400
 
 
 # ottenere la lista dei membri dato un team id
