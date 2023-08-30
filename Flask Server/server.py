@@ -18,27 +18,15 @@ import time
 
 # Server setup
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
 socketio = SocketIO(
     app, cors_allowed_origins="http://localhost:3000", async_mode="eventlet"
 )
 
-
-# Middleware per gestire le richieste preflight OPTIONS
-@app.before_request
-def before_request():
-    if request.method == "OPTIONS":
-        headers = {
-            "Access-Control-Allow-Origin": "http://localhost:3000",
-            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE",
-            "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept",
-            "Access-Control-Allow-Credentials": "true",
-        }
-        return ("", 200, headers)
-
-
 connected_clients = []
-teams = []  # List of teams; each team is of the following format: [name, [member1, member2, ..., member10]]
+teams = (
+    []
+)  # List of teams; each team is of the following format: [name, [member1, member2, ..., member10]]
 
 # DB setup
 conn = get_connection()
@@ -301,14 +289,6 @@ def create_new_task():
     team_id = request.json["teamId"]
     event_members = request.json["members"]
 
-    # Team name given the id (it is useful for the notifications)
-    query_team_name = "SELECT name FROM team WHERE id = %s"
-    params_team_name = (team_id,)
-    curr.execute(query_team_name, params_team_name)
-    (team_name,) = curr.fetchone()
-    team_name = str(team_name).strip()
-
-
     curr.execute(
         "SELECT username FROM member where username= %s ORDER BY username DESC LIMIT 1",
         (member,),
@@ -333,8 +313,7 @@ def create_new_task():
 
         return jsonify({"message": "Task created successfully", "id": new_id}), 200
 
-
-    else:   # Shared task
+    else:
         query = "INSERT INTO task (id, title, date, time, description, member, duration,type) VALUES (%s, %s, %s, %s, %s, %s, %s,%s)"
         values = (new_id, title, date, time, description, member, duration, type_task)
 
@@ -344,7 +323,7 @@ def create_new_task():
             print("[ERROR] /new_task: ", err)
             return jsonify("ko"), 400
 
-        # here i include the user that creates the event
+        # here i includes the user that creates the event
         query_inclues = (
             "INSERT INTO includes (event,team,username,state) VALUES (%s,%s,%s,%s)"
         )
@@ -357,24 +336,16 @@ def create_new_task():
             return jsonify("ko"), 400
 
         for person in event_members:
-            query_inclues_member = "INSERT INTO includes (event,team,username,state) VALUES (%s,%s,%s,%s)"
+            query_inclues_member = (
+                "INSERT INTO includes (event,team,username,state) VALUES (%s,%s,%s,%s)"
+            )
             params_includes_member = (new_id, team_id, person, "pending")
             try:
                 curr.execute(query_inclues_member, params_includes_member)
             except Exception as err:
                 print("[ERROR] /new_event (event member): ", err)
                 return jsonify("ko"), 400
-            
-            if person != member:
-                query_notification = "INSERT INTO notification (date, content, type, read, username) VALUES (%s,%s,%s,%s,%s)"
-                params_notification = (datetime.datetime.now(), f"{member} of team {team_name} has invited you to join the event '{title}'.", "event", False, person,)
-                try:
-                    curr.execute(query_notification, params_notification)
-                    socketio.emit("event_notification", "", room=person)
-                except Exception as err:
-                    print("[ERROR] /home/newtask: "+err)
-                    return jsonify("ko"), 400
-                
+
         return jsonify({"message": "Task created successfully", "id": new_id}), 200
 
 
@@ -451,8 +422,11 @@ def get_tasks():
     local_user = request.args.get("user")  # get back the params from the request
     local_user = decrypt_username(local_user)
     curr.execute(
-        "SELECT title, description, date, time, duration, id, status, type, member FROM task WHERE member = %s",
-        (local_user,),
+        "SELECT title, description, date, time, duration, id, status, type, member FROM task WHERE member = %s AND type=%s",
+        (
+            local_user,
+            "personal",
+        ),
     )
     tasks = curr.fetchall()
 
@@ -476,6 +450,48 @@ def get_tasks():
                 "member": task[8],
             }
         )
+
+    curr.execute(
+        "SELECT title, description, date, time, duration, id, status, type, member FROM task WHERE member = %s AND type=%s",
+        (
+            local_user,
+            "event",
+        ),
+    )
+    events = curr.fetchall()
+
+    for event in events:
+        curr.execute(
+            "SELECT event from includes where event=%s and state=%s",
+            (
+                event[5],
+                "accepted",
+            ),
+        )
+        exist = curr.fetchone()
+        if str(exist) != "":
+            start_date = (
+                event[2].strftime("%Y-%m-%d") + " " + event[3].strftime("%H:%M:%S")
+            )
+            end_date = (
+                event[2].strftime("%Y-%m-%d") + " " + event[3].strftime("%H:%M:%S")
+            )
+
+            new_end_date = convert_date(end_date, event[4])
+
+            tasks_list.append(
+                {
+                    "title": event[0],
+                    "start": start_date,
+                    "end": new_end_date,
+                    "description": event[1],
+                    "duration": event[4],
+                    "id": event[5],
+                    "status": event[6],
+                    "type": event[7],
+                    "member": event[8],
+                }
+            )
 
     return jsonify(tasks_list), 200
 
@@ -616,28 +632,6 @@ def team_list():
     return jsonify(teams), 200
 
 
-# Get joined teams from username
-@app.route("/getJoinedTeams", methods=['POST'])
-def get_joined_teams():
-    data = request.get_json()
-    curr = conn.cursor()
-    teams = []
-
-    username = data['username']
-    username = decrypt_username(username)
-    query="SELECT team.name FROM joinTeam JOIN team ON joinTeam.team = team.id WHERE username = %s"
-    params=(username,)
-
-    curr.execute(query, params)
-
-    teams = curr.fetchall()
-    if not teams:
-        print('[INFO] No joined team.')
-        return jsonify({"message":"No joined team.", "status":201})
-
-    return jsonify({"teams":teams, "status":200})
-
-
 # team details given team id
 @app.route("/teamDetails", methods=["GET"])
 def team_details():
@@ -769,6 +763,47 @@ def members_given_team():
     return jsonify(member_list), 200
 
 
+# leave a team API
+@app.route("/home/teams/leaveteam", methods=["DELETE"])
+def exit_from_team():
+    team_id = request.args.get("teamId")
+    username = request.args.get("username")
+
+    curr = conn.cursor()
+
+    query_delete = "DELETE FROM joinTeam WHERE username = %s and team=%s"
+    param_delete = (username, team_id)
+
+    try:
+        curr.execute(query_delete, param_delete)
+        return jsonify(
+            {"message": f"[INFO] /home/exitfromteam: id {team_id} successfully left"}
+        )
+    except Exception as err:
+        print("[ERROR] /home/deletetask : ", err)
+        return jsonify("ko"), 400
+
+
+# delete a team API
+@app.route("/home/teams/deleteteam", methods=["DELETE"])
+def delete_team():
+    team_id = request.args.get("teamId")
+
+    curr = conn.cursor()
+
+    query_delete = "DELETE FROM team WHERE id = %s "
+    param_delete = (team_id,)
+
+    try:
+        curr.execute(query_delete, param_delete)
+        return jsonify(
+            {"message": f"[INFO] /home/deleteteam: id {team_id} successfully delete"}
+        )
+    except Exception as err:
+        print("[ERROR] /home/deleteteam : ", err)
+        return jsonify("ko"), 400
+
+
 # ottenere la lista dei membri dato un team id
 @app.route("/teamGivenID", methods=["GET"])
 def team_given_id():
@@ -783,81 +818,6 @@ def team_given_id():
     name = str(name).strip()
 
     return jsonify({"name": name, "status": 200})
-
-
-# get the list of members of a certain team given an event id
-@app.route("/home/team/member", methods=["GET"])
-def team_members_given_event_id():
-    curr = conn.cursor()
-    # Fetch the ID of the last inserted task
-    eventID = request.args.get("id")  # get back the params from the request
-    curr.execute(
-        "SELECT team FROM includes WHERE event = %s",
-        (eventID,),
-    )
-    (team_id,) = curr.fetchone()
-    team_id = str(team_id).strip()
-    curr.execute(
-        "SELECT username FROM joinTeam WHERE team = %s",
-        (team_id,),
-    )
-    members = curr.fetchall()
-
-    member_list = []
-    for member in members:
-        member_list.append({"member": member[0]})
-
-    print(member_list)
-
-    return jsonify({"member_list": member_list, "status": 200})
-
-
-# edit member API
-@app.route("/home/team/event/editmember", methods=["POST"])
-def edit_member_event():
-    curr = conn.cursor()
-    data = request.get_json()  # Fetch the ID of the last inserted task
-    event_id = data["id"]  # get back the params from the request
-    new_members = data["members"]
-    admin = data["admin"]
-    new_set = []
-    for member in new_members:
-        if member != "member":
-            new_set.append(member)
-
-    curr.execute(
-        "SELECT username, team FROM includes WHERE event = %s",
-        (event_id,),
-    )
-    members = curr.fetchall()
-    member_list = []
-    for member in members:
-        member_list.append(member[0])
-        team_id = member[1]
-
-    for member in member_list:
-        if member not in new_set and member != admin:
-            query_member = "DELETE FROM includes WHERE username = %s"
-            param_member = (member,)
-            try:
-                curr.execute(query_member, param_member)
-            except Exception as err:
-                print("[ERROR] /home/team/event/editmember:", err)
-                return jsonify("ko"), 400
-
-    for member in new_set:
-        if member not in member_list:
-            query_member = "INSERT INTO includes (event,team,username) VALUES(%s,%s,%s)"
-            param_member = (event_id, team_id, member)
-            try:
-                curr.execute(query_member, param_member)
-            except Exception as err:
-                print("[ERROR] /home/team/event/editmemeber: (insert:)", err)
-                return jsonify("ko"), 400
-
-    # TODO: here we must send the invites
-
-    return jsonify({"member_list": member_list, "status": 200})
 
 
 # Get list of members included in a certain event the one that accepted
@@ -1044,12 +1004,19 @@ def get_notifications():
 
 
 # Read the notification
-@app.route("/readNotification", methods=["POST"])
+app.route("/readNotification", methods=["POST"])
+
+
 def read_notification():
+    print("ciao")
     data = request.get_json()
     curr = conn.cursor()
 
+    print("ciao")
+
     id = data["notification_id"]
+
+    print("ciao")
 
     query_exists = "SELECT read FROM notification WHERE id = %s"
     params = (id,)
@@ -1057,7 +1024,7 @@ def read_notification():
     curr.execute(query_exists, params)
     try:
         (read,) = curr.fetchone()
-        if read == False:
+        if read == "false":
             query_read = "UPDATE notification SET read = true WHERE id = %s"
             try:
                 curr.execute(query_read, params)
@@ -1145,12 +1112,10 @@ def invite():
 
 
 # given username, check invites of user
-@app.route("/checkInvites", methods=["POST"])
+@app.route("/checkInvites", methods=["GET"])
 def check_invites():
     curr = conn.cursor()
-    data = request.get_json()
-
-    username = data["username"]
+    username = request.args.get("username")
     username = decrypt_username(username)
     curr.execute(
         "SELECT admin, team id, name, description FROM invite JOIN team on team.id=invite.team WHERE username = %s ORDER BY name",
@@ -1167,41 +1132,7 @@ def check_invites():
                 "team_description": invite[3],
             }
         )
-    return jsonify({"invites": invitesJson, "status": 200})
-
-
-# Given username, check event invites of the user
-@app.route("/checkEventInvites", methods=["POST"])
-def check_event_invites():
-    curr = conn.cursor()
-    data = request.get_json()
-
-    username = data["username"]
-    username = decrypt_username(username)
-    curr.execute(
-        """
-        SELECT includes.event, includes.team, includes.username, includes.state, task.title, task.description, task.member
-        FROM includes JOIN task ON task.id=includes.event 
-        WHERE username = %s
-        AND includes.state = 'pending'
-        """,
-        (username,),
-    )
-    invites = curr.fetchall()
-    invitesJson = []
-    for invite in invites:
-        invitesJson.append(
-            {
-                "event_id": invite[0],
-                "team_id": invite[1],
-                "member": invite[2],
-                "state": invite[3],
-                "event_title": invite[4],
-                "event_description": invite[5],
-                "admin": invite[6],
-            }
-        )
-    return jsonify({"invites": invitesJson, "status": 200})
+    return jsonify(invitesJson), 200
 
 
 # given team id and username, user accepts invite and therefore joins team
@@ -1237,35 +1168,6 @@ def accept_invite():
         return jsonify({"message": "ok", "status": 200})
     else:
         return jsonify("ko"), 400
-
-
-@app.route("/acceptEventInvite", methods=['POST'])
-def accept_event_invite():
-    curr = conn.cursor()
-    data = request.get_json()
-
-    username = data['username']
-    username = decrypt_username(username)
-    event_id = data['event_id']
-    team_id = data['teamId']
-
-    query_update_event_invite = """
-    UPDATE includes 
-    SET state = 'accepted' 
-    WHERE username = %s 
-    AND event = %s
-    AND team = %s
-    """
-    params_update_event_invite = (username, event_id, team_id)
-
-    try:
-        curr.execute(query_update_event_invite, params_update_event_invite)
-        print('[INFO] Event acceptance successfully updated!')
-    except Exception as err:
-        print('[ERROR] /acceptEventInvite: '+err)
-        return jsonify({"message":"Update of event acceptance failed.", "status":500})
-    
-    return jsonify({"message":"Event successfully joined!", "status":200})
 
 
 @app.route("/rejectInvite", methods=["POST"])
@@ -1309,49 +1211,6 @@ def reject_invite():
         return jsonify({"message": "ok", "status": 200})
     else:
         return jsonify("ko"), 400
-
-
-@app.route("/rejectEventInvite", methods=['POST'])
-def reject_event_invite():
-    curr = conn.cursor()
-    data = request.get_json()
-
-    username = data['username']
-    username = decrypt_username(username)
-    event_id = data['event_id']
-    team_id = data['teamId']
-    admin = data['admin']
-    event_name = data['event_title']
-
-    query_update_event_invite = """
-    UPDATE includes 
-    SET state = 'rejected' 
-    WHERE username = %s 
-    AND event = %s
-    AND team = %s
-    """
-    params_update_event_invite = (username, event_id, team_id)
-
-    try:
-        curr.execute(query_update_event_invite, params_update_event_invite)
-        print('[INFO] Event acceptance successfully updated!')
-
-        # If the user refuses my message, I get notified
-        query_notification = "INSERT INTO notification (date, content, type, read, username) VALUES (%s,%s,%s,%s,%s)"
-        params_notification = (
-            datetime.datetime.now(),
-            f"{username} will not join the event {event_name}.",
-            "message",
-            False,
-            admin,
-        )
-        curr.execute(query_notification, params_notification)
-        socketio.emit("message_notification", "", room=admin)
-    except Exception as err:
-        print('[ERROR] /acceptEventInvite: '+err)
-        return jsonify({"message":"Update of event acceptance failed.", "status":500})
-    
-    return jsonify({"message":"Event successfully rejected.", "status":200})
 
 
 ############################ END REST APIs ####################################
