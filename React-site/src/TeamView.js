@@ -38,8 +38,6 @@ function TeamView() {
   const handleInviteKo = () => {
     sessionStorage.setItem("inviteError_alert", "false");
   };
-  const endpoint1 = address+flask_port+"/teamDetails";
-  const endpoint2 = address+flask_port+"/invite";
 
   const [data, setData] = useState([]);
   const [new_member, setNewMember] = useState("");
