@@ -33,6 +33,7 @@
     background-color: gainsboro;
     padding: .5%;
     margin: 0% 2% 2% 0%;
+    opacity: 1;
 }
 
 .ChatContainer > hr {

@@ -7,6 +7,7 @@ import Alert from "./components/Alert.tsx";
 import UserIcon from "./components/UserIcon";
 import Notifications from "./components/Notifications";
 import axios from "axios";
+import Chat from "./components/chat";
 
 import { address, flask_port } from "./components/Endpoint";
 
@@ -66,6 +67,7 @@ function Teams() {
   return (
     <div className="App">
       {!username && <Navigate to="/login" />}
+      <Chat></Chat>
       <div className="TopBar">
         <div className="BarHeading">
           <Link

@@ -14,7 +14,7 @@ import Task from "./components/Task.js";
 import PopUp from "./components/PopUp.js";
 
 import {WebSocketComponent} from "./components/WebSocketComponent";
-import Chat from "./components/Chat";
+import Chat from "./components/chat";
 
 function HomeLoggedIn() {
 //rimozione alert

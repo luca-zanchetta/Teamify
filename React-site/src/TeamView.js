@@ -18,6 +18,7 @@ import PopUp from "./components/PopUp.js";
 import Survey from "./components/Survey";
 import "./css/Survey.css"
 import { address, flask_port } from "./components/Endpoint";
+import Chat from "./components/chat";
 
 import CreateSurvey from "./components/CreateSurvey";
 
@@ -164,7 +165,7 @@ function TeamView() {
 
   return (
     <div className="App">
-      {/* <WebSocketComponent></WebSocketComponent> */}
+      <Chat></Chat>
       <div className="TopBar">
         <div className="BarHeading">
           <Link to="/" style={{ color: "inherit", textDecoration: "inherit" }}>

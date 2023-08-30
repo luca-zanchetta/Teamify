@@ -569,6 +569,28 @@ def team_list():
     return jsonify(teams), 200
 
 
+# Get joined teams from username
+@app.route("/getJoinedTeams", methods=['POST'])
+def get_joined_teams():
+    data = request.get_json()
+    curr = conn.cursor()
+    teams = []
+
+    username = data['username']
+    username = decrypt_username(username)
+    query="SELECT team.name FROM joinTeam JOIN team ON joinTeam.team = team.id WHERE username = %s"
+    params=(username,)
+
+    curr.execute(query, params)
+
+    teams = curr.fetchall()
+    if not teams:
+        print('[INFO] No joined team.')
+        return jsonify({"message":"No joined team.", "status":201})
+
+    return jsonify({"teams":teams, "status":200})
+
+
 # team details given team id
 @app.route("/teamDetails", methods=["GET"])
 def team_details():
