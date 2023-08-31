@@ -1455,7 +1455,7 @@ def reject_event_invite():
 
 
 
-#POLLS
+#INIZIO POLLS
 @app.route('/vote', methods=['POST'])
 def add_vote():
     data = request.get_json()
@@ -1581,6 +1581,13 @@ def get_surveys():
         })
     
     return jsonify(result)
+
+#FINE POLLS
+
+
+
+
+
 
 ############################ END REST APIs ####################################
 
