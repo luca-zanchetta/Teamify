@@ -1466,25 +1466,57 @@ def add_vote():
     curr = conn.cursor()
     
     # check if the pool exists
-    cur = curr.execute('SELECT * FROM survey WHERE id = ?', [pool_id])
-    pool = cur.fetchone()
+    curr.execute(
+        'SELECT * FROM survey WHERE id = %s',
+        (
+            pool_id,
+        ),
+    )
+    pool = curr.fetchone()
     if not pool:
         return jsonify({'message': 'Pool not found'}), 400
     
     # check if the user has already voted
-    cur = curr.execute('SELECT * FROM vote WHERE username = ?', [username])
-    vote = cur.fetchone()
+    curr.execute(
+        'SELECT option FROM vote WHERE username = %s',
+        (
+            username,
+        ),
+    )
+    vote = curr.fetchone()
     
     # add or update the vote
     if vote:
-        old_option_id = vote['option_id']
-        curr.execute('UPDATE vote SET option_id = ? WHERE username = ?', [option_id, username])
-        curr.execute('UPDATE option SET counter = counter - 1 WHERE id = ?', [old_option_id])
+        old_option_id = vote[0]
+        curr.execute(
+            'UPDATE vote SET option = %s WHERE username = %s',
+            (
+                option_id,
+                username,
+            ),
+        )
+        curr.execute(
+            'UPDATE option SET counter = counter - 1 WHERE id = %s',
+            (
+                old_option_id,
+            ),
+        )
     else:
-        curr.execute('INSERT INTO vote (username, option_id) VALUES (?, ?)', [username, option_id])
+        curr.execute(
+            'INSERT INTO vote (username, option) VALUES (%s, %s)',
+            (
+                username,
+                option_id,
+            ),
+        )
     
     # update the counter
-    curr.execute('UPDATE option SET counter = counter + 1 WHERE id = ?', [option_id])
+    curr.execute(
+        'UPDATE option SET counter = counter + 1 WHERE id = %s',
+        (
+            option_id,
+        ),
+    )
     
     return jsonify({'message': 'Success'}), 200
 
@@ -1512,10 +1544,8 @@ def create_pool():
     
     # insert the options
     for option_text in options:
-        cur.execute('INSERT INTO option (survey_id, text) VALUES (%s, %s)', [survey_id, option_text])
-    
-    curr.commit()
-    
+        cur.execute('INSERT INTO option (survey, text) VALUES (%s, %s)', [survey_id, option_text])
+        
     return jsonify({'message': 'Success'}), 200
 
 
@@ -1534,20 +1564,20 @@ def get_surveys():
     for survey in surveys:
         survey_id, survey_text, due_date = survey
         # get the options
-        cur.execute('SELECT id, text FROM option WHERE survey_id = %s', [survey_id])
+        cur.execute('SELECT id, text, counter FROM option WHERE survey = %s', (survey_id,),)
         options = cur.fetchall()
         
         # get the user's vote
-        cur.execute('SELECT option_id FROM vote WHERE username = %s AND option_id IN (SELECT id FROM option WHERE survey_id = %s)', [username, survey_id])
+        cur.execute('SELECT option FROM vote WHERE username = %s AND option IN (SELECT id FROM option WHERE survey = %s)', [username, survey_id])
         vote = cur.fetchone()
         vote_option_id = vote[0] if vote else None
         
         result.append({
             'survey_id': survey_id,
             'survey_text': survey_text,
-            'due_date': due_date,
-            'options': [{'option_id': option[0], 'option_text': option[1]} for option in options],
-            'vote': vote_option_id
+            'due_date': due_date.strftime('%Y-%m-%d'),
+            'options': [{'option_id': option[0], 'option_text': option[1], 'option_votes':option[2]} for option in options],
+            'user_voted_this_option_id': vote_option_id
         })
     
     return jsonify(result)

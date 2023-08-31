@@ -28,6 +28,8 @@ function CreateSurvey() {
   function Confirm() {
 
     var elements =document.getElementsByClassName("option")
+    var date = document.getElementById("date").value
+    var title = document.getElementById("title").value
     var values = []
     for (let index = 0; index < options; index++) {
       values.push(elements[index].value)
@@ -35,6 +37,8 @@ function CreateSurvey() {
 
     // Values contine la lista di tutte le options del survey
     console.log(values)
+    console.log(title)
+    console.log(date)
 
     setShow(false)
     setOptions(1)
