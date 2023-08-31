@@ -1,4 +1,5 @@
 .Bubble  {
+    z-index: 100;
     display: block;
     position: fixed;
     right: 0;
