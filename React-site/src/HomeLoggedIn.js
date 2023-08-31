@@ -144,9 +144,9 @@ useEffect(() => {
 
   return (
     <div className="App">
-      <Chat></Chat>
       {!username && <Navigate to="/login" />}
       <WebSocketComponent ref={webSocketRef} />
+      <Chat></Chat>
       <div className="TopBar">
         <div className="BarHeading">
           <Link

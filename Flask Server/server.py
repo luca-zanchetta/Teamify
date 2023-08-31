@@ -1460,6 +1460,79 @@ def reject_event_invite():
     return jsonify({"message": "Event successfully rejected.", "status": 200})
 
 
+# Send message to team
+@app.route("/sendMessageToTeam", methods=['POST'])
+def send_chat_message():
+    data = request.get_json()
+    curr = conn.cursor()
+
+    text = data['text']
+    sender = data['username']
+    sender = decrypt_username(sender)
+    team = data['teamId']
+    members = data['members']
+
+    message = []
+    date = str(datetime.datetime.now().date())
+    time_ = str(datetime.datetime.now().time())[:5]
+    message.append(sender)
+    message.append(text)
+    message.append(date)
+    message.append(time_)
+
+    # message: [sender, text, date, time]
+
+    query_message = "INSERT INTO message (datetime, content, sender, team) VALUES (%s,%s,%s,%s)"
+    params_message = (datetime.datetime.now(), text, sender, team)
+
+    try:
+        curr.execute(query_message, params_message)
+    except Exception as err:
+        print('[ERROR] The message has not been registered into the DB. Err: '+str(err))
+        return jsonify({"message":"The message has not been registered into the DB.", "status":500})
+
+    for member in members:
+        socketio.emit("chat_message", message, room=member)
+
+    print('[INFO] Message sent successfully!')
+    return jsonify({"message":"ok", "status":200})
+
+
+# Get messages
+@app.route("/getMessages", methods=['POST'])
+def get_chat_messages():
+    data = request.get_json()
+    curr = conn.cursor()
+    records = []
+    messages = [] # [sender, text, date, time]
+
+    teamId = data['teamId']
+
+    query_retrieve_messages = "SELECT * FROM message WHERE team = %s"
+    params_retrieve_messages = (teamId,)
+
+    curr.execute(query_retrieve_messages, params_retrieve_messages)
+
+    records = curr.fetchall()
+    if not records:
+        print('[INFO] There is no message available.')
+        return jsonify({"message":"No message available.", "status":201})
+    
+    for message in records:
+        msg = []
+        date = str(message[1])[:10]
+        time_ = str(message[1])[11:16]
+        msg.append(message[3])  # sender
+        msg.append(message[2])  # text
+        msg.append(date)
+        msg.append(time_)
+
+        messages.append(msg)
+
+    print('[INFO] Messages retrieved successfully.')
+    return jsonify({"messages":messages, "status":200})
+
+
 ############################ END REST APIs ####################################
 
 if __name__ == "__main__":

@@ -1,3 +1,6 @@
+import sys
+sys.path.append('./Flask Server')
+
 import psycopg2
 from DBConnection import get_connection, user, psw
 from hashlib import sha256
@@ -366,7 +369,7 @@ except Exception as err:
 dropMessage= "DROP TABLE IF EXISTS message CASCADE"
 message = """CREATE TABLE message (
     id SERIAL PRIMARY KEY,
-    date DATE NOT NULL,
+    datetime TIMESTAMP NOT NULL,
     content TEXT NOT NULL,
     sender VARCHAR(100) NOT NULL,
     team INT NOT NULL,

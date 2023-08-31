@@ -339,7 +339,7 @@ except Exception as err:
 # Table 'message'
 message = """CREATE TABLE message (
     id SERIAL PRIMARY KEY,
-    date DATE NOT NULL,
+    datetime TIMESTAMP NOT NULL,
     content TEXT NOT NULL,
     sender VARCHAR(100) NOT NULL,
     team INT NOT NULL,
