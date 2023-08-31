@@ -1461,6 +1461,7 @@ def add_vote():
     data = request.get_json()
     pool_id = data.get('pool_id')
     username = data.get('username')
+    username = decrypt_username(username)
     option_id = data.get('option_id')
 
     curr = conn.cursor()
@@ -1527,6 +1528,7 @@ def create_pool():
     text = data.get('text')
     due_date = data.get('due_date')
     admin = data.get('admin')
+    admin = decrypt_username(admin)
     team = data.get('team')
     options = data.get('options')
     
@@ -1553,6 +1555,8 @@ def create_pool():
 def get_surveys():
     team_id = request.args.get('team_id')
     username = request.args.get('username')
+    username = decrypt_username(username)
+
     
     
     # get the surveys

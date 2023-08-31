@@ -1,14 +1,24 @@
 import "../css/Navigator.css";
 
 import { useEffect } from "react";
+import axios from "axios";
 
 import "../css/Survey.css"
 import { useState } from "react";
 import cancel from "../icons/cancel.png"
+import { address, flask_port } from "./Endpoint";
+
+
 function CreateSurvey() {
 
   const [show, setShow] = useState(false);
+  const [data, setData] = useState(false);
   const [options,setOptions] = useState(1)
+  const queryParameters = new URLSearchParams(window.location.search);
+  const id = queryParameters.get("id");
+  const username = localStorage.getItem("LoggedUser");
+  const decryptedUsername = localStorage.getItem("username");
+  const endpointCreate= address + flask_port + "/createPool";
 
   function AddOption() {
     setOptions(options+1);
@@ -25,7 +35,9 @@ function CreateSurvey() {
     setShow(!show)
   }
 
-  function Confirm() {
+  const Confirm = async (event) =>{
+    event.preventDefault();
+    console.log(endpointCreate);
 
     var elements =document.getElementsByClassName("option")
     var date = document.getElementById("date").value
@@ -34,15 +46,55 @@ function CreateSurvey() {
     for (let index = 0; index < options; index++) {
       values.push(elements[index].value)
     }
+    setShow(false);
+    setOptions(1);
 
-    // Values contine la lista di tutte le options del survey
-    console.log(values)
-    console.log(title)
-    console.log(date)
+    try {
+      // Send a POST request to the endpoint of the Flask server
+      const response = await axios
+        .post(endpointCreate, {
+          text:title,
+          due_date:date,
+          admin:username,
+          team:id,
+          options:values
+        }).then((response) => {
+          setData(response.data[0]);
+        }).catch(function (error) {
+          if (error.response) {
+            // Print error data
+            console.log("Data: " + error.response.data);
+            console.log("Status: " + error.response.status);
+            console.log("Headers: " + error.response.headers);
 
-    setShow(false)
-    setOptions(1)
-  }
+            // Handle error
+            if (error.response.status === 400) {
+              sessionStorage.setItem("inviteError_alert", "true");
+              window.location.replace(window.location.href); // For alert purposes only
+            }
+          }
+        });
+
+      // If the login has been successfully performed, then redirect the user to the homepage.
+      if (response.status === 200) {
+        sessionStorage.setItem("invite_alert", "true");
+        window.location.replace(window.location.href); // For alert purposes only
+      }
+    } catch (error) {
+      // Request failed
+      console.log("[ERROR] Request failed: " + error);
+    }
+}
+
+    useEffect(() => {
+
+      
+      
+    }, []);
+
+
+
+  
 
   return (
     <div className="SurveySectionTopBar">
