@@ -295,7 +295,7 @@ function NewTask() {
         )}
 
         <div className="SignUpBackground">
-          <div className="container" style={{ Display: "flex" }}>
+          <div className="container" style={{ Display: "flex" , width:"100%",  height:"100%", flexDirection:"column"}}>
             <div className="row mb-5">
               <div
                 style={{ textAlign: "right", cursor: "pointer" }}
@@ -316,7 +316,7 @@ function NewTask() {
                 </svg>
               </div>
             </div>
-            <div className="row" style={{ Display: "flex" }}>
+            <div className="row" style={{ Display: "flex", flexWrap:"nowrap", justifyContent:"space-evenly"}}>
               <div className="col-sm">
                 <div
                   className="CardL"
