@@ -675,21 +675,27 @@ def team_list():
 def get_joined_teams():
     data = request.get_json()
     curr = conn.cursor()
+    tmp = []
     teams = []
+    ids = []
 
     username = data["username"]
     username = decrypt_username(username)
-    query = "SELECT team.name FROM joinTeam JOIN team ON joinTeam.team = team.id WHERE username = %s"
+    query = "SELECT team.id, team.name FROM joinTeam JOIN team ON joinTeam.team = team.id WHERE username = %s"
     params = (username,)
 
     curr.execute(query, params)
 
-    teams = curr.fetchall()
-    if not teams:
+    tmp = curr.fetchall()
+    if not tmp:
         print("[INFO] No joined team.")
         return jsonify({"message": "No joined team.", "status": 201})
+    
+    for team in tmp:
+        ids.append(team[0])
+        teams.append(team[1])
 
-    return jsonify({"teams": teams, "status": 200})
+    return jsonify({"teams": teams, "ids":ids, "status": 200})
 
 
 # team details given team id
@@ -805,22 +811,26 @@ def admin_given_team():
 
 
 # ottenere la lista dei membri dato un team id
-@app.route("/membersGivenTeam", methods=["GET"])
+@app.route("/membersGivenTeam", methods=["POST"])
 def members_given_team():
     curr = conn.cursor()
-    # Fetch the ID of the last inserted task
-    teamId = request.args.get("teamId")  # get back the params from the request
+    data = request.get_json()
+
+    teamId = data['teamId']
     curr.execute(
         "SELECT username FROM joinTeam WHERE team = %s",
         (teamId,),
     )
     members = curr.fetchall()
+    if not members:
+        print('[ERROR] There is no member for this team!')
+        return jsonify({"message":"There is no member for this team!", "status":400})
 
     member_list = []
     for member in members:
-        member_list.append({"member": member[0]})
+        member_list.append(member[0])
 
-    return jsonify(member_list), 200
+    return jsonify({"members":member_list, "status":200})
 
 
 # leave a team API
