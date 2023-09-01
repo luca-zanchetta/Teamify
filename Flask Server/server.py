@@ -15,7 +15,7 @@ import datetime
 from flask_mail import Mail, Message
 import time
 import requests
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 
 
 
@@ -1531,10 +1531,11 @@ def create_pool():
     admin = decrypt_username(admin)
     team = data.get('team')
     options = data.get('options')
+    members = []
     
     
     # parse the due date
-    due_date = datetime.strptime(due_date, '%Y-%m-%d').date()
+    due_date = datetime.datetime.strptime(due_date, '%Y-%m-%d').date()
     
     # create the pool
     cur = conn.cursor()
@@ -1547,6 +1548,30 @@ def create_pool():
     # insert the options
     for option_text in options:
         cur.execute('INSERT INTO option (survey, text) VALUES (%s, %s)', [survey_id, option_text])
+
+
+    # Register and send notification
+    query_get_team = "SELECT name FROM team WHERE id = %s"
+    params_get_team = (team,)
+    cur.execute(query_get_team, params_get_team)
+    (team_name,) = cur.fetchone()
+    team_name = str(team_name).strip()
+
+    query_get_members = 'SELECT username FROM joinTeam WHERE team = %s'
+    params_get_members = (team,)
+    cur.execute(query_get_members, params_get_members)
+    members = cur.fetchall()
+
+    for member in members:
+        (user,) = member
+
+        if user != admin:
+            query_notification = 'INSERT INTO notification (date, content, type, read, username) VALUES (%s,%s,%s,%s,%s)'
+            params_notification = (datetime.datetime.now(), f"{admin} of team {team_name} created a new survey!", "survey", False, user,)
+            cur.execute(query_notification, params_notification)
+
+            socketio.emit('survey_notification', '', room=user)
+
         
     return jsonify({'message': 'Success', 'status':200})
 

@@ -35,12 +35,6 @@ function Survey(props) {
           console.log("Data: " + error.response.data);
           console.log("Status: " + error.response.status);
           console.log("Headers: " + error.response.headers);
-
-          // Handle error
-          if (error.response.status === 400) {
-            sessionStorage.setItem("inviteError_alert", "true");
-            window.location.replace(window.location.href); // For alert purposes only
-          }
         }
       });
     }

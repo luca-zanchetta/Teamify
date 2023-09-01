@@ -33,10 +33,6 @@ function Chat() {
         e.target.value = ""
     }
   }
-  function showChat() {
-
-  }
-
 
   // Get teams of the user
   async function get_teams() {
@@ -72,7 +68,6 @@ function Chat() {
 
   useEffect(() => {
     get_teams();
-    showChat();
   }, []);
 
   return (
@@ -97,11 +92,6 @@ function Chat() {
                         {!showTeams && (
                             <h3>No team available</h3>
                         )}
-
-                        {/* <h3>
-                            team 2
-                            <i class="arrow up"></i>
-                        </h3> */}
                         <img src={cancel} onClick={ToggleChat}></img>
                     </div>
                     <hr></hr>
