@@ -38,6 +38,14 @@ function TeamView() {
     sessionStorage.setItem("inviteError_alert", "false");
   };
 
+  const handleAlertNewAdmin = () => {
+    sessionStorage.setItem("new_admin", "false");
+  };
+
+  const handleAlertRemoveAdmin = () => {
+    sessionStorage.setItem("removed_admin", "false");
+  };
+
   const [data, setData] = useState([]);
   const [new_member, setNewMember] = useState("");
   const queryParameters = new URLSearchParams(window.location.search);
@@ -57,6 +65,10 @@ function TeamView() {
   const [deleteTeam, setDeleteTeam] = useState(false);
   const [removeAdmin, setRemoveAdmin] = useState(false);
   const [adminToRemove, setAdminToRemove] = useState("");
+
+  const alert_new_admin = sessionStorage.getItem("new_admin") === "true";
+  const alert_removed_admin =
+    sessionStorage.getItem("removed_admin") === "true";
 
   const updateDimensions = () => {
     setWindowWidth(window.innerWidth);
@@ -89,6 +101,8 @@ function TeamView() {
       handleInviteOk();
       handleInviteKo();
       handleMissingFields();
+      handleAlertNewAdmin();
+      handleAlertRemoveAdmin();
     }, 1000);
 
     return () => clearTimeout(timeout);
@@ -194,9 +208,8 @@ function TeamView() {
       });
       // If task has been successfully created, then redirect the user to the Home page.
       if (response.status === 200) {
+        sessionStorage.setItem("new_admin", "true");
         window.location.reload();
-        alert("new admin");
-        //TODO: add alert
       }
     } catch (error) {
       // There is at least one mandatory field that has not been filled
@@ -239,6 +252,16 @@ function TeamView() {
             {missingFields && (
               <Alert onClick={handleMissingFields} state="danger">
                 Username field must be filled to invite!
+              </Alert>
+            )}
+            {alert_new_admin && (
+              <Alert onClick={handleAlertNewAdmin} state="success">
+                Role correctly updated
+              </Alert>
+            )}
+            {alert_removed_admin && (
+              <Alert onClick={handleAlertRemoveAdmin} state="success">
+                User role restored
               </Alert>
             )}
           </div>

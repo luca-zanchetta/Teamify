@@ -126,8 +126,7 @@ function PopUp({ type, task_id, message, id, dU }: Props) {
       );
       if (response.status === 200) {
         // If the deletion was successful, update local storage and reload the page
-        // TODO: You can add an alert here to inform the user about the successful action
-        alert("succesfully removed");
+        sessionStorage.setItem("removed_admin", "true");
         window.location.reload();
       }
     } catch (error) {
