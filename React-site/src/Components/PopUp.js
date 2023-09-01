@@ -91,7 +91,6 @@ function PopUp({ type, task_id, message, id, dU }: Props) {
   };
 
   const handleDelete = async () => {
-    console.log("handle");
     try {
       const response = await axios.delete(
         address + flask_port + `/home/teams/deleteteam`,
@@ -114,6 +113,29 @@ function PopUp({ type, task_id, message, id, dU }: Props) {
   const handleRevertReload = () => {
     window.location.reload();
   };
+
+  const handleRemoveAdmin = async () => {
+    //adminToRemove in dU, id team in id
+    try {
+      const response = await axios.delete(
+        address + flask_port + `/home/teams/team/removeadmin`,
+        {
+          data: null, // Send an empty data object to indicate no request body
+          params: { teamId: id, admin_to_remove: dU }, // Add params if needed
+        }
+      );
+      if (response.status === 200) {
+        // If the deletion was successful, update local storage and reload the page
+        // TODO: You can add an alert here to inform the user about the successful action
+        alert("succesfully removed");
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      // Handle any errors that occur during the DELETE request
+    }
+  };
+
   return (
     <div className="MessageContainer" id="message-container">
       <div className="CardPopUP">
@@ -125,6 +147,7 @@ function PopUp({ type, task_id, message, id, dU }: Props) {
               onClick={
                 (type == "leaveTeam" && handleLeaveTeam) ||
                 (type == "deleteTeam" && handleDelete) ||
+                (type == "removeAdmin" && handleRemoveAdmin) ||
                 handleConfirmation
               }
             >

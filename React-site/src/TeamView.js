@@ -44,6 +44,7 @@ function TeamView() {
   const id = queryParameters.get("id");
   const endpoint1 = address + flask_port + "/teamDetails";
   const endpoint2 = address + flask_port + "/invite";
+  const endpoint3 = address + flask_port + "/home/teams/team/newadmin";
   const decryptedUsername = localStorage.getItem("username");
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
@@ -54,6 +55,8 @@ function TeamView() {
   const task_id = localStorage.getItem("task_to_delete");
   const [leaveTeam, setLeaveTeam] = useState(false);
   const [deleteTeam, setDeleteTeam] = useState(false);
+  const [removeAdmin, setRemoveAdmin] = useState(false);
+  const [adminToRemove, setAdminToRemove] = useState("");
 
   const updateDimensions = () => {
     setWindowWidth(window.innerWidth);
@@ -177,6 +180,30 @@ function TeamView() {
     setLeaveTeam(true);
   };
 
+  const handleRemoveAdmin = (admin) => {
+    setAdminToRemove(admin);
+    setRemoveAdmin(true);
+  };
+
+  const handleMakeAdmin = async (admin) => {
+    try {
+      // Send a POST request to the /newtask endpoint of the Flask server
+      const response = await axios.post(endpoint3, {
+        admin: admin,
+        teamId: id,
+      });
+      // If task has been successfully created, then redirect the user to the Home page.
+      if (response.status === 200) {
+        window.location.reload();
+        alert("new admin");
+        //TODO: add alert
+      }
+    } catch (error) {
+      // There is at least one mandatory field that has not been filled
+      console.log("ERROR", error);
+    }
+  };
+
   return (
     <div className="App">
       <Chat></Chat>
@@ -242,6 +269,17 @@ function TeamView() {
               />
             </div>
           )}
+          {removeAdmin && (
+            <div>
+              <PopUp
+                type="removeAdmin"
+                message={"Do you want to remove this user from the admins?"}
+                id={id}
+                dU={adminToRemove}
+              />
+            </div>
+          )}
+
           <div className="row mt-4 mb-2" style={{ textAlign: "left" }}>
             <div className="row mb-3">
               <div className="col"></div>
@@ -388,22 +426,48 @@ function TeamView() {
                     {data.map((item) => (
                       <div className="row">
                         <div className="col-2">Team Members:</div>
-                        {item.members.map((member, index) => (
-                          <div className="col-1" key={member}>
-                            {member}
-                          </div>
-                        ))}
+                        {isAdmin &&
+                          item.members.map((member, index) => (
+                            <div className="col mt-1" key={member}>
+                              {member}
+                              <button
+                                className="btn btn-sm "
+                                style={{ marginLeft: "5%" }}
+                                onClick={() => handleMakeAdmin(member)}
+                              >
+                                Make admin
+                              </button>
+                            </div>
+                          ))}
                       </div>
                     ))}
 
                     {data.map((item) => (
                       <div className="row">
                         <div className="col-2">Team Admins:</div>
-                        {item.admins.map((admin, index) => (
-                          <div className="col-1" key={admin}>
-                            {admin}
-                          </div>
-                        ))}
+                        {(isAdmin &&
+                          item.admins.map((admin, index) => (
+                            <div className="col mt-1" key={admin}>
+                              <div className="row">
+                                <li>{admin}</li>
+                                {admin !== decryptedUsername && (
+                                  <button
+                                    className="btn btn-sm "
+                                    style={{ marginLeft: "5%" }}
+                                    onClick={() => handleRemoveAdmin(admin)}
+                                  >
+                                    Remove admin role
+                                  </button>
+                                )}
+                                <br />
+                              </div>
+                            </div>
+                          ))) ||
+                          item.admins.map((admin, index) => (
+                            <div className="col" key={admin}>
+                              <div className="col">{admin}</div>
+                            </div>
+                          ))}
                       </div>
                     ))}
                     {isAdmin && (

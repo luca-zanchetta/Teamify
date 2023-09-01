@@ -809,6 +809,53 @@ def admin_given_team():
     return jsonify(admin_list), 200
 
 
+# remove admin API
+@app.route("/home/teams/team/removeadmin", methods=["DELETE"])
+def remove_admin():
+    curr = conn.cursor()
+    team_id = request.args.get("teamId")
+    admin = request.args.get("admin_to_remove")
+    try:
+        curr.execute(
+            "DELETE FROM manage WHERE admin=%s AND team= %s",
+            (
+                admin,
+                team_id,
+            ),
+        )
+        return jsonify("Admin correctly removed"), 200
+
+    except Exception as error:
+        print("[ERROR] error in removing admin")
+        return (
+            jsonify({"error": "An error occurred"}),
+            500,
+        )  # Return a valid response
+
+
+# add a new admin API
+@app.route("/home/teams/team/newadmin", methods=["POST"])
+def new_admin():
+    curr = conn.cursor()
+    data = request.json
+    team_id = data.get("teamId")
+    admin = data.get("admin")
+    print(team_id, admin)
+    try:
+        curr.execute(
+            "INSERT INTO manage (admin, team) VALUES (%s,%s) ",
+            (
+                admin,
+                team_id,
+            ),
+        )
+        return jsonify("member addes"), 200
+
+    except Exception as err:
+        print("[ERROR] /home/deleteteam : ", err)
+        return jsonify("ko"), 400
+
+
 # ottenere la lista dei membri dato un team id
 @app.route("/membersGivenTeam", methods=["GET"])
 def members_given_team():
