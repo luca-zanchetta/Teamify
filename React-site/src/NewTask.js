@@ -444,8 +444,11 @@ function NewTask() {
                               id={`member-${member.id}`}
                               disabled={member.member === task.member}
                               defaultChecked={
-                                member.member === task.member ||
-                                isMemberIncluded(member.member, eventMembers)
+                                isMemberIncluded(
+                                  member.member,
+                                  eventMembers,
+                                  task.member
+                                ).toString() === "true"
                               }
                               onChange={(event) =>
                                 setEventMembers((prevMembers) => {

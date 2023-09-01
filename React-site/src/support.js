@@ -22,10 +22,14 @@ export function objectToArray(object) {
   return r;
 }
 
-export function isMemberIncluded(member, eventMembers) {
-  for (const m of eventMembers) {
-    if (member === m.member) {
-      return true;
+export function isMemberIncluded(member, eventMembers, task_m) {
+  if (task_m === member) {
+    return true;
+  } else {
+    for (const m of eventMembers) {
+      if (member === m.member) {
+        return true;
+      }
     }
   }
   return false;
