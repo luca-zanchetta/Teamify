@@ -62,26 +62,17 @@ function CreateSurvey() {
           options:values
         }).then((response) => {
           setData(response.data[0]);
+          if (response.data.status === 200) {
+            window.location.replace(window.location.href);
+          }
         }).catch(function (error) {
           if (error.response) {
             // Print error data
             console.log("Data: " + error.response.data);
             console.log("Status: " + error.response.status);
             console.log("Headers: " + error.response.headers);
-
-            // Handle error
-            if (error.response.status === 400) {
-              sessionStorage.setItem("inviteError_alert", "true");
-              window.location.replace(window.location.href); // For alert purposes only
-            }
           }
         });
-
-      // If the login has been successfully performed, then redirect the user to the homepage.
-      if (response.status === 200) {
-        sessionStorage.setItem("invite_alert", "true");
-        window.location.replace(window.location.href); // For alert purposes only
-      }
     } catch (error) {
       // Request failed
       console.log("[ERROR] Request failed: " + error);

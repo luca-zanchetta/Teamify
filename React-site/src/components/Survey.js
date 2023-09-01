@@ -25,7 +25,10 @@ function Survey(props) {
           username: username,
           option_id: checkedVote,
         }).then((response) => {
-        console.log(response)
+        // console.log(response);
+        if (response.data.status === 200) {
+          window.location.replace(window.location.href);
+        }
       }).catch(function (error) {
         if (error.response) {
           // Print error data

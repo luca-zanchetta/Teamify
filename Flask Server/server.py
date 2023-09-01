@@ -1519,7 +1519,7 @@ def add_vote():
         ),
     )
     
-    return jsonify({'message': 'Success'}), 200
+    return jsonify({'message': 'Success', 'status':200})
 
 
 @app.route('/createPool', methods=['POST'])
@@ -1548,7 +1548,7 @@ def create_pool():
     for option_text in options:
         cur.execute('INSERT INTO option (survey, text) VALUES (%s, %s)', [survey_id, option_text])
         
-    return jsonify({'message': 'Success'}), 200
+    return jsonify({'message': 'Success', 'status':200})
 
 
 @app.route('/getSurveys', methods=['GET'])
@@ -1562,12 +1562,12 @@ def get_surveys():
     
     # get the surveys
     cur = conn.cursor()
-    cur.execute('SELECT survey.id, survey.text, survey.due_date FROM survey JOIN sended_by ON survey.id = sended_by.survey WHERE sended_by.team = %s AND survey.due_date > %s', [team_id, date.today()])
+    cur.execute('SELECT survey.id, survey.text, survey.due_date, sended_by.admin FROM survey JOIN sended_by ON survey.id = sended_by.survey WHERE sended_by.team = %s AND survey.due_date > %s', [team_id, date.today()])
     surveys = cur.fetchall()
     
     result = []
     for survey in surveys:
-        survey_id, survey_text, due_date = survey
+        survey_id, survey_text, due_date, survey_author = survey
         # get the options
         cur.execute('SELECT id, text, counter FROM option WHERE survey = %s', (survey_id,),)
         options = cur.fetchall()
@@ -1582,7 +1582,8 @@ def get_surveys():
             'survey_text': survey_text,
             'due_date': due_date.strftime('%Y-%m-%d'),
             'options': [{'option_id': option[0], 'option_text': option[1], 'option_votes':option[2]} for option in options],
-            'user_voted_this_option_id': vote_option_id
+            'user_voted_this_option_id': vote_option_id,
+            'survey_author': survey_author
         })
     
     return jsonify(result)

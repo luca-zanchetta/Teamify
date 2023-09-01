@@ -73,7 +73,7 @@ function TeamView() {
             _survey.id = data.survey_id
             _survey.date = data.due_date;
             _survey.title = data.survey_text;
-            _survey.author = "missing backend!!!"
+            _survey.author = data.survey_author;
             _survey.entries = []
             
             var totalVotes = 0
