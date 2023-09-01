@@ -1555,6 +1555,7 @@ def create_pool():
 def get_surveys():
     team_id = request.args.get('team_id')
     username = request.args.get('username')
+    username=username.replace(" ","+")
     username = decrypt_username(username)
 
     
