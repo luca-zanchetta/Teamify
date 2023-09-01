@@ -13,19 +13,18 @@ function Survey(props) {
   const [vote, setShow] = useState(false);
   const [checkedVote, setCheckedVote] = useState(props.entries.map((data) => { if(data[2]) return data[3]}))
   const [poolID, SetPool] = useState(props.id)
-
+  const username=localStorage.getItem("LoggedUser");
+  console.log(username);
   
   async function ToggleVote() {
     
     if(vote){
       await axios
       .post(address + flask_port + "/vote", {
-        params: {
           pool_id:poolID,
-          username: localStorage.getItem("LoggedUser"),
+          username: username,
           option_id: checkedVote,
-        },
-      }).then((response) => {
+        }).then((response) => {
         console.log(response)
       }).catch(function (error) {
         if (error.response) {
