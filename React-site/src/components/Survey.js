@@ -47,11 +47,7 @@ function Survey(props) {
   }
   
   useEffect(() => {
-    props.entries.forEach(element => {
-      if(element[2])
-        setCheckedVote(element[1])
-    });
-    
+    props.entries.map((data) => { if(data[2]) setCheckedVote(data[3])})
     SetPool(props.id)
   }, []);
 
@@ -65,14 +61,14 @@ function Survey(props) {
 
       {props.entries.map(
         function(data, i){
-          const color = data[3]== checkedVote? "green": "red"
+          const color = (data[3] == checkedVote? "green": "red")
           if(!vote)
             return (
               <div className="SurveyEntry">
                 <h2>{data[0]}</h2>
                 <div className="SurveyValue">
                   <h2>{data[1]}</h2>
-                  <div className="SurveyBar" style={{width:data[0], backgroundColor:color}}></div>
+                  <div className="SurveyBar" style={{width: data[0] == 0? data[0] + "%" : data[0]/props.votes*100 + "%", backgroundColor:color}}></div>
                   {
                     data[3] == checkedVote && (
                       <h3>You voted this</h3>

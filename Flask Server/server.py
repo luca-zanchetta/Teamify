@@ -1583,18 +1583,16 @@ def get_surveys():
     username=username.replace(" ","+")
     username = decrypt_username(username)
 
-    
-    
     # get the surveys
     cur = conn.cursor()
-    cur.execute('SELECT survey.id, survey.text, survey.due_date, sended_by.admin FROM survey JOIN sended_by ON survey.id = sended_by.survey WHERE sended_by.team = %s AND survey.due_date > %s', [team_id, date.today()])
+    cur.execute('SELECT survey.id, survey.text, survey.due_date, sended_by.admin FROM survey JOIN sended_by ON survey.id = sended_by.survey WHERE sended_by.team = %s AND survey.due_date > %s ORDER BY id ASC ', [team_id, date.today()])
     surveys = cur.fetchall()
     
     result = []
     for survey in surveys:
         survey_id, survey_text, due_date, survey_author = survey
         # get the options
-        cur.execute('SELECT id, text, counter FROM option WHERE survey = %s', (survey_id,),)
+        cur.execute('SELECT id, text, counter FROM option WHERE survey = %s ORDER BY option.id ASC', (survey_id,),)
         options = cur.fetchall()
         
         # get the user's vote
