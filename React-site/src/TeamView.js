@@ -389,22 +389,24 @@ function TeamView() {
                         </button>
                       </Row>
                       <Row></Row>
-                      <Row className="mt-3">
-                        <button
-                          onClick={handleNewEvent}
-                          className="btn"
-                          style={{
-                            textDecoration: "inherit",
-                            backgroundColor: "#c5fdc8",
-                            width: "100px",
-                            cursor: isButtonDisabled
-                              ? "not-allowed"
-                              : "pointer",
-                          }}
-                        >
-                          New Event
-                        </button>
-                      </Row>
+                      {isAdmin && (
+                        <Row className="mt-3">
+                          <button
+                            onClick={handleNewEvent}
+                            className="btn"
+                            style={{
+                              textDecoration: "inherit",
+                              backgroundColor: "#c5fdc8",
+                              width: "100px",
+                              cursor: isButtonDisabled
+                                ? "not-allowed"
+                                : "pointer",
+                            }}
+                          >
+                            New Event
+                          </button>
+                        </Row>
+                      )}
                     </Col>
                   </Row>
                 </Accordion.Body>

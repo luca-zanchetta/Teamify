@@ -1076,7 +1076,7 @@ def edit_member_event():
 
 
 # Get list of members included in a certain event the one that accepted
-@app.route("/home/event/members", methods=["get"])
+@app.route("/home/event/members", methods=["GET"])
 def members_given_event():
     curr = conn.cursor()
     # Fetch the ID of the last inserted task

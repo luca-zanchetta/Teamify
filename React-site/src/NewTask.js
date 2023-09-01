@@ -14,7 +14,12 @@ import axios from "axios";
 import moment from "moment";
 import Form from "react-bootstrap/Form";
 import Notifications from "./components/Notifications";
-import { formatTime, formatDate, objectToArray } from "./support.js";
+import {
+  formatTime,
+  formatDate,
+  objectToArray,
+  isMemberIncluded,
+} from "./support.js";
 
 import { address, flask_port } from "./components/Endpoint";
 
@@ -46,7 +51,6 @@ function NewTask() {
   const [eventMembers, setEventMembers] = useState([]);
   const [modifyEvent, setModifyEvent] = useState(false);
   const endpoint2 = address + flask_port + "/home/event/members";
-  console.log("PREVIOUS PAGE", previousPage);
 
   const handleClosure = () => {
     sessionStorage.setItem("error_alert", false);
@@ -245,7 +249,8 @@ function NewTask() {
             })
             .then((response) => {
               const res = response.data;
-              setEventMembers(res[0]);
+              const a = objectToArray(res);
+              setEventMembers(a);
             })
             .catch((error) => {
               console.error("Error fetching team data:", error);
@@ -438,26 +443,21 @@ function NewTask() {
                               }
                               id={`member-${member.id}`}
                               disabled={member.member === task.member}
-                              defaultChecked={member.member === task.member}
-                              onChange={(event) => {
-                                const memberValue =
-                                  typeof member === "object"
-                                    ? member.member
-                                    : member;
-
+                              defaultChecked={
+                                member.member === task.member ||
+                                isMemberIncluded(member.member, eventMembers)
+                              }
+                              onChange={(event) =>
                                 setEventMembers((prevMembers) => {
                                   if (event.target.checked) {
-                                    return {
-                                      ...prevMembers,
-                                      [memberValue]: true,
-                                    };
+                                    return [...prevMembers, member];
                                   } else {
-                                    const updatedMembers = { ...prevMembers };
-                                    delete updatedMembers[memberValue];
-                                    return updatedMembers;
+                                    return prevMembers.filter(
+                                      (prevMember) => prevMember !== member
+                                    );
                                   }
-                                });
-                              }}
+                                })
+                              }
                             />
                           ))}
                         </div>

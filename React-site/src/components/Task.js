@@ -13,6 +13,7 @@ import { address, flask_port } from "./Endpoint";
 interface Props {
   task: Object;
 }
+
 function Task({ task }: Props) {
   const endpoint = address + flask_port + "/home/event/members";
   const endpoint3 = address + flask_port + "/home/team/member";
@@ -114,7 +115,8 @@ function Task({ task }: Props) {
         })
         .then((response) => {
           const res = response.data;
-          setMembers(res[0]);
+          console.log(res);
+          setMembers(res);
         })
         .catch((error) => {
           console.error("Error fetching team data:", error);
@@ -192,13 +194,13 @@ function Task({ task }: Props) {
                 style={{ maxHeight: "75px" }}
               >
                 <ul>
-                  {Object.values(members).map((member, index) =>
-                    member == decryptedUsername ? (
-                      <li>You</li>
-                    ) : (
-                      <li key={member}>{member}</li>
-                    )
-                  )}
+                  {members.map((memberObj, index) => (
+                    <li key={index}>
+                      {memberObj.member === decryptedUsername
+                        ? "You"
+                        : memberObj.member}
+                    </li>
+                  ))}
                 </ul>
               </div>
             )}
