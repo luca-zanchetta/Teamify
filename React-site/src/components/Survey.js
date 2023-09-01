@@ -6,14 +6,43 @@ import chat from "../icons/chat.png";
 import cancel from "../icons/cancel.png";
 import face from "../img/face.jpeg";
 import { useState } from "react";
+import { address, flask_port } from "./Endpoint";
+import axios from "axios";
 
 function Survey(props) {
   const [vote, setShow] = useState(false);
-  const [entries, dsadsa] = useState(props.entries);
-  const [checkedVote, setCheckedVote] = useState(props.entries.map((data) => { if(data[2]) return data[1]}))
+  const [checkedVote, setCheckedVote] = useState(props.entries.map((data) => { if(data[2]) return data[3]}))
+  const [poolID, SetPool] = useState(props.id)
 
-  function ToggleVote() {
-    setShow(!vote);
+  
+  async function ToggleVote() {
+    
+    if(vote){
+      await axios
+      .post(address + flask_port + "/vote", {
+        params: {
+          pool_id:poolID,
+          username: localStorage.getItem("LoggedUser"),
+          option_id: checkedVote,
+        },
+      }).then((response) => {
+        console.log(response)
+      }).catch(function (error) {
+        if (error.response) {
+          // Print error data
+          console.log("Data: " + error.response.data);
+          console.log("Status: " + error.response.status);
+          console.log("Headers: " + error.response.headers);
+
+          // Handle error
+          if (error.response.status === 400) {
+            sessionStorage.setItem("inviteError_alert", "true");
+            window.location.replace(window.location.href); // For alert purposes only
+          }
+        }
+      });
+    }
+      setShow(!vote);
   }
 
   function OnSurveyChange(e) {
@@ -26,20 +55,21 @@ function Survey(props) {
       if(element[2])
         setCheckedVote(element[1])
     });
+    
+    SetPool(props.id)
   }, []);
 
   return (
     <div className="SurveyContainer">
       <div className="SurveyHeader">
         <h2>{props.title}</h2>
-        <h3>{props.description}</h3>
       </div>
 
       <div className="SurveyBody">
 
       {props.entries.map(
         function(data, i){
-          const color = data[1] === checkedVote? "green": "red"
+          const color = data[3]== checkedVote? "green": "red"
           if(!vote)
             return (
               <div className="SurveyEntry">
@@ -48,7 +78,7 @@ function Survey(props) {
                   <h2>{data[1]}</h2>
                   <div className="SurveyBar" style={{width:data[0], backgroundColor:color}}></div>
                   {
-                    data[1] === checkedVote && (
+                    data[3] == checkedVote && (
                       <h3>You voted this</h3>
                     )
                   }
@@ -58,7 +88,7 @@ function Survey(props) {
           else
             return (
               <div className="SurveyInputEntry">
-                <input type="radio" id={data[1]} name={props.title} value={data[1]} checked={data[1] === checkedVote} onChange={OnSurveyChange}></input>
+                <input type="radio" id={data[1]} name={props.title} value={data[3]} checked={data[3] == checkedVote} onChange={OnSurveyChange}></input>
                 <label for={data[1]}>{data[1]}</label>
               </div>
             )                 

@@ -42,6 +42,8 @@ function CreateSurvey() {
     var elements =document.getElementsByClassName("option")
     var date = document.getElementById("date").value
     var title = document.getElementById("title").value
+    console.log(date)
+    console.log(title)
     var values = []
     for (let index = 0; index < options; index++) {
       values.push(elements[index].value)
@@ -92,10 +94,6 @@ function CreateSurvey() {
       
     }, []);
 
-
-
-  
-
   return (
     <div className="SurveySectionTopBar">
     {
@@ -116,7 +114,6 @@ function CreateSurvey() {
           </div>
           <div className="SurveyHeader">
             <input type="text" placeholder ="insert title here" id="title"></input>
-            <input type="text" placeholder ="insert description here" id="description"></input>
             <input type="date" placeholder ="insert title here" id="date"></input>
           </div>
         <div className="SurveyBody">
@@ -131,7 +128,7 @@ function CreateSurvey() {
         }
           <div className="SurveyEntry" style={{justifyContent:"spaceAround"}}>
             <span class="dot"></span>
-            <input type="text" placeholder ="Add Another option" className="option" onFocus={(e) => e.target.blur()}onClick={AddOption} readOnly="true"></input>
+            <input type="text" placeholder ="Add Another option" className="option" onFocus={(e) => e.target.blur()}onClick={AddOption} readOnly={true}></input>
           </div> 
         </div>
 

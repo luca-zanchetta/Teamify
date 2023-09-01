@@ -19,7 +19,6 @@ import Survey from "./components/Survey";
 import "./css/Survey.css"
 import { address, flask_port } from "./components/Endpoint";
 import Chat from "./components/chat";
-
 import CreateSurvey from "./components/CreateSurvey";
 
 
@@ -51,12 +50,67 @@ function TeamView() {
   const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState(false);
   const [task, setTask] = useState([]);
+  const [surveys, setSurvey] = useState([]);
   const showDeletePopUp = localStorage.getItem("delete") === "true";
   const task_id = localStorage.getItem("task_to_delete");
   const updateDimensions = () => {
     setWindowWidth(window.innerWidth);
   };
+
+  async function GatherSurveys() {
+    await axios
+        .get(address + flask_port + "/getSurveys", {
+          params: {
+            team_id:id,
+            username:localStorage.getItem("LoggedUser"),
+          },
+        }).then((response) => {
+          var _surveys = Array();
+          console.log(response.data)
+          response.data.map( (data, i ) => {
+            var _survey = [];
+            //access data field
+            _survey.id = data.survey_id
+            _survey.date = data.due_date;
+            _survey.title = data.survey_text;
+            _survey.author = "missing backend!!!"
+            _survey.entries = []
+            
+            var totalVotes = 0
+            data.options.map((option, i ) => {
+              var _entry = []
+              totalVotes += option.option_votes;
+              _entry[0] = option.option_votes;
+              _entry[1] = option.option_text;
+              _entry[2] = option.option_id ==  data.user_voted_this_option_id;
+              _entry[3] = option.option_id 
+              _survey.entries.push(_entry)
+            })
+            _survey.votes = totalVotes;
+            _surveys.push(_survey)
+          })
+          console.log(_surveys)
+          setSurvey(_surveys);
+  
+        }).catch(function (error) {
+          if (error.response) {
+            // Print error data
+            console.log("Data: " + error.response.data);
+            console.log("Status: " + error.response.status);
+            console.log("Headers: " + error.response.headers);
+
+            // Handle error
+            if (error.response.status === 400) {
+              sessionStorage.setItem("inviteError_alert", "true");
+              window.location.replace(window.location.href); // For alert purposes only
+            }
+          }
+        });
+  }
   useEffect(() => {
+    
+    GatherSurveys()
+
     window.addEventListener("resize", updateDimensions);
     return () => {
       window.removeEventListener("resize", updateDimensions);
@@ -451,8 +505,13 @@ function TeamView() {
                   <CreateSurvey></CreateSurvey>
                   <hr></hr>
                   <div className="Surveys">
-                    <Survey title="Esempio di titolo" description="Descrizione." votes="14" date="14/02/23" author="Prova prova" entries={[[ "50%" , "ciao", true], [ "25%" , "ciaociao", false], [ "25%" , "eheheh", false]]}>
-                    </Survey>
+                  {
+                    surveys.map((survey, i) => (
+                      <Survey id={survey.id} title={survey.title} votes={survey.votes} date={survey.date} author={survey.author} entries={survey.entries}>
+                      </Survey>
+                    ))
+                  }
+                    
                   </div>
                 </Accordion.Body>
               </Accordion.Item>
