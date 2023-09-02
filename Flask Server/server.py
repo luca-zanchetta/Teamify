@@ -1855,4 +1855,4 @@ if __name__ == "__main__":
     # app.run(debug=True, host="localhost", port=5000)
     local = "localhost"
     docker = "0.0.0.0"
-    socketio.run(app, host=local, port=5000, debug=True)
+    socketio.run(app, host=docker, port=5000, debug=True)
