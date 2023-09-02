@@ -94,6 +94,12 @@ const WebSocketComponent =  forwardRef((props, ref) => {
         scrollChat.scrollTop = scrollChat.scrollHeight;
       }
     });
+      
+    newSocket.on('survey_notification', (message) => {
+      console.log('[INFO] Recieved notification: '+message);
+      var bellIcon = document.getElementById('bell');
+      bellIcon.src = alarm;
+    });
 
 
     // Chiudi la connessione WebSocket quando il componente viene smontato

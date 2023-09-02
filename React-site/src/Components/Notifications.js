@@ -134,9 +134,29 @@ function Notifications() {
         
       case 'message':
         read_notification(notification[0]);
+        var bellIcon = document.getElementById('bell');
+        bellIcon.src = bell;
+    
+        for(let i = 0; i < notifications.length; i++) {
+          if(notifications[i][4] === false) {
+            var bellIcon = document.getElementById('bell');
+            bellIcon.src = alarm;
+          }
+        }
+
         break;
 
       case 'survey':
+        read_notification(notification[0]);
+        var bellIcon = document.getElementById('bell');
+        bellIcon.src = bell;
+    
+        for(let i = 0; i < notifications.length; i++) {
+          if(notifications[i][4] === false) {
+            var bellIcon = document.getElementById('bell');
+            bellIcon.src = alarm;
+          }
+        }
         break;
 
       case 'event':
@@ -181,6 +201,15 @@ function Notifications() {
         } catch (error) {
           // Request failed
           console.log("[ERROR] Request failed: " + error);
+        }
+        var bellIcon = document.getElementById('bell');
+        bellIcon.src = bell;
+    
+        for(let i = 0; i < notifications.length; i++) {
+          if(notifications[i][4] === false) {
+            var bellIcon = document.getElementById('bell');
+            bellIcon.src = alarm;
+          }
         }
         break;
 

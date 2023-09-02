@@ -103,7 +103,7 @@ except Exception as err:
 dropNotification = "DROP TABLE IF EXISTS notification CASCADE"
 notification = """CREATE TABLE notification (
     id SERIAL PRIMARY KEY,
-    date DATE NOT NULL,
+    date TIMESTAMP NOT NULL,
     content VARCHAR(500),
     type VARCHAR(50) NOT NULL DEFAULT 'message',
     read boolean NOT NULL DEFAULT FALSE,

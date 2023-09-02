@@ -77,11 +77,6 @@ function Chat() {
     }
   }
 
-
-  function showChat() {
-
-  }
-
   // Get teams of the user
   async function get_teams() {
     try {
@@ -190,7 +185,6 @@ function Chat() {
 
   useEffect(() => {
     get_teams();
-    showChat();
   }, []);
 
   return (
@@ -213,7 +207,9 @@ function Chat() {
                           <option value={index} id={index}>{team}</option>
                           ))}
                         </select>
-                        
+                        {!showTeams && (
+                            <h3>No team available</h3>
+                        )}
                         <img src={cancel} onClick={ToggleChat}></img>
                     </div>
                     <hr></hr>
@@ -234,17 +230,6 @@ function Chat() {
                             </div>
                         </div>
                       ))}
-                        {/* <div class="ChatEntry">
-                            <img src={account}></img>
-                            <div className="ChatEntryText">
-                                <h2>
-                                    Username
-                                </h2>
-                                <h3>
-                                    Acuna matata a tutti ragazzi, ben ritrovati dal vostro ciccio gamer 89!
-                                </h3>
-                            </div>
-                        </div> */}
                     </div>
                     <hr></hr>
                     <input type="text" onKeyDown={OnChatSubmit} id="chatInput">
