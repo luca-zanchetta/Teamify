@@ -1,7 +1,9 @@
 i dockerfile sono nelle cartelle
 
-fatti i file vanno buildati le "images" che sarebbero le vm: docker build -t [your_flask_image_name] -f [path_to_flask_dockerfile] 
-fatto ciò si inseriscono i nomi delle images nel docker-compose e si runna tutto dal docker-compose con un solo comando
+prima di runnare bisogna:
+switchare address e address2 in /react/components/endpoint
+in flask/DBConnection psycopg2.connect cambiare host da local a docker
+in server.py alla fine l'host di socket.io da local a docker
 
-runna il docker compose con docker-compose up backend frontend db (in questo modo non runna l'installer del db)
-runna poi a parte l'installer con docker-compose run install-db (solo 1 volta)
+runna il docker compose con docker-compose up
+successive run con docker-compose run frontend backend db
