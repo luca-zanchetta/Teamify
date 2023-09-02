@@ -66,37 +66,41 @@ function Task({ task }: Props) {
 
   //in this way you can pass the props through the navigate
   const handleEdit = () => {
-    const modify = task.type === "event" ? "event" : "personal";
-    if (modify === "event") {
-      axios
-        .get(endpoint3, {
-          params: {
-            id: task.id,
-          },
-        })
-        .then((response) => {
-          const res = response.data;
-          //console.log("RES meme\n", res.member_list);
-          navigate("/home/tasks/edittask", {
-            state: {
-              task: task,
-              modify: modify,
-              members: members,
-              team: res.member_list,
-              previousPage: window.location.href,
+    if (task.member === decryptedUsername) {
+      const modify = task.type === "event" ? "event" : "personal";
+      if (modify === "event") {
+        axios
+          .get(endpoint3, {
+            params: {
+              id: task.id,
             },
+          })
+          .then((response) => {
+            const res = response.data;
+            //console.log("RES meme\n", res.member_list);
+            navigate("/home/tasks/edittask", {
+              state: {
+                task: task,
+                modify: modify,
+                members: members,
+                team: res.member_list,
+                previousPage: window.location.href,
+              },
+            });
+          })
+          .catch((error) => {
+            console.error("Error fetching team data:", error);
           });
-        })
-        .catch((error) => {
-          console.error("Error fetching team data:", error);
+      } else {
+        navigate("/home/tasks/edittask", {
+          state: {
+            task: task,
+            previousPage: window.location.href,
+          },
         });
+      }
     } else {
-      navigate("/home/tasks/edittask", {
-        state: {
-          task: task,
-          previousPage: window.location.href,
-        },
-      });
+      alert("not auth");
     }
   };
 

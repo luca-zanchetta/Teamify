@@ -907,6 +907,18 @@ def exit_from_team():
     admin_list = []
     for admin in admins:
         admin_list.append({"admin": admin[0]})
+        if username == admin[0]:
+            cancel_adm = "true"
+
+    if cancel_adm == "true":
+        try:
+            curr.execute("DELETE FROM manage WHERE admin=%s", (username,))
+        except Exception as error:
+            print("[ERROR] error in deleting admin from manage")
+            return (
+                jsonify({"error": "An error occurred"}),
+                500,
+            )  # Return a valid response
 
     if len(admin_list) <= 1:
         # Find a new admin
