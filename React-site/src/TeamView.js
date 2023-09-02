@@ -503,16 +503,17 @@ function TeamView() {
                             >
                               <div className="row mt-1" key={admin}>
                                 <div className="row">
-                                  <li>{admin}</li>
-                                  {admin !== decryptedUsername && (
-                                    <button
-                                      className="btn btn-sm "
-                                      onClick={() => handleRemoveAdmin(admin)}
-                                    >
-                                      Remove admin role
-                                    </button>
-                                  )}
-                                  <br />
+                                  <li>
+                                    {admin}
+                                    {admin !== decryptedUsername && (
+                                      <button
+                                        className="btn btn-sm "
+                                        onClick={() => handleRemoveAdmin(admin)}
+                                      >
+                                        Remove admin role
+                                      </button>
+                                    )}
+                                  </li>
                                 </div>
                               </div>
                             </div>
