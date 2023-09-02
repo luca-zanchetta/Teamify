@@ -74,6 +74,7 @@ function TeamView() {
   const updateDimensions = () => {
     setWindowWidth(window.innerWidth);
   };
+
   useEffect(() => {
     window.addEventListener("resize", updateDimensions);
     return () => {
@@ -457,19 +458,35 @@ function TeamView() {
                 <Accordion.Body>
                   <div className="container">
                     {data.map((item) => (
-                      <div className="row">
-                        <div className="col-2">Team Members:</div>
-                        {isAdmin &&
+                      <div className="row mb-3">
+                        <div className="row">Team Members:</div>
+                        {(isAdmin &&
                           item.members.map((member, index) => (
-                            <div className="col mt-1" key={member}>
-                              {member}
-                              <button
-                                className="btn btn-sm "
-                                style={{ marginLeft: "5%" }}
-                                onClick={() => handleMakeAdmin(member)}
-                              >
-                                Make admin
-                              </button>
+                            <div
+                              className="container"
+                              style={{ textAlign: "left", overflow: "auto" }}
+                            >
+                              <div className="row mt-1" key={member}>
+                                <li>
+                                  {member}
+                                  <button
+                                    className="btn btn-sm"
+                                    onClick={() => handleMakeAdmin(member)}
+                                  >
+                                    Make admin
+                                  </button>
+                                </li>
+                              </div>
+                            </div>
+                          ))) ||
+                          item.members.map((member, index) => (
+                            <div
+                              className="container"
+                              style={{ textAlign: "left", overflow: "auto" }}
+                            >
+                              <div className="row mt-1" key={member}>
+                                <li>{member}</li>
+                              </div>
                             </div>
                           ))}
                       </div>
@@ -477,28 +494,39 @@ function TeamView() {
 
                     {data.map((item) => (
                       <div className="row">
-                        <div className="col-2">Team Admins:</div>
+                        <div className="row">Team Admins:</div>
                         {(isAdmin &&
                           item.admins.map((admin, index) => (
-                            <div className="col mt-1" key={admin}>
-                              <div className="row">
-                                <li>{admin}</li>
-                                {admin !== decryptedUsername && (
-                                  <button
-                                    className="btn btn-sm "
-                                    style={{ marginLeft: "5%" }}
-                                    onClick={() => handleRemoveAdmin(admin)}
-                                  >
-                                    Remove admin role
-                                  </button>
-                                )}
-                                <br />
+                            <div
+                              className="container"
+                              style={{ textAlign: "left" }}
+                            >
+                              <div className="row mt-1" key={admin}>
+                                <div className="row">
+                                  <li>{admin}</li>
+                                  {admin !== decryptedUsername && (
+                                    <button
+                                      className="btn btn-sm "
+                                      onClick={() => handleRemoveAdmin(admin)}
+                                    >
+                                      Remove admin role
+                                    </button>
+                                  )}
+                                  <br />
+                                </div>
                               </div>
                             </div>
                           ))) ||
                           item.admins.map((admin, index) => (
-                            <div className="col" key={admin}>
-                              <div className="col">{admin}</div>
+                            <div
+                              className="container"
+                              style={{ textAlign: "left" }}
+                            >
+                              <div className="row" key={admin}>
+                                <div className="row">
+                                  <li>{admin}</li>
+                                </div>
+                              </div>
                             </div>
                           ))}
                       </div>
