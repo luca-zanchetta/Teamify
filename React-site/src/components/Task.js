@@ -86,7 +86,6 @@ function Task({ task }: Props) {
               previousPage: window.location.href,
             },
           });
-          console.log("RES", typeof objectToArray(res.member_list));
         })
         .catch((error) => {
           console.error("Error fetching team data:", error);

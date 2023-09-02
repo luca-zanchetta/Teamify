@@ -19,7 +19,7 @@ function Teams() {
 
   const username = localStorage.getItem("LoggedUser");
   const navigate = useNavigate();
-  const endpoint = address+flask_port+"/home/teams";
+  const endpoint = address + flask_port + "/home/teams";
   const [teams, setTeams] = useState([]);
 
   const ToggleDisplayAgenda = () => {
@@ -141,7 +141,17 @@ function Teams() {
             {teams.map((team, index) => (
               <div className="row mb-1" key={index}>
                 <div className="col">
-                  <Link to={`/teamview?id=${team.id}`}>{team.title}</Link>
+                  <div
+                    onClick={() =>
+                      navigate(`/teamview?id=${team.id}`, {
+                        state: {
+                          id: team.id,
+                        },
+                      })
+                    }
+                  >
+                    {team.title}
+                  </div>
                 </div>
                 <div className="col">
                   <div>{team.description}</div>

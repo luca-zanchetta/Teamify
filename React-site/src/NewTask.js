@@ -207,7 +207,6 @@ function NewTask() {
               console.error("Error:", error);
             }
           }
-          console.log(previousPage);
           window.location.replace(previousPage);
           // TODO: add alert
         }
@@ -263,12 +262,11 @@ function NewTask() {
         setEvent(true);
         setMembers(location.state.event);
         setTeam(location.state.team);
+        console.log("TEAM IN NEW TASK\n\n", location.state.team);
         setType("event");
       }
       if (location.state.team) {
-        setPreviousPage(
-          location.state.previousPage + "?id=" + location.state.team
-        );
+        setPreviousPage(location.state.previousPage);
       }
     }
   }, [location.state]);
@@ -311,7 +309,7 @@ function NewTask() {
                   width="25"
                   height="25"
                   fill="currentColor"
-                  class="bi bi-arrow-90deg-left"
+                  className="bi bi-arrow-90deg-left"
                   viewBox="0 0 16 16"
                 >
                   <path

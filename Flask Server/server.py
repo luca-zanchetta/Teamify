@@ -698,16 +698,15 @@ def get_joined_teams():
 def team_details():
     curr = conn.cursor()
     # Fetch the ID of the last inserted task
-    id = request.args.get("id")
+    team_id = request.args.get("id")
     curr.execute(
         "SELECT name, description FROM team WHERE id = %s",
-        (id,),
+        (team_id,),
     )
     teamData = curr.fetchone()
-
     curr.execute(
         "SELECT username FROM joinTeam WHERE team = %s",
-        (id,),
+        (team_id,),
     )
     members = curr.fetchall()
     members2 = []
@@ -716,7 +715,7 @@ def team_details():
 
     curr.execute(
         "SELECT admin FROM manage WHERE team = %s",
-        (id,),
+        (team_id,),
     )
     admins = curr.fetchall()
     admins2 = []
@@ -1037,9 +1036,8 @@ def edit_member_event():
     admin = data["admin"]
     new_set = []
     for member in new_members:
-        if member != "member":
-            new_set.append(member)
-
+        m = member["member"]
+        new_set.append(m)
     curr.execute(
         "SELECT username, team FROM includes WHERE event = %s",
         (event_id,),
@@ -1050,22 +1048,43 @@ def edit_member_event():
         member_list.append(member[0])
         team_id = member[1]
 
+    print("OLD MEMBERS", member_list, "\nNEW MEMBERS", new_members, "\n")
+
     for member in member_list:
         if member not in new_set and member != admin:
+            print("NOT IN NEW", member)
             query_member = "DELETE FROM includes WHERE username = %s"
             param_member = (member,)
             try:
                 curr.execute(query_member, param_member)
             except Exception as err:
-                print("[ERROR] /home/team/event/editmember:", err)
+                print("[ERROR] /home/team/event/editmember: (delete)", err)
                 return jsonify("ko"), 400
 
-    for member in new_set:
-        if member not in member_list:
+    for member in new_members:
+        if member["member"] not in member_list:
             query_member = "INSERT INTO includes (event,team,username) VALUES(%s,%s,%s)"
-            param_member = (event_id, team_id, member)
+            param_member = (
+                event_id,
+                team_id,
+                member["member"],
+            )
             try:
                 curr.execute(query_member, param_member)
+                query_notification = "INSERT INTO notification (date, content, type, read, username) VALUES (%s,%s,%s,%s,%s)"
+                params_notification = (
+                    datetime.datetime.now(),
+                    f"{admin}  has invited you to join the event '.",
+                    "event",
+                    False,
+                    member["member"],
+                )
+                try:
+                    curr.execute(query_notification, params_notification)
+                    socketio.emit("event_notification", "", room=member["member"])
+                except Exception as err:
+                    print("[ERROR] /home/newtask: " + err)
+                    return jsonify("ko"), 400
             except Exception as err:
                 print("[ERROR] /home/team/event/editmemeber: (insert:)", err)
                 return jsonify("ko"), 400

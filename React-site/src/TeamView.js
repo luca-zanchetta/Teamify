@@ -8,8 +8,9 @@ import Alert from "./components/Alert.tsx";
 import { Container } from "./css/Navigator.css";
 import { Accordion, Col, Row } from "react-bootstrap";
 import React, { useState, useEffect, useCallback } from "react";
+
 import axios from "axios";
-import { Link, useNavigate, Navigate } from "react-router-dom";
+import { Link, useNavigate, Navigate, useLocation } from "react-router-dom";
 import UserIcon from "./components/UserIcon";
 import Notifications from "./components/Notifications";
 import WebSocketComponent from "./components/WebSocketComponent";
@@ -22,9 +23,10 @@ import Chat from "./components/chat";
 
 import CreateSurvey from "./components/CreateSurvey";
 
-var endpoint = address + flask_port + "/teamGivenID";
+const endpoint = address + flask_port + "/teamGivenID";
 
 function TeamView() {
+  const location = useLocation();
   const inviteOk = sessionStorage.getItem("invite_alert") === "true";
   const handleInviteOk = () => {
     sessionStorage.setItem("invite_alert", "false");
@@ -49,7 +51,7 @@ function TeamView() {
   const [data, setData] = useState([]);
   const [new_member, setNewMember] = useState("");
   const queryParameters = new URLSearchParams(window.location.search);
-  const id = queryParameters.get("id");
+  const [id, setId] = useState(queryParameters.get("id"));
   const endpoint1 = address + flask_port + "/teamDetails";
   const endpoint2 = address + flask_port + "/invite";
   const endpoint3 = address + flask_port + "/home/teams/team/newadmin";
@@ -65,7 +67,6 @@ function TeamView() {
   const [deleteTeam, setDeleteTeam] = useState(false);
   const [removeAdmin, setRemoveAdmin] = useState(false);
   const [adminToRemove, setAdminToRemove] = useState("");
-
   const alert_new_admin = sessionStorage.getItem("new_admin") === "true";
   const alert_removed_admin =
     sessionStorage.getItem("removed_admin") === "true";
@@ -94,7 +95,7 @@ function TeamView() {
         setIsAdmin(response.data[0].admins.includes(decryptedUsername));
       })
       .catch((error) => console.log(error));
-  }, [isAdmin]);
+  }, [id, isAdmin]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -107,6 +108,14 @@ function TeamView() {
 
     return () => clearTimeout(timeout);
   }, []);
+
+  useEffect(() => {
+    if (location.state) {
+      setId(location.state.id);
+    } else {
+      setId(queryParameters.get("id"));
+    }
+  });
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -179,7 +188,6 @@ function TeamView() {
 
   const handleSelectEvent = useCallback((event) => {
     setTask(event);
-    console.log(event);
   });
 
   const handleBack = () => {
@@ -350,7 +358,7 @@ function TeamView() {
                     width="25"
                     height="25"
                     fill="currentColor"
-                    class="bi bi-trash3"
+                    className="bi bi-trash3"
                     viewBox="0 0 16 16"
                   >
                     <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0H11Zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5h9.916Zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47ZM8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5Z" />
