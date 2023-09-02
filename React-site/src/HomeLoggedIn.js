@@ -13,26 +13,26 @@ import Alert from "./components/Alert.tsx";
 import Task from "./components/Task.js";
 import PopUp from "./components/PopUp.js";
 
-import {WebSocketComponent} from "./components/WebSocketComponent";
+import { WebSocketComponent } from "./components/WebSocketComponent";
 import Chat from "./components/chat";
 
 function HomeLoggedIn() {
-//rimozione alert
-useEffect(() => {
-  const timeout = setTimeout(() => {
-    handleWrongPassword8();
-    handleDataUpdate();
-    handleDataUpdateErr();
-    handleRightPassword();
-    handleWrongPassword();
-    handleDifferentPasswords();
-    handleDb();
-    handlePasswordSameAsOld();
-    handleFields();
-  }, 1000);
+  //rimozione alert
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      handleWrongPassword8();
+      handleDataUpdate();
+      handleDataUpdateErr();
+      handleRightPassword();
+      handleWrongPassword();
+      handleDifferentPasswords();
+      handleDb();
+      handlePasswordSameAsOld();
+      handleFields();
+    }, 1000);
 
-  return () => clearTimeout(timeout);
-}, []);
+    return () => clearTimeout(timeout);
+  }, []);
 
   const username = localStorage.getItem("LoggedUser");
   const decryptedusername = localStorage.getItem("username");
@@ -96,50 +96,55 @@ useEffect(() => {
   };
 
   // Handler for data update error event
-  const dataUpdateErr = sessionStorage.getItem("dataUpdateErr_alert") === "true";
+  const dataUpdateErr =
+    sessionStorage.getItem("dataUpdateErr_alert") === "true";
   const handleDataUpdateErr = () => {
     sessionStorage.setItem("dataUpdateErr_alert", "false");
   };
 
   // Handler for wrong password event
-  const wrongPassword = sessionStorage.getItem("wrongPassword_alert") === "true";
+  const wrongPassword =
+    sessionStorage.getItem("wrongPassword_alert") === "true";
   const handleWrongPassword = () => {
     sessionStorage.setItem("wrongPassword_alert", "false");
-  }
+  };
 
   // Handler for password updated successfully
-  const rightPassword = sessionStorage.getItem("rightPassword_alert") === "true";
+  const rightPassword =
+    sessionStorage.getItem("rightPassword_alert") === "true";
   const handleRightPassword = () => {
     sessionStorage.setItem("rightPassword_alert", "false");
-  }
+  };
 
   // Handler for new password not long enough
-  const differentPasswords = sessionStorage.getItem("differentPasswords_alert") === "true";
+  const differentPasswords =
+    sessionStorage.getItem("differentPasswords_alert") === "true";
   const handleDifferentPasswords = () => {
     sessionStorage.setItem("differentPasswords_alert", "false");
-  }
+  };
 
   const db = sessionStorage.getItem("db_alert") === "true";
   const handleDb = () => {
     sessionStorage.setItem("db_alert", "false");
-  }
-  const passwordSameAsOld = sessionStorage.getItem("passwordSameAsOld_alert") === "true";
+  };
+  const passwordSameAsOld =
+    sessionStorage.getItem("passwordSameAsOld_alert") === "true";
   const handlePasswordSameAsOld = () => {
     sessionStorage.setItem("passwordSameAsOld_alert", "false");
-  }
+  };
   const fields = sessionStorage.getItem("fields_alert") === "true";
   const handleFields = () => {
     sessionStorage.setItem("fields_alert", "false");
-  }
+  };
   const wrongPassword8 = sessionStorage.getItem("password8_alert") === "true";
   const handleWrongPassword8 = () => {
     sessionStorage.setItem("password8_alert", "false");
-  }
+  };
   /* END ALERT SECTION */
 
   const handleSelectEvent = useCallback((event) => {
     setTask(event);
-    console.log(event)
+    console.log(event);
   });
 
   return (
@@ -176,7 +181,13 @@ useEffect(() => {
         </Alert>
       )}
       {task.id !== undefined && <Task task={task} />}
-      {showDeletePopUp && <PopUp type="task" task_id={task_id} />}
+      {showDeletePopUp && (
+        <PopUp
+          type="task"
+          task_id={task_id}
+          message={"Do you want to delete this task?"}
+        />
+      )}
       {dataUpdate && (
         <Alert onClick={handleDataUpdate} state="success">
           User data has been updated!
@@ -204,26 +215,27 @@ useEffect(() => {
       )}
 
       {fields && (
-              <Alert onClick={handleFields} state="danger">
-                You must fill all the fields to change your password
-              </Alert>
-            )}
+        <Alert onClick={handleFields} state="danger">
+          You must fill all the fields to change your password
+        </Alert>
+      )}
       {passwordSameAsOld && (
-              <Alert onClick={handlePasswordSameAsOld} state="danger">
-                Your new password can't be the same as the old password
-              </Alert>
-            )}
+        <Alert onClick={handlePasswordSameAsOld} state="danger">
+          Your new password can't be the same as the old password
+        </Alert>
+      )}
       {db && (
-              <Alert onClick={handleDb} state="danger">
-                Error updating password
-              </Alert>
-            )}
+        <Alert onClick={handleDb} state="danger">
+          Error updating password
+        </Alert>
+      )}
       {differentPasswords && (
-              <Alert onClick={handleDifferentPasswords} state="danger">
-                You inserted two different new passwords, make sure to retry without typos
-              </Alert>
-            )}
-      
+        <Alert onClick={handleDifferentPasswords} state="danger">
+          You inserted two different new passwords, make sure to retry without
+          typos
+        </Alert>
+      )}
+
       <div className="SideContainer">
         <NavBar></NavBar>
         <div className="CenterContainer">

@@ -18,6 +18,10 @@ import requests
 from datetime import date, timedelta
 
 
+address = "http://localhost:"
+react_port = "3000"
+flask_port = "5000"
+address2 = "http://backend:"
 
 # Server setup
 app = Flask(__name__)
@@ -302,28 +306,6 @@ def create_new_task():
     duration = request.json["duration"]
     type_task = request.json["type"]
 
-    # if event
-    team_id = request.json["teamId"]
-    event_members = request.json["members"]
-
-    # Team name given the id (it is useful for the notifications)
-    query_team_name = "SELECT name FROM team WHERE id = %s"
-    params_team_name = (team_id,)
-    curr.execute(query_team_name, params_team_name)
-    (team_name,) = curr.fetchone()
-    team_name = str(team_name).strip()
-
-    curr.execute(
-        "SELECT username FROM member where username= %s ORDER BY username DESC LIMIT 1",
-        (member,),
-    )
-    member_db = curr.fetchone()
-
-    if not member_db:
-        return jsonify("Not auth"), 401
-
-    # Insert the new task with the calculated new_id
-
     # if is a pernsonal task
     if type_task == "personal":
         query = "INSERT INTO task (id, title, date, time, description, member,duration) VALUES (%s, %s, %s, %s, %s, %s, %s)"
@@ -338,6 +320,25 @@ def create_new_task():
         return jsonify({"message": "Task created successfully", "id": new_id}), 200
 
     else:  # Shared task
+        team_id = request.json["teamId"]
+        event_members = request.json["members"]
+
+        # Team name given the id (it is useful for the notifications)
+        query_team_name = "SELECT name FROM team WHERE id = %s"
+        params_team_name = (team_id,)
+        curr.execute(query_team_name, params_team_name)
+        (team_name,) = curr.fetchone()
+        team_name = str(team_name).strip()
+
+        curr.execute(
+            "SELECT username FROM member where username= %s ORDER BY username DESC LIMIT 1",
+            (member,),
+        )
+        member_db = curr.fetchone()
+
+        if not member_db:
+            return jsonify("Not auth"), 401
+
         query = "INSERT INTO task (id, title, date, time, description, member, duration,type) VALUES (%s, %s, %s, %s, %s, %s, %s,%s)"
         values = (new_id, title, date, time, description, member, duration, type_task)
 
@@ -705,16 +706,15 @@ def get_joined_teams():
 def team_details():
     curr = conn.cursor()
     # Fetch the ID of the last inserted task
-    id = request.args.get("id")
+    team_id = request.args.get("id")
     curr.execute(
         "SELECT name, description FROM team WHERE id = %s",
-        (id,),
+        (team_id,),
     )
     teamData = curr.fetchone()
-
     curr.execute(
         "SELECT username FROM joinTeam WHERE team = %s",
-        (id,),
+        (team_id,),
     )
     members = curr.fetchall()
     members2 = []
@@ -723,7 +723,7 @@ def team_details():
 
     curr.execute(
         "SELECT admin FROM manage WHERE team = %s",
-        (id,),
+        (team_id,),
     )
     admins = curr.fetchall()
     admins2 = []
@@ -793,6 +793,7 @@ def team_create():
     return jsonify("ok"), 200
 
 
+# TODO:
 # ottenere la lista degli admin dato un team id
 @app.route("/adminGivenTeam", methods=["GET"])
 def admin_given_team():
@@ -809,7 +810,57 @@ def admin_given_team():
     for admin in admins:
         admin_list.append({"admin": admin[0]})
 
+    if not admin_list:
+        return jsonify([])  # Return a 404 Not Found status
+
     return jsonify(admin_list), 200
+
+
+# remove admin API
+@app.route("/home/teams/team/removeadmin", methods=["DELETE"])
+def remove_admin():
+    curr = conn.cursor()
+    team_id = request.args.get("teamId")
+    admin = request.args.get("admin_to_remove")
+    try:
+        curr.execute(
+            "DELETE FROM manage WHERE admin=%s AND team= %s",
+            (
+                admin,
+                team_id,
+            ),
+        )
+        return jsonify("Admin correctly removed"), 200
+
+    except Exception as error:
+        print("[ERROR] error in removing admin")
+        return (
+            jsonify({"error": "An error occurred"}),
+            500,
+        )  # Return a valid response
+
+
+# add a new admin API
+@app.route("/home/teams/team/newadmin", methods=["POST"])
+def new_admin():
+    curr = conn.cursor()
+    data = request.json
+    team_id = data.get("teamId")
+    admin = data.get("admin")
+    print(team_id, admin)
+    try:
+        curr.execute(
+            "INSERT INTO manage (admin, team) VALUES (%s,%s) ",
+            (
+                admin,
+                team_id,
+            ),
+        )
+        return jsonify("member addes"), 200
+
+    except Exception as err:
+        print("[ERROR] /home/deleteteam : ", err)
+        return jsonify("ko"), 400
 
 
 # ottenere la lista dei membri dato un team id
@@ -846,15 +897,82 @@ def exit_from_team():
     query_delete = "DELETE FROM joinTeam WHERE username = %s and team=%s"
     param_delete = (username, team_id)
 
+    # Fetch admins for the team
+    curr.execute(
+        "SELECT admin FROM manage WHERE team = %s",
+        (team_id,),
+    )
+    admins = curr.fetchall()
+
+    admin_list = []
+    for admin in admins:
+        admin_list.append({"admin": admin[0]})
+
+    if len(admin_list) <= 1:
+        # Find a new admin
+        curr.execute(
+            "SELECT username FROM joinTeam WHERE team = %s AND username != %s ",
+            (
+                team_id,
+                username,
+            ),
+        )
+        new_admin = curr.fetchone()
+        if new_admin:
+            query_new_admin = "INSERT INTO manage (admin, team) VALUES (%s,%s)"
+            query_new_params = (
+                new_admin[0],
+                team_id,
+            )
+            try:
+                curr.execute(query_new_admin, query_new_params)
+                try:
+                    curr.execute("DELETE FROM manage WHERE admin =%s", (username,))
+                except Exception as error:
+                    print("[ERROR] error in deleting admin ")
+                    return (
+                        jsonify({"error": "An error occurred"}),
+                        500,
+                    )  # Return a valid response
+            except Exception as error:
+                print("[ERROR] error in adding the new admin")
+                return (
+                    jsonify({"error": "An error occurred"}),
+                    500,
+                )  # Return a valid response
+
+        else:
+            # Delete the team if there is no new admin
+            query_delete_team = "DELETE FROM team WHERE id=%s"
+            delete_team_params = (team_id,)
+            try:
+                curr.execute(query_delete_team, delete_team_params)
+                return (
+                    jsonify(
+                        {
+                            "message": f"[INFO] /home/deleteteam: id {team_id} successfully deleted because no admin"
+                        }
+                    ),
+                    200,
+                )
+            except Exception as err:
+                print("[ERROR] impossible to delete the team without admin : ", err)
+                return (
+                    jsonify({"error": "An error occurred"}),
+                    500,
+                )  # Return a valid response
+
     try:
         curr.execute(query_delete, param_delete)
-
+        conn.commit()  # Don't forget to commit changes
+        # i call the already existent API
         return jsonify(
             {"message": f"[INFO] /home/exitfromteam: id {team_id} successfully left"}
         )
+
     except Exception as err:
-        print("[ERROR] /home/deletetask : ", err)
-        return jsonify("ko"), 400
+        print("[ERROR] /home/leaveteam : ", err)
+        return jsonify({"error": "An error occurred"}), 500  # Return a valid response
 
 
 # delete a team API
@@ -930,9 +1048,8 @@ def edit_member_event():
     admin = data["admin"]
     new_set = []
     for member in new_members:
-        if member != "member":
-            new_set.append(member)
-
+        m = member["member"]
+        new_set.append(m)
     curr.execute(
         "SELECT username, team FROM includes WHERE event = %s",
         (event_id,),
@@ -943,22 +1060,43 @@ def edit_member_event():
         member_list.append(member[0])
         team_id = member[1]
 
+    print("OLD MEMBERS", member_list, "\nNEW MEMBERS", new_members, "\n")
+
     for member in member_list:
         if member not in new_set and member != admin:
+            print("NOT IN NEW", member)
             query_member = "DELETE FROM includes WHERE username = %s"
             param_member = (member,)
             try:
                 curr.execute(query_member, param_member)
             except Exception as err:
-                print("[ERROR] /home/team/event/editmember:", err)
+                print("[ERROR] /home/team/event/editmember: (delete)", err)
                 return jsonify("ko"), 400
 
-    for member in new_set:
-        if member not in member_list:
+    for member in new_members:
+        if member["member"] not in member_list:
             query_member = "INSERT INTO includes (event,team,username) VALUES(%s,%s,%s)"
-            param_member = (event_id, team_id, member)
+            param_member = (
+                event_id,
+                team_id,
+                member["member"],
+            )
             try:
                 curr.execute(query_member, param_member)
+                query_notification = "INSERT INTO notification (date, content, type, read, username) VALUES (%s,%s,%s,%s,%s)"
+                params_notification = (
+                    datetime.datetime.now(),
+                    f"{admin}  has invited you to join the event '.",
+                    "event",
+                    False,
+                    member["member"],
+                )
+                try:
+                    curr.execute(query_notification, params_notification)
+                    socketio.emit("event_notification", "", room=member["member"])
+                except Exception as err:
+                    print("[ERROR] /home/newtask: " + err)
+                    return jsonify("ko"), 400
             except Exception as err:
                 print("[ERROR] /home/team/event/editmemeber: (insert:)", err)
                 return jsonify("ko"), 400
@@ -969,7 +1107,7 @@ def edit_member_event():
 
 
 # Get list of members included in a certain event the one that accepted
-@app.route("/home/event/members", methods=["get"])
+@app.route("/home/event/members", methods=["GET"])
 def members_given_event():
     curr = conn.cursor()
     # Fetch the ID of the last inserted task
@@ -1703,6 +1841,6 @@ def get_surveys():
 
 if __name__ == "__main__":
     # app.run(debug=True, host="localhost", port=5000)
-    local="localhost"
-    docker="0.0.0.0"
+    local = "localhost"
+    docker = "0.0.0.0"
     socketio.run(app, host=local, port=5000, debug=True)

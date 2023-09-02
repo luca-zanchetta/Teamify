@@ -2,7 +2,7 @@ import "../css/Navigator.css";
 
 import { useEffect } from "react";
 
-import "../css/chat.css"
+import "../css/chat.css";
 import chat from "../icons/chat.png";
 import cancel from "../icons/cancel.png";
 import face from "../img/face.jpeg";
@@ -93,19 +93,17 @@ function Chat() {
             console.log("Headers: " + error.response.headers);
           }
         });
-  
+
       if (response.data.status === 200) {
         setTeams(response.data.teams);
         setTeamIds(response.data.ids);
         setShowTeams(true);
-      }
-      else if (response.data.status === 201) {
+      } else if (response.data.status === 201) {
         setTeams([]);
         setTeamIds([]);
         setShowTeams(false);
       }
-    } 
-    catch (error) {
+    } catch (error) {
       // Request failed
       console.log("[ERROR] Request failed: " + error);
     }
@@ -215,7 +213,7 @@ function Chat() {
                     <hr></hr>
                     <div className="ChatBody" id="ChatBody">
                       {showMessages && messages.map((message, index) => (
-                        <div class="ChatEntry">
+                        <div className="ChatEntry">
                             <img src={account}></img>
                             <div className="ChatEntryText">
                                 <h2>

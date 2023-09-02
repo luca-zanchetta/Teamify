@@ -35,7 +35,10 @@ function Profile() {
     <div className="Profile">
       {deleteAccount && (
         <div>
-          <PopUp type="account" />
+          <PopUp
+            type="account"
+            message={"Do you want to delete your account?"}
+          />
         </div>
       )}
       <div className="ProfileCard">

@@ -25,7 +25,7 @@ function CreateTeam() {
 
   const username = localStorage.getItem("LoggedUser");
   const navigate = useNavigate();
-  const endpoint = address+flask_port+"/home/newteam";
+  const endpoint = address + flask_port + "/home/newteam";
   const [teams, setTeams] = useState([]);
 
   const ToggleDisplayAgenda = () => {
@@ -133,7 +133,7 @@ function CreateTeam() {
                 width="25"
                 height="25"
                 fill="currentColor"
-                class="bi bi-arrow-90deg-left"
+                className="bibi-arrow-90deg-left"
                 viewBox="0 0 16 16"
               >
                 <path

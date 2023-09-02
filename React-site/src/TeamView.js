@@ -8,23 +8,24 @@ import Alert from "./components/Alert.tsx";
 import { Container } from "./css/Navigator.css";
 import { Accordion, Col, Row } from "react-bootstrap";
 import React, { useState, useEffect, useCallback } from "react";
+
 import axios from "axios";
-import { Link, useNavigate, Navigate } from "react-router-dom";
+import { Link, useNavigate, Navigate, useLocation } from "react-router-dom";
 import UserIcon from "./components/UserIcon";
 import Notifications from "./components/Notifications";
 import WebSocketComponent from "./components/WebSocketComponent";
 import Task from "./components/Task.js";
 import PopUp from "./components/PopUp.js";
 import Survey from "./components/Survey";
-import "./css/Survey.css"
+import "./css/Survey.css";
 import { address, flask_port } from "./components/Endpoint";
 import Chat from "./components/chat";
 import CreateSurvey from "./components/CreateSurvey";
 
-
-var endpoint = address + flask_port + "/teamGivenID";
+const endpoint = address + flask_port + "/teamGivenID";
 
 function TeamView() {
+  const location = useLocation();
   const inviteOk = sessionStorage.getItem("invite_alert") === "true";
   const handleInviteOk = () => {
     sessionStorage.setItem("invite_alert", "false");
@@ -38,12 +39,21 @@ function TeamView() {
     sessionStorage.setItem("inviteError_alert", "false");
   };
 
+  const handleAlertNewAdmin = () => {
+    sessionStorage.setItem("new_admin", "false");
+  };
+
+  const handleAlertRemoveAdmin = () => {
+    sessionStorage.setItem("removed_admin", "false");
+  };
+
   const [data, setData] = useState([]);
   const [new_member, setNewMember] = useState("");
   const queryParameters = new URLSearchParams(window.location.search);
-  const id = queryParameters.get("id");
+  const [id, setId] = useState(queryParameters.get("id"));
   const endpoint1 = address + flask_port + "/teamDetails";
   const endpoint2 = address + flask_port + "/invite";
+  const endpoint3 = address + flask_port + "/home/teams/team/newadmin";
   const decryptedUsername = localStorage.getItem("username");
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
@@ -53,6 +63,14 @@ function TeamView() {
   const [surveys, setSurvey] = useState([]);
   const showDeletePopUp = localStorage.getItem("delete") === "true";
   const task_id = localStorage.getItem("task_to_delete");
+  const [leaveTeam, setLeaveTeam] = useState(false);
+  const [deleteTeam, setDeleteTeam] = useState(false);
+  const [removeAdmin, setRemoveAdmin] = useState(false);
+  const [adminToRemove, setAdminToRemove] = useState("");
+  const alert_new_admin = sessionStorage.getItem("new_admin") === "true";
+  const alert_removed_admin =
+    sessionStorage.getItem("removed_admin") === "true";
+
   const updateDimensions = () => {
     setWindowWidth(window.innerWidth);
   };
@@ -131,17 +149,27 @@ function TeamView() {
         setIsAdmin(response.data[0].admins.includes(decryptedUsername));
       })
       .catch((error) => console.log(error));
-  }, [isAdmin]);
+  }, [id, isAdmin]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
       handleInviteOk();
       handleInviteKo();
       handleMissingFields();
+      handleAlertNewAdmin();
+      handleAlertRemoveAdmin();
     }, 1000);
 
     return () => clearTimeout(timeout);
   }, []);
+
+  useEffect(() => {
+    if (location.state) {
+      setId(location.state.id);
+    } else {
+      setId(queryParameters.get("id"));
+    }
+  });
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -214,50 +242,40 @@ function TeamView() {
 
   const handleSelectEvent = useCallback((event) => {
     setTask(event);
-    console.log(event);
   });
 
   const handleBack = () => {
     window.location.replace("/home/teams");
   };
 
-  const handleLeaveTeam = async () => {
-    try {
-      const response = await axios.delete(
-        address + flask_port + `/home/teams/leaveteam`,
-        {
-          data: null, // Send an empty data object to indicate no request body
-          params: { teamId: id, username: decryptedUsername }, // Add params if needed
-        }
-      );
-      if (response.status === 200) {
-        // If the deletion was successful, update local storage and reload the page
-        window.location.replace("/home/teams");
-        // TODO: You can add an alert here to inform the user about the successful action
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      // Handle any errors that occur during the DELETE request
-    }
+  const handleDelete = () => {
+    setDeleteTeam(true);
   };
 
-  const handleDelete = async () => {
+  const handleLeaveTeam = () => {
+    setLeaveTeam(true);
+  };
+
+  const handleRemoveAdmin = (admin) => {
+    setAdminToRemove(admin);
+    setRemoveAdmin(true);
+  };
+
+  const handleMakeAdmin = async (admin) => {
     try {
-      const response = await axios.delete(
-        address + flask_port + `/home/teams/deleteteam`,
-        {
-          data: null, // Send an empty data object to indicate no request body
-          params: { teamId: id }, // Add params if needed
-        }
-      );
+      // Send a POST request to the /newtask endpoint of the Flask server
+      const response = await axios.post(endpoint3, {
+        admin: admin,
+        teamId: id,
+      });
+      // If task has been successfully created, then redirect the user to the Home page.
       if (response.status === 200) {
-        // If the deletion was successful, update local storage and reload the page
-        window.location.replace("/home/teams");
-        // TODO: You can add an alert here to inform the user about the successful action
+        sessionStorage.setItem("new_admin", "true");
+        window.location.reload();
       }
     } catch (error) {
-      console.error("Error:", error);
-      // Handle any errors that occur during the DELETE request
+      // There is at least one mandatory field that has not been filled
+      console.log("ERROR", error);
     }
   };
 
@@ -298,9 +316,55 @@ function TeamView() {
                 Username field must be filled to invite!
               </Alert>
             )}
+            {alert_new_admin && (
+              <Alert onClick={handleAlertNewAdmin} state="success">
+                Role correctly updated
+              </Alert>
+            )}
+            {alert_removed_admin && (
+              <Alert onClick={handleAlertRemoveAdmin} state="success">
+                User role restored
+              </Alert>
+            )}
           </div>
           {task.id !== undefined && <Task task={task} />}
-          {showDeletePopUp && <PopUp type="task" task_id={task_id} />}
+          {showDeletePopUp && (
+            <PopUp
+              type="task"
+              task_id={task_id}
+              message={"Do you want to delete this task?"}
+            />
+          )}
+          {deleteTeam && (
+            <div>
+              <PopUp
+                type="deleteTeam"
+                message={"Do you want to delete this team?"}
+                id={id}
+              />
+            </div>
+          )}
+          {leaveTeam && (
+            <div>
+              <PopUp
+                type="leaveTeam"
+                message={"Do you want to leave this team?"}
+                id={id}
+                dU={decryptedUsername}
+              />
+            </div>
+          )}
+          {removeAdmin && (
+            <div>
+              <PopUp
+                type="removeAdmin"
+                message={"Do you want to remove this user from the admins?"}
+                id={id}
+                dU={adminToRemove}
+              />
+            </div>
+          )}
+
           <div className="row mt-4 mb-2" style={{ textAlign: "left" }}>
             <div className="row mb-3">
               <div className="col"></div>
@@ -348,7 +412,7 @@ function TeamView() {
                     width="25"
                     height="25"
                     fill="currentColor"
-                    class="bi bi-trash3"
+                    className="bi bi-trash3"
                     viewBox="0 0 16 16"
                   >
                     <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0H11Zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5h9.916Zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47ZM8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5Z" />
@@ -410,22 +474,24 @@ function TeamView() {
                         </button>
                       </Row>
                       <Row></Row>
-                      <Row className="mt-3">
-                        <button
-                          onClick={handleNewEvent}
-                          className="btn"
-                          style={{
-                            textDecoration: "inherit",
-                            backgroundColor: "#c5fdc8",
-                            width: "100px",
-                            cursor: isButtonDisabled
-                              ? "not-allowed"
-                              : "pointer",
-                          }}
-                        >
-                          New Event
-                        </button>
-                      </Row>
+                      {isAdmin && (
+                        <Row className="mt-3">
+                          <button
+                            onClick={handleNewEvent}
+                            className="btn"
+                            style={{
+                              textDecoration: "inherit",
+                              backgroundColor: "#c5fdc8",
+                              width: "100px",
+                              cursor: isButtonDisabled
+                                ? "not-allowed"
+                                : "pointer",
+                            }}
+                          >
+                            New Event
+                          </button>
+                        </Row>
+                      )}
                     </Col>
                   </Row>
                 </Accordion.Body>
@@ -445,24 +511,78 @@ function TeamView() {
                 <Accordion.Body>
                   <div className="container">
                     {data.map((item) => (
-                      <div className="row">
-                        <div className="col-2">Team Members:</div>
-                        {item.members.map((member, index) => (
-                          <div className="col-1" key={member}>
-                            {member}
-                          </div>
-                        ))}
+                      <div className="row mb-3">
+                        <div className="row">Team Members:</div>
+                        {(isAdmin &&
+                          item.members.map((member, index) => (
+                            <div
+                              className="container"
+                              style={{ textAlign: "left", overflow: "auto" }}
+                            >
+                              <div className="row mt-1" key={member}>
+                                <li>
+                                  {member}
+                                  <button
+                                    className="btn btn-sm"
+                                    onClick={() => handleMakeAdmin(member)}
+                                  >
+                                    Make admin
+                                  </button>
+                                </li>
+                              </div>
+                            </div>
+                          ))) ||
+                          item.members.map((member, index) => (
+                            <div
+                              className="container"
+                              style={{ textAlign: "left", overflow: "auto" }}
+                            >
+                              <div className="row mt-1" key={member}>
+                                <li>{member}</li>
+                              </div>
+                            </div>
+                          ))}
                       </div>
                     ))}
 
                     {data.map((item) => (
                       <div className="row">
-                        <div className="col-2">Team Admins:</div>
-                        {item.admins.map((admin, index) => (
-                          <div className="col-1" key={admin}>
-                            {admin}
-                          </div>
-                        ))}
+                        <div className="row">Team Admins:</div>
+                        {(isAdmin &&
+                          item.admins.map((admin, index) => (
+                            <div
+                              className="container"
+                              style={{ textAlign: "left" }}
+                            >
+                              <div className="row mt-1" key={admin}>
+                                <div className="row">
+                                  <li>
+                                    {admin}
+                                    {admin !== decryptedUsername && (
+                                      <button
+                                        className="btn btn-sm "
+                                        onClick={() => handleRemoveAdmin(admin)}
+                                      >
+                                        Remove admin role
+                                      </button>
+                                    )}
+                                  </li>
+                                </div>
+                              </div>
+                            </div>
+                          ))) ||
+                          item.admins.map((admin, index) => (
+                            <div
+                              className="container"
+                              style={{ textAlign: "left" }}
+                            >
+                              <div className="row" key={admin}>
+                                <div className="row">
+                                  <li>{admin}</li>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
                       </div>
                     ))}
                     {isAdmin && (
