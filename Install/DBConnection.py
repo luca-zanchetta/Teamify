@@ -3,7 +3,6 @@ import psycopg2
 user="postgres"
 psw="postgres"
 docker="db"
-local="localhost"
 
 def get_connection():
     try:
