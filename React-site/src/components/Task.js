@@ -101,6 +101,7 @@ function Task({ task }: Props) {
       }
     } else {
       alert("not auth");
+      //TODO: alert to fix
     }
   };
 
