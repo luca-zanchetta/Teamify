@@ -47,6 +47,10 @@ function TeamView() {
     sessionStorage.setItem("removed_admin", "false");
   };
 
+  const handleAlertNotAuth = () => {
+    sessionStorage.setItem("not_auth", false);
+  };
+
   const [data, setData] = useState([]);
   const [new_member, setNewMember] = useState("");
   const queryParameters = new URLSearchParams(window.location.search);
@@ -71,63 +75,65 @@ function TeamView() {
   const alert_removed_admin =
     sessionStorage.getItem("removed_admin") === "true";
 
+  const not_auth = sessionStorage.getItem("not_auth") === "true";
+
   const updateDimensions = () => {
     setWindowWidth(window.innerWidth);
   };
 
   async function GatherSurveys() {
     await axios
-        .get(address + flask_port + "/getSurveys", {
-          params: {
-            team_id:id,
-            username:localStorage.getItem("LoggedUser"),
-          },
-        }).then((response) => {
-          var _surveys = Array();
-          console.log(response.data)
-          response.data.map( (data, i ) => {
-            var _survey = [];
-            //access data field
-            _survey.id = data.survey_id
-            _survey.date = data.due_date;
-            _survey.title = data.survey_text;
-            _survey.author = data.survey_author;
-            _survey.entries = []
-            
-            var totalVotes = 0
-            data.options.map((option, i ) => {
-              var _entry = []
-              totalVotes += option.option_votes;
-              _entry[0] = option.option_votes;
-              _entry[1] = option.option_text;
-              _entry[2] = option.option_id ==  data.user_voted_this_option_id;
-              _entry[3] = option.option_id 
-              _survey.entries.push(_entry)
-            })
-            _survey.votes = totalVotes;
-            _surveys.push(_survey)
-          })
-          console.log(_surveys)
-          setSurvey(_surveys);
-  
-        }).catch(function (error) {
-          if (error.response) {
-            // Print error data
-            console.log("Data: " + error.response.data);
-            console.log("Status: " + error.response.status);
-            console.log("Headers: " + error.response.headers);
+      .get(address + flask_port + "/getSurveys", {
+        params: {
+          team_id: id,
+          username: localStorage.getItem("LoggedUser"),
+        },
+      })
+      .then((response) => {
+        var _surveys = Array();
+        console.log(response.data);
+        response.data.map((data, i) => {
+          var _survey = [];
+          //access data field
+          _survey.id = data.survey_id;
+          _survey.date = data.due_date;
+          _survey.title = data.survey_text;
+          _survey.author = data.survey_author;
+          _survey.entries = [];
 
-            // Handle error
-            if (error.response.status === 400) {
-              sessionStorage.setItem("inviteError_alert", "true");
-              window.location.replace(window.location.href); // For alert purposes only
-            }
-          }
+          var totalVotes = 0;
+          data.options.map((option, i) => {
+            var _entry = [];
+            totalVotes += option.option_votes;
+            _entry[0] = option.option_votes;
+            _entry[1] = option.option_text;
+            _entry[2] = option.option_id == data.user_voted_this_option_id;
+            _entry[3] = option.option_id;
+            _survey.entries.push(_entry);
+          });
+          _survey.votes = totalVotes;
+          _surveys.push(_survey);
         });
+        console.log(_surveys);
+        setSurvey(_surveys);
+      })
+      .catch(function (error) {
+        if (error.response) {
+          // Print error data
+          console.log("Data: " + error.response.data);
+          console.log("Status: " + error.response.status);
+          console.log("Headers: " + error.response.headers);
+
+          // Handle error
+          if (error.response.status === 400) {
+            sessionStorage.setItem("inviteError_alert", "true");
+            window.location.replace(window.location.href); // For alert purposes only
+          }
+        }
+      });
   }
   useEffect(() => {
-    
-    GatherSurveys()
+    GatherSurveys();
 
     window.addEventListener("resize", updateDimensions);
     return () => {
@@ -327,6 +333,11 @@ function TeamView() {
               </Alert>
             )}
           </div>
+          {not_auth && (
+            <Alert onClick={handleAlertNotAuth} state="danger">
+              Not authorized
+            </Alert>
+          )}
           {task.id !== undefined && <Task task={task} />}
           {showDeletePopUp && (
             <PopUp
@@ -354,6 +365,7 @@ function TeamView() {
               />
             </div>
           )}
+
           {removeAdmin && (
             <div>
               <PopUp
@@ -625,13 +637,16 @@ function TeamView() {
                   <CreateSurvey></CreateSurvey>
                   <hr></hr>
                   <div className="Surveys">
-                  {
-                    surveys.map((survey, i) => (
-                      <Survey id={survey.id} title={survey.title} votes={survey.votes} date={survey.date} author={survey.author} entries={survey.entries}>
-                      </Survey>
-                    ))
-                  }
-                    
+                    {surveys.map((survey, i) => (
+                      <Survey
+                        id={survey.id}
+                        title={survey.title}
+                        votes={survey.votes}
+                        date={survey.date}
+                        author={survey.author}
+                        entries={survey.entries}
+                      ></Survey>
+                    ))}
                   </div>
                 </Accordion.Body>
               </Accordion.Item>

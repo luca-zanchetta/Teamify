@@ -25,7 +25,6 @@ function Task({ task }: Props) {
   const formattedTime = formatTime(task.end);
   const [completeButton, setButtonText] = useState("Complete");
   const [isExpanded, setIsExpanded] = useState(false);
-  const [page, setPage] = useState("");
 
   const toggleAccordion = () => {
     setIsExpanded(!isExpanded);
@@ -37,10 +36,8 @@ function Task({ task }: Props) {
       localStorage.setItem("delete", true);
       window.location.reload();
     } else {
-      alert("Not authorized");
-      console.log(task.member);
-      console.log(decryptedUsername);
-      //TODO: change it with a better allert
+      sessionStorage.setItem("not_auth", true);
+      window.location.reload();
     }
   };
 
@@ -100,8 +97,8 @@ function Task({ task }: Props) {
         });
       }
     } else {
-      alert("not auth");
-      //TODO: alert to fix
+      sessionStorage.setItem("not_auth", true);
+      window.location.reload();
     }
   };
 
