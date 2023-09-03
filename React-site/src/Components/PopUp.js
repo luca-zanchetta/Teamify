@@ -47,7 +47,6 @@ function PopUp({ type, task_id, message, id, dU }: Props) {
         console.log("ERROR", error);
       }
     } else if (type === "task") {
-      console.log("delete");
       try {
         const response = await axios.delete(
           address + flask_port + `/home/deletetask/${task_id}`
@@ -55,8 +54,8 @@ function PopUp({ type, task_id, message, id, dU }: Props) {
         if (response.status === 200) {
           localStorage.setItem("delete", false);
           localStorage.setItem("task_to_delete", 0);
+          sessionStorage.setItem("task_deleted", true);
           window.location.reload();
-          // TODO: add alert
         }
       } catch (error) {
         console.error("Error:", error);
@@ -82,7 +81,7 @@ function PopUp({ type, task_id, message, id, dU }: Props) {
       if (response.status === 200) {
         // If the deletion was successful, update local storage and reload the page
         window.location.replace("/home/teams");
-        // TODO: You can add an alert here to inform the user about the successful action
+        sessionStorage.setItem("team_leaved", true);
       }
     } catch (error) {
       console.error("Error:", error);
@@ -102,7 +101,7 @@ function PopUp({ type, task_id, message, id, dU }: Props) {
       if (response.status === 200) {
         // If the deletion was successful, update local storage and reload the page
         window.location.replace("/home/teams");
-        // TODO: You can add an alert here to inform the user about the successful action
+        sessionStorage.setItem("team_deleted", true);
       }
     } catch (error) {
       console.error("Error:", error);
