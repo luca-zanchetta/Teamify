@@ -18,11 +18,6 @@ import requests
 from datetime import date, timedelta
 
 
-address = "http://localhost:"
-react_port = "3000"
-flask_port = "5000"
-address2 = "http://backend:"
-
 # Server setup
 app = Flask(__name__)
 CORS(app)
