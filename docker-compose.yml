@@ -28,7 +28,6 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     container_name: db
-    #volumes è un modo per salvare i dati di postgres fuori dal container, così se viene eliminato o altri danni, i dati permangono.
     volumes:
       - db-data:/var/lib/postgresql/data
     networks:
@@ -42,7 +41,9 @@ services:
     container_name: install-db
     networks:
       - my-network
+
 volumes:
   db-data:
+
 networks:
   my-network:
