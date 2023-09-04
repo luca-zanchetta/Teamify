@@ -5,5 +5,5 @@ switchare address e address2 in /react/src/components/endpoint
 in flask/DBConnection e install/DBConnection e in install/install psycopg2.connect cambiare host da local a docker
 in server.py alla fine l'host di socket.io da local a docker
 
-runna il docker compose con docker-compose up nella cartella della main branch (o root)
+runna il docker compose con docker compose up nella cartella della main branch (o root)
 successive run con docker-compose run frontend backend db
