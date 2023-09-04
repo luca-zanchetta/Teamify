@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 services:
   backend:
     build:
@@ -27,12 +27,7 @@ services:
     #volumes è un modo per salvare i dati di postgres fuori dal container, così se viene eliminato o altri danni, i dati permangono.
     volumes:
       - db-data:/var/lib/postgresql/data
-    command: ["postgres", "-c", "wal_level=logical"]
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -q -d teamify -U postgres"]
-      interval: 30s
-      timeout: 15s
-      retries: 5
+
   install-db:
     build:
       context: ./Install
