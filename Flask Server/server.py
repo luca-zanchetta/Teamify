@@ -1860,7 +1860,7 @@ def get_surveys():
     # get the surveys
     cur = conn.cursor()
     cur.execute(
-        "SELECT survey.id, survey.text, survey.due_date, sended_by.admin FROM survey JOIN sended_by ON survey.id = sended_by.survey WHERE sended_by.team = %s AND survey.due_date > %s ORDER BY id ASC ",
+        "SELECT survey.id, survey.text, survey.due_date, sended_by.admin FROM survey JOIN sended_by ON survey.id = sended_by.survey WHERE sended_by.team = %s AND survey.due_date >= %s ORDER BY id ASC ",
         [team_id, date.today()],
     )
     surveys = cur.fetchall()

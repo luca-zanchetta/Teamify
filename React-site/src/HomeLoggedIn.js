@@ -180,9 +180,7 @@ function HomeLoggedIn() {
             Teamify
           </Link>
         </div>
-        <div className="MenuOptions">
-          <TopBar></TopBar>
-        </div>
+
         <div className="Buttons">
           <Notifications></Notifications>
           <UserIcon></UserIcon>
