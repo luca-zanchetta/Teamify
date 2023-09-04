@@ -9,6 +9,8 @@ services:
     depends_on:
       - install-db
     container_name: backend
+    networks:
+      - my-network
   frontend:
     build:
       context: ./React-site
@@ -18,6 +20,8 @@ services:
     depends_on:
       - backend
     container_name: frontend
+    networks:
+      - my-network
   db:
     image: postgres
     environment:
@@ -27,12 +31,8 @@ services:
     #volumes è un modo per salvare i dati di postgres fuori dal container, così se viene eliminato o altri danni, i dati permangono.
     volumes:
       - db-data:/var/lib/postgresql/data
-    command: ["postgres", "-c", "wal_level=logical"]
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -q -d teamify -U postgres"]
-      interval: 30s
-      timeout: 15s
-      retries: 5
+    networks:
+      - my-network
   install-db:
     build:
       context: ./Install
@@ -40,5 +40,9 @@ services:
     depends_on:
       - db
     container_name: install-db
+    networks:
+      - my-network
 volumes:
   db-data:
+networks:
+  my-network:
