@@ -17,6 +17,25 @@ import { WebSocketComponent } from "./components/WebSocketComponent";
 import Chat from "./components/chat";
 
 function HomeLoggedIn() {
+  const username = localStorage.getItem("LoggedUser");
+  const decryptedusername = localStorage.getItem("username");
+  const navigate = useNavigate();
+  const [task, setTask] = useState([]);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  const ProfileData = localStorage.getItem("ProfileData") === "true";
+  const showDeletePopUp = localStorage.getItem("delete") === "true";
+  const not_auth = sessionStorage.getItem("not_auth") === "true";
+  const event_modified = sessionStorage.getItem("event_modified") === "true";
+  const task_deleted = sessionStorage.getItem("task_deleted") == "true";
+  const task_id = localStorage.getItem("task_to_delete");
+
+  const webSocketRef = useRef(null);
+
+  const updateDimensions = () => {
+    setWindowWidth(window.innerWidth);
+  };
+
   //rimozione alert
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -34,21 +53,7 @@ function HomeLoggedIn() {
     return () => clearTimeout(timeout);
   }, []);
 
-  const username = localStorage.getItem("LoggedUser");
-  const decryptedusername = localStorage.getItem("username");
-  const ProfileData = localStorage.getItem("ProfileData") === "true";
-  const navigate = useNavigate();
-  const [task, setTask] = useState([]);
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-  const showDeletePopUp = localStorage.getItem("delete") === "true";
-  const task_id = localStorage.getItem("task_to_delete");
-
-  const webSocketRef = useRef(null);
-
-  const updateDimensions = () => {
-    setWindowWidth(window.innerWidth);
-  };
-
+  console.log(task_id);
   useEffect(() => {
     window.addEventListener("resize", updateDimensions);
     return () => {
@@ -60,6 +65,8 @@ function HomeLoggedIn() {
     const timeout = setTimeout(() => {
       handleLogin();
       handleDataUpdate();
+      handleAlertNotAuth();
+      handleEventModified();
     }, 1000);
 
     return () => clearTimeout(timeout);
@@ -109,6 +116,14 @@ function HomeLoggedIn() {
     sessionStorage.setItem("wrongPassword_alert", "false");
   };
 
+  const handleAlertNotAuth = () => {
+    sessionStorage.setItem("not_auth", false);
+  };
+
+  const handleTaskDeleted = () => {
+    sessionStorage.setItem("task_deleted", false);
+  };
+
   // Handler for password updated successfully
   const rightPassword =
     sessionStorage.getItem("rightPassword_alert") === "true";
@@ -139,6 +154,9 @@ function HomeLoggedIn() {
   const wrongPassword8 = sessionStorage.getItem("password8_alert") === "true";
   const handleWrongPassword8 = () => {
     sessionStorage.setItem("password8_alert", "false");
+  };
+  const handleEventModified = () => {
+    sessionStorage.setItem("event_modified", false);
   };
   /* END ALERT SECTION */
 
@@ -178,6 +196,11 @@ function HomeLoggedIn() {
       {new_task && (
         <Alert onClick={handleClosure} state="success">
           New task correctly created!
+        </Alert>
+      )}
+      {task_deleted && (
+        <Alert onClick={handleTaskDeleted} state="success">
+          Correctly deleted
         </Alert>
       )}
       {task.id !== undefined && <Task task={task} />}
@@ -235,7 +258,16 @@ function HomeLoggedIn() {
           typos
         </Alert>
       )}
-
+      {not_auth && (
+        <Alert onClick={handleAlertNotAuth} state="danger">
+          Not authorized
+        </Alert>
+      )}
+      {event_modified && (
+        <Alert onClick={handleEventModified} state="success">
+          Event correctly modified
+        </Alert>
+      )}
       <div className="SideContainer">
         <NavBar></NavBar>
         <div className="CenterContainer">

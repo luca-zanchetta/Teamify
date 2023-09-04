@@ -51,6 +51,15 @@ function TeamView() {
     sessionStorage.setItem("not_auth", false);
   };
 
+  const handleEventModified = () => {
+    sessionStorage.setItem("event_modified", false);
+  };
+
+  const handleClosure = () => {
+    sessionStorage.setItem("new_task", false);
+    //sessionStorage.setItem("error_alert", false);
+  };
+
   const [data, setData] = useState([]);
   const [new_member, setNewMember] = useState("");
   const queryParameters = new URLSearchParams(window.location.search);
@@ -74,8 +83,10 @@ function TeamView() {
   const alert_new_admin = sessionStorage.getItem("new_admin") === "true";
   const alert_removed_admin =
     sessionStorage.getItem("removed_admin") === "true";
-
+  const event_modified = sessionStorage.getItem("event_modified") === "true";
   const not_auth = sessionStorage.getItem("not_auth") === "true";
+  const new_task = sessionStorage.getItem("new_task") === "true";
+  const task_deleted = sessionStorage.getItem("task_deleted") == "true";
 
   const updateDimensions = () => {
     setWindowWidth(window.innerWidth);
@@ -164,6 +175,8 @@ function TeamView() {
       handleMissingFields();
       handleAlertNewAdmin();
       handleAlertRemoveAdmin();
+      handleAlertNotAuth();
+      handleEventModified();
     }, 1000);
 
     return () => clearTimeout(timeout);
@@ -231,7 +244,7 @@ function TeamView() {
     navigate("/home/newtask", {
       state: {
         event: data[0].members,
-        previousPage: window.location.pathname,
+        previousPage: window.location.href,
         team: id,
       },
     });
@@ -240,7 +253,7 @@ function TeamView() {
   const handleNewTask = () => {
     navigate("/home/newtask", {
       state: {
-        previousPage: window.location.pathname,
+        previousPage: window.location.href,
         team: id,
       },
     });
@@ -249,6 +262,10 @@ function TeamView() {
   const handleSelectEvent = useCallback((event) => {
     setTask(event);
   });
+
+  const handleTaskDeleted = () => {
+    sessionStorage.setItem("task_deleted", false);
+  };
 
   const handleBack = () => {
     window.location.replace("/home/teams");
@@ -332,10 +349,25 @@ function TeamView() {
                 User role restored
               </Alert>
             )}
+            {event_modified && (
+              <Alert onClick={handleEventModified} state="success">
+                Event correctly modified
+              </Alert>
+            )}
           </div>
           {not_auth && (
             <Alert onClick={handleAlertNotAuth} state="danger">
               Not authorized
+            </Alert>
+          )}
+          {new_task && (
+            <Alert onClick={handleClosure} state="success">
+              New task correctly created!
+            </Alert>
+          )}
+          {task_deleted && (
+            <Alert onClick={handleTaskDeleted} state="success">
+              Correctly deleted
             </Alert>
           )}
           {task.id !== undefined && <Task task={task} />}

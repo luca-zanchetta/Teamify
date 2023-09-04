@@ -462,7 +462,6 @@ def get_tasks():
     # Fetch the ID of the last inserted task
     local_user = request.args.get("user")  # get back the params from the request
     local_user = decrypt_username(local_user)
-    print("LOCAL USER\n\n\n\n\n", local_user)
     curr.execute(
         "SELECT title, description, date, time, duration, id, status, type, member FROM task WHERE member = %s AND type=%s",
         (
@@ -502,7 +501,6 @@ def get_tasks():
     )
 
     events = curr.fetchall()
-    print("ALL EVENTS\n\n", events)
 
     for event in events:
         curr.execute(
@@ -513,7 +511,6 @@ def get_tasks():
             ),
         )
         exist = curr.fetchone()
-        print("EVENT\n\n\n\n", exist)
 
         if str(exist) != "":
             start_date = (
@@ -550,6 +547,7 @@ def delete_task(task_id):
     # remove all the task connected to the user
     query_delete = "DELETE FROM task WHERE id = %s"
     param_delete = (task_id,)
+    print("PROBLEM")
     try:
         curr.execute(query_delete, param_delete)
         return jsonify(
@@ -612,7 +610,6 @@ def get_tasks_events():
                 "SELECT title, description, date, time, duration, id, member, type,status FROM task WHERE id = %s",
                 (eventid[0],),
             )
-        # TODO: send invite when add members
         events = curr.fetchall()
         # here i get also the id of event i need another query to retrieve event
         for event in events:
@@ -913,17 +910,14 @@ def exit_from_team():
     for admin in admins:
         admin_list.append({"admin": admin[0]})
         if username == admin[0]:
-            cancel_adm = "true"
-
-    if cancel_adm == "true":
-        try:
-            curr.execute("DELETE FROM manage WHERE admin=%s", (username,))
-        except Exception as error:
-            print("[ERROR] error in deleting admin from manage")
-            return (
-                jsonify({"error": "An error occurred"}),
-                500,
-            )  # Return a valid response
+            try:
+                curr.execute("DELETE FROM manage WHERE admin=%s", (username,))
+            except Exception as error:
+                print("[ERROR] error in deleting admin from manage")
+                return (
+                    jsonify({"error": "An error occurred"}),
+                    500,
+                )  # Return a valid response
 
     if len(admin_list) <= 1:
         # Find a new admin
@@ -963,7 +957,23 @@ def exit_from_team():
             query_delete_team = "DELETE FROM team WHERE id=%s"
             delete_team_params = (team_id,)
             try:
+                curr.execute("SELECT event FROM includes WHERE team=%s", (team_id,))
+                events = curr.fetchall()
+                for event in events:
+                    try:
+                        curr.execute("DELETE FROM task WHERE id=%s", (event[0],))
+                    except Exception as err:
+                        print(
+                            "[ERROR] impossible to delete the events correleted to the team  : ",
+                            err,
+                        )
+                        return (
+                            jsonify({"error": "An error occurred"}),
+                            500,
+                        )  # Return a valid response
+
                 curr.execute(query_delete_team, delete_team_params)
+
                 return (
                     jsonify(
                         {
@@ -1003,6 +1013,20 @@ def delete_team():
     param_delete = (team_id,)
 
     try:
+        curr.execute("SELECT event FROM includes WHERE team=%s", (team_id,))
+        events = curr.fetchall()
+        for event in events:
+            try:
+                curr.execute("DELETE FROM task WHERE id=%s", (event[0],))
+            except Exception as err:
+                print(
+                    "[ERROR] impossible to delete the events correleted to the team  : ",
+                    err,
+                )
+                return (
+                    jsonify({"error": "An error occurred"}),
+                    500,
+                )
         curr.execute(query_delete, param_delete)
         return jsonify(
             {"message": f"[INFO] /home/deleteteam: id {team_id} successfully delete"}

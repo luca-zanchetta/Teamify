@@ -21,6 +21,8 @@ function Teams() {
   const navigate = useNavigate();
   const endpoint = address + flask_port + "/home/teams";
   const [teams, setTeams] = useState([]);
+  const team_leaved = sessionStorage.getItem("team_leaved") === "true";
+  const team_deleted = sessionStorage.getItem("team_deleted") === "true";
 
   const ToggleDisplayAgenda = () => {
     localStorage.setItem("ProfileData", "false");
@@ -29,6 +31,14 @@ function Teams() {
 
   const handleBack = () => {
     navigate("/home");
+  };
+
+  const handleAlertTeamDeleted = () => {
+    sessionStorage.setItem("team_deleted", false);
+  };
+
+  const handleAlertTeamLeaved = () => {
+    sessionStorage.setItem("team_leaved", false);
   };
 
   useEffect(() => {
@@ -59,6 +69,8 @@ function Teams() {
   useEffect(() => {
     const timeout = setTimeout(() => {
       handleTeamCreated();
+      handleAlertTeamDeleted();
+      handleAlertTeamLeaved();
     }, 1000);
 
     return () => clearTimeout(timeout);
@@ -92,6 +104,16 @@ function Teams() {
           {teamCreated && (
             <Alert onClick={handleTeamCreated} state="success">
               Team created
+            </Alert>
+          )}
+          {team_deleted && (
+            <Alert onClick={handleAlertTeamDeleted} state="success">
+              Team successfully deleted
+            </Alert>
+          )}
+          {team_leaved && (
+            <Alert onClick={handleAlertTeamLeaved} state="success">
+              Team successfully Leaved
             </Alert>
           )}
           <div className="row mt-4 mb-2" style={{ textAlign: "left" }}>

@@ -25,8 +25,6 @@ import { address, flask_port } from "./components/Endpoint";
 
 const endpoint = address + flask_port + "/home/newtask";
 
-// TODO: alert post modifica
-
 function NewTask() {
   const location = useLocation();
   const [previousPage, setPreviousPage] = useState("/home"); // a way to get the page i'm coming from
@@ -51,7 +49,6 @@ function NewTask() {
   const [eventMembers, setEventMembers] = useState([]);
   const [modifyEvent, setModifyEvent] = useState(false);
   const endpoint2 = address + flask_port + "/home/event/members";
-
   const handleClosure = () => {
     sessionStorage.setItem("error_alert", false);
   };
@@ -192,6 +189,7 @@ function NewTask() {
           }
         );
         if (response.status == 200) {
+          sessionStorage.setItem("event_modified", true);
           if (task.type === "event") {
             try {
               const response = await axios.post(
@@ -208,7 +206,6 @@ function NewTask() {
             }
           }
           window.location.replace(previousPage);
-          // TODO: add alert
         }
         console.log(response.data.message); // Display the response message
       } catch (error) {
@@ -298,7 +295,15 @@ function NewTask() {
         )}
 
         <div className="SignUpBackground">
-          <div className="container" style={{ Display: "flex" , width:"100%",  height:"100%", flexDirection:"column"}}>
+          <div
+            className="container"
+            style={{
+              Display: "flex",
+              width: "100%",
+              height: "100%",
+              flexDirection: "column",
+            }}
+          >
             <div className="row mb-5">
               <div
                 style={{ textAlign: "right", cursor: "pointer" }}
@@ -319,7 +324,14 @@ function NewTask() {
                 </svg>
               </div>
             </div>
-            <div className="row" style={{ Display: "flex", flexWrap:"nowrap", justifyContent:"space-evenly"}}>
+            <div
+              className="row"
+              style={{
+                Display: "flex",
+                flexWrap: "nowrap",
+                justifyContent: "space-evenly",
+              }}
+            >
               <div className="col-sm">
                 <div
                   className="CardL"
