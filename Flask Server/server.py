@@ -1393,6 +1393,8 @@ def invite():
     id = data["id"]
     admin = data["admin"]
     admin = decrypt_username(admin)
+    if username==admin:
+        return jsonify("ko"), 400 
 
     query_invite = "INSERT INTO invite (username, admin, team) VALUES (%s,%s,%s)"
     params_invite = (
@@ -1911,4 +1913,4 @@ if __name__ == "__main__":
     # app.run(debug=True, host="localhost", port=5000)
     local = "localhost"
     docker = "0.0.0.0"
-    socketio.run(app, host=docker, port=5000, debug=True)
+    socketio.run(app, host=local, port=5000, debug=True)
