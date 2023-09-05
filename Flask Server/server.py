@@ -1747,8 +1747,8 @@ def add_vote():
 
     # check if the user has already voted
     curr.execute(
-        "SELECT option FROM vote WHERE username = %s",
-        (username,),
+        "select * from vote, option where username = %s and option.id = vote.option and option.survey = %s",
+        (username,pool_id,),
     )
     vote = curr.fetchone()
 
@@ -1756,10 +1756,11 @@ def add_vote():
     if vote:
         old_option_id = vote[0]
         curr.execute(
-            "UPDATE vote SET option = %s WHERE username = %s",
+            "UPDATE vote SET option = %s WHERE option = (select option from vote, option where username = %s and option = option.id and survey = %s)",
             (
                 option_id,
                 username,
+                pool_id,
             ),
         )
         curr.execute(
