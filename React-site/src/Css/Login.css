@@ -149,3 +149,13 @@
     background-repeat: no-repeat;
     background-size: cover;
 }
+
+.Descriptor > h2 {
+    font-size: xx-large;
+
+}
+
+.Descriptor > h3 {
+    font-size: x-large;
+    
+}

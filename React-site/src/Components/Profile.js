@@ -53,19 +53,6 @@ function Profile() {
             />
             <label for="Profile">My Profile</label>
           </div>
-          <div className="ProfileNavEntry" onClick={() => SetTab(2)}>
-            <input type="radio" id="Team" name="nav" />
-            <label for="Team">Teams</label>
-          </div>
-          <div className="ProfileNavEntry" onClick={() => SetTab(3)}>
-            <input
-              type="radio"
-              id="Notification"
-              name="nav"
-              style={{ cursor: "pointer" }}
-            />
-            <label for="Notification">Notifications</label>
-          </div>
           <div
             className="ProfileNavEntry"
             style={{ paddingTop: "15%", color: "red", cursor: "pointer" }}
@@ -75,7 +62,7 @@ function Profile() {
           </div>
         </div>
         <div id="divider"></div>
-        {(currentTab == 1 && <UserInfo></UserInfo>) ||
+          {(currentTab == 1 && <UserInfo></UserInfo>) ||
           (currentTab == 2 && <UserInfo></UserInfo>) ||
           (currentTab == 3 && <ProfileNotifications></ProfileNotifications>)}
       </div>

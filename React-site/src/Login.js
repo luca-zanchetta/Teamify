@@ -226,17 +226,16 @@ function Login() {
         <div className="RightContainer">
           <div className="Descriptor">
             <h2>
-              Lorem ipsum dolor sit amet, consectetur adipisci elit, sed eiusmod
-              tempor incidunt ut labore et dolore magna aliqua.
+              Teamify is a dynamic and innovative application designed to streamline 
+              and enhance collaboration across multiple teams within an organization.
             </h2>
             <h3>
-              Ut enim ad minim veniam, quis nostrum exercitationem ullam
-              corporis suscipit laboriosam, nisi ut aliquid ex ea commodi
-              consequatur.
+              Teamify offers a comprehensive task and project management system 
+              that enables users to create, assign, and track tasks and projects effortlessly.
             </h3>
             <h3>
-              Quis aute iure reprehenderit in voluptate velit esse cillum dolore
-              eu fugiat nulla pariatur.
+              Teamify empowers users to efficiently organize 
+              and manage their work in a highly collaborative environment
             </h3>
           </div>
         </div>

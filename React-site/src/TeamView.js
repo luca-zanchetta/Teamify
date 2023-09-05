@@ -101,6 +101,7 @@ function TeamView() {
         },
       })
       .then((response) => {
+        console.log(response)
         var _surveys = Array();
         console.log(response.data);
         response.data.map((data, i) => {
@@ -663,7 +664,7 @@ function TeamView() {
               </Accordion.Item>
               <Accordion.Item eventKey="3">
                 <Accordion.Header>Surveys</Accordion.Header>
-                <Accordion.Body>
+                <Accordion.Body style={{overflowY:'auto'}}>
                   <CreateSurvey></CreateSurvey>
                   <hr></hr>
                   <div className="Surveys">
