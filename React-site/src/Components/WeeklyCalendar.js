@@ -13,8 +13,8 @@ import axios from "axios";
 
 import { address, flask_port } from "./Endpoint";
 
-var endpoint1 = address+flask_port+"/tasks";
-var endpoint2 = address+flask_port+"/teamview";
+var endpoint1 = address + flask_port + "/tasks";
+var endpoint2 = address + flask_port + "/teamview";
 
 const localizer = momentLocalizer(moment);
 
@@ -43,7 +43,7 @@ const WeeklyCalendar = ({
   const [events, setEvents] = useState([]);
   const localUser = localStorage.getItem("LoggedUser");
   const localTeam = 0; //da gestire quando si implementano i team
-  const currentPath = window.location.pathname; //get the current position
+  const currentPath = window.location.href; //get the current position
 
   const eventStyleGetter = (event, start, end, isSelected) => {
     const style = {

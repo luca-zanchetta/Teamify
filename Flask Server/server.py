@@ -388,12 +388,10 @@ def create_new_task():
 # Modify a task API
 @app.route("/home/updatetask", methods=["POST"])
 def update_task():
+    curr = conn.cursor()
     data = request.get_json()
     username = data["local_user"]
     task_id = data["task_id"]
-
-    print(request.json)
-    curr = conn.cursor()
     username = decrypt_username(username)
 
     title = data.get("title")
@@ -402,10 +400,10 @@ def update_task():
     description = data.get("description")
     duration = data.get("duration")
 
-    curr.execute("SELECT * FROM task WHERE id = %s", (task_id,))
+    curr.execute("SELECT type FROM task WHERE id = %s", (task_id,))
     existing_task = curr.fetchone()
+
     if not existing_task:
-        print(existing_task)
         return jsonify({"message": "Task not found"}), 404
 
     update_query = "UPDATE task SET title = %s, date = %s, time = %s, description = %s, member = %s, duration = %s WHERE id = %s"
@@ -413,9 +411,31 @@ def update_task():
 
     try:
         curr.execute(update_query, update_values)
-        conn.commit()
+
+        if existing_task[0] == "event":
+            curr.execute("SELECT username FROM includes WHERE event = %s", (task_id,))
+            members = curr.fetchall()
+            # send the notification when the event is updated
+
+            for member in members:
+                if member[0] != username:
+                    query_notification = "INSERT INTO notification (date, content, type, read, username) VALUES (%s,%s,%s,%s,%s)"
+                    params_notification = (
+                        datetime.datetime.now(),
+                        f"{username} modify event {title} with id {task_id}.",
+                        "modifyevent",
+                        False,
+                        member[0],
+                    )
+                    try:
+                        curr.execute(query_notification, params_notification)
+                        socketio.emit("event_notification", "", room=member[0])
+                    except Exception as err:
+                        print("[ERROR] /home/edittask (notification): " + err)
+                        return jsonify("ko"), 400
+
     except Exception as err:
-        print("[ERROR] /updatetask: ", err)
+        print("[ERROR] /updatetask: An error occurred:", err)
         return jsonify({"message": "Update failed"}), 400
 
     return jsonify({"message": "Task updated successfully"}), 200
@@ -488,46 +508,44 @@ def get_tasks():
         )
 
     curr.execute(
-        "SELECT title, description, date, time, duration, id, status, type, member FROM task WHERE member = %s AND type=%s",
+        "SELECT event from includes where state=%s and username=%s",
         (
+            "accepted",
             local_user,
-            "event",
         ),
     )
-    events = curr.fetchall()
+    set_e = curr.fetchall()
 
-    for event in events:
+    events = []
+    for event in set_e:
         curr.execute(
-            "SELECT event from includes where event=%s and state=%s",
+            "SELECT title, description, date, time, duration, id, status, type, member FROM task WHERE type=%s AND id= %s",
             (
-                event[5],
-                "accepted",
+                "event",
+                event[0],
             ),
         )
-        exist = curr.fetchone()
-        if str(exist) != "":
-            start_date = (
-                event[2].strftime("%Y-%m-%d") + " " + event[3].strftime("%H:%M:%S")
-            )
-            end_date = (
-                event[2].strftime("%Y-%m-%d") + " " + event[3].strftime("%H:%M:%S")
-            )
+        events.append(curr.fetchone())
 
-            new_end_date = convert_date(end_date, event[4])
+    for event in events:
+        start_date = event[2].strftime("%Y-%m-%d") + " " + event[3].strftime("%H:%M:%S")
+        end_date = event[2].strftime("%Y-%m-%d") + " " + event[3].strftime("%H:%M:%S")
 
-            tasks_list.append(
-                {
-                    "title": event[0],
-                    "start": start_date,
-                    "end": new_end_date,
-                    "description": event[1],
-                    "duration": event[4],
-                    "id": event[5],
-                    "status": event[6],
-                    "type": event[7],
-                    "member": event[8],
-                }
-            )
+        new_end_date = convert_date(end_date, event[4])
+
+        tasks_list.append(
+            {
+                "title": event[0],
+                "start": start_date,
+                "end": new_end_date,
+                "description": event[1],
+                "duration": event[4],
+                "id": event[5],
+                "status": event[6],
+                "type": event[7],
+                "member": event[8],
+            }
+        )
 
     return jsonify(tasks_list), 200
 
@@ -596,14 +614,14 @@ def get_tasks_events():
         )
         events_ids = curr.fetchall()
 
+        events = []
         for eventid in events_ids:
             print("ID\n", eventid[0])
             curr.execute(
                 "SELECT title, description, date, time, duration, id, member, type,status FROM task WHERE id = %s",
                 (eventid[0],),
             )
-        # TODO: send invite when add members
-        events = curr.fetchall()
+            events.append(curr.fetchone())
         # here i get also the id of event i need another query to retrieve event
         for event in events:
             start_date = (
@@ -1347,6 +1365,17 @@ def read_notification():
         ),
         200,
     )
+
+
+# given event id return team id
+@app.route("/evevnt/teamview", methods=["GET"])
+def give_team_id():
+    curr = conn.cursor()
+    data = request.get_json()
+    event_id = data["event"]
+    curr.execute("SELECT team FROM includes WHERE event=%s", (event_id))
+    team_id = curr.fetchone()
+    return jsonify(team_id), 200
 
 
 # given team id and username, invites the user to the team

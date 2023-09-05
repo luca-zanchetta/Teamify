@@ -10,10 +10,11 @@ import axios from "axios";
 
 import { address, flask_port } from "./Endpoint";
 
-var endpoint = address+flask_port+"/home/notifications";
-var endpointReadNotification = address+flask_port+"/readNotification";
-var endpointCheckInvites = address+flask_port+"/checkInvites";
-var endpointCheckEventInvites = address+flask_port+"/checkEventInvites";
+var endpoint = address + flask_port + "/home/notifications";
+var endpointReadNotification = address + flask_port + "/readNotification";
+var endpointCheckInvites = address + flask_port + "/checkInvites";
+var endpointCheckEventInvites = address + flask_port + "/checkEventInvites";
+var endpointFindTeamId = address + flask_port + "/event/teamview";
 
 function Notifications() {
   const [show, setShow] = useState(false);
@@ -44,9 +45,9 @@ function Notifications() {
       if (response.data.status === 200) {
         setNotifications(response.data.notifications);
         setDisplayNotifications(true);
-        for(let i = 0; i < response.data.notifications.length; i++) {
-          if(response.data.notifications[i][4] === false) {
-            var bellIcon = document.getElementById('bell');
+        for (let i = 0; i < response.data.notifications.length; i++) {
+          if (response.data.notifications[i][4] === false) {
+            var bellIcon = document.getElementById("bell");
             bellIcon.src = alarm;
           }
         }
@@ -63,19 +64,23 @@ function Notifications() {
     // If I click on a non-read notification, I'm reading it
     try {
       // Send a POST request to the corresponding endpoint of the Flask server
-      const response_2 = await axios.post(endpointReadNotification, {
-        notification_id,
-      }, {
-        headers: {
-          'Content-Type': 'application/json'
+      const response_2 = await axios.post(
+        endpointReadNotification,
+        {
+          notification_id,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
-      });
-        
-        if (response_2 && response_2.data && response_2.data.status === 200) {
-          console.log('Notification read!');
-        } else {
-          console.log('Invalid response:', response_2);
-        }
+      );
+
+      if (response_2 && response_2.data && response_2.data.status === 200) {
+        console.log("Notification read!");
+      } else {
+        console.log("Invalid response:", response_2);
+      }
     } catch (error) {
       // Request failed
       console.log("[ERROR] Request failed: " + error);
@@ -91,12 +96,12 @@ function Notifications() {
     setShow(!show);
     show_notifications();
 
-    var bellIcon = document.getElementById('bell');
+    var bellIcon = document.getElementById("bell");
     bellIcon.src = bell;
 
-    for(let i = 0; i < notifications.length; i++) {
-      if(notifications[i][4] === false) {
-        var bellIcon = document.getElementById('bell');
+    for (let i = 0; i < notifications.length; i++) {
+      if (notifications[i][4] === false) {
+        var bellIcon = document.getElementById("bell");
         bellIcon.src = alarm;
       }
     }
@@ -105,8 +110,8 @@ function Notifications() {
   // Handle user notifications
   async function handleNotification(notification) {
     // Handlers for the notification types
-    switch(notification[3]) {
-      case 'invite':
+    switch (notification[3]) {
+      case "invite":
         try {
           // Send a POST request to the corresponding endpoint of the Flask server
           const response = await axios
@@ -121,45 +126,52 @@ function Notifications() {
                 console.log("Headers: " + error.response.headers);
               }
             });
-      
+
           if (response.data.status === 200) {
             read_notification(notification[0]);
-            navigate("/invite", { state: { description: response.data.invites[0].team_description, admin:response.data.invites[0].admin, team:response.data.invites[0].team_name, id:response.data.invites[0].id } });
+            navigate("/invite", {
+              state: {
+                description: response.data.invites[0].team_description,
+                admin: response.data.invites[0].admin,
+                team: response.data.invites[0].team_name,
+                id: response.data.invites[0].id,
+              },
+            });
           }
         } catch (error) {
           // Request failed
           console.log("[ERROR] Request failed: " + error);
         }
         break;
-        
-      case 'message':
+
+      case "message":
         read_notification(notification[0]);
-        var bellIcon = document.getElementById('bell');
+        var bellIcon = document.getElementById("bell");
         bellIcon.src = bell;
-    
-        for(let i = 0; i < notifications.length; i++) {
-          if(notifications[i][4] === false) {
-            var bellIcon = document.getElementById('bell');
+
+        for (let i = 0; i < notifications.length; i++) {
+          if (notifications[i][4] === false) {
+            var bellIcon = document.getElementById("bell");
             bellIcon.src = alarm;
           }
         }
 
         break;
 
-      case 'survey':
+      case "survey":
         read_notification(notification[0]);
-        var bellIcon = document.getElementById('bell');
+        var bellIcon = document.getElementById("bell");
         bellIcon.src = bell;
-    
-        for(let i = 0; i < notifications.length; i++) {
-          if(notifications[i][4] === false) {
-            var bellIcon = document.getElementById('bell');
+
+        for (let i = 0; i < notifications.length; i++) {
+          if (notifications[i][4] === false) {
+            var bellIcon = document.getElementById("bell");
             bellIcon.src = alarm;
           }
         }
         break;
 
-      case 'event':
+      case "event":
         read_notification(notification[0]);
         try {
           // Send a POST request to the corresponding endpoint of the Flask server
@@ -175,26 +187,28 @@ function Notifications() {
                 console.log("Headers: " + error.response.headers);
               }
             });
-      
+
           if (response.data.status === 200) {
             const content = notification[2];
-            for(let i = 0; i<response.data.invites.length; i++) {
+            for (let i = 0; i < response.data.invites.length; i++) {
               // I check whether the event title is present in the event notification that I have selected,
               // so that I can link the event with the notification to answer
               var event_title = response.data.invites[i].event_title;
               var regex = new RegExp(`\\b${event_title}\\b`);
 
               // The event title is present in the notification content
-              if(regex.test(content)) {
-                navigate("/invite", { state: { 
-                  event_id: response.data.invites[i].event_id, 
-                  team_id: response.data.invites[i].team_id,
-                  member: response.data.invites[i].member,
-                  state: response.data.invites[i].state,
-                  event_title: response.data.invites[i].event_title,
-                  description: response.data.invites[i].event_description,  
-                  admin: response.data.invites[i].admin,
-                } });
+              if (regex.test(content)) {
+                navigate("/invite", {
+                  state: {
+                    event_id: response.data.invites[i].event_id,
+                    team_id: response.data.invites[i].team_id,
+                    member: response.data.invites[i].member,
+                    state: response.data.invites[i].state,
+                    event_title: response.data.invites[i].event_title,
+                    description: response.data.invites[i].event_description,
+                    admin: response.data.invites[i].admin,
+                  },
+                });
               }
             }
           }
@@ -202,43 +216,66 @@ function Notifications() {
           // Request failed
           console.log("[ERROR] Request failed: " + error);
         }
-        var bellIcon = document.getElementById('bell');
+        var bellIcon = document.getElementById("bell");
         bellIcon.src = bell;
-    
-        for(let i = 0; i < notifications.length; i++) {
-          if(notifications[i][4] === false) {
-            var bellIcon = document.getElementById('bell');
+
+        for (let i = 0; i < notifications.length; i++) {
+          if (notifications[i][4] === false) {
+            var bellIcon = document.getElementById("bell");
             bellIcon.src = alarm;
           }
         }
         break;
 
-      case 'admin':
+      case "admin":
         break;
-        
-      default:
-        console.log('Not the right case!');
+
+      case "modifyevent":
+        read_notification(notification[0]);
+        const content = notification[2];
+        const r = /with id (\d+)\./;
+        const match = content.match(r);
+
+        if (match) {
+          // The task ID is captured in the first capture group (index 1)
+          const task_id = match[1];
+          navigate("/teamview?id=" + task_id);
+        } else {
+          navigate("/home");
+        }
+        break;
+
+        deault: console.log("Not the right case!");
     }
   }
 
   return (
     <div className="UserIcon" style={{ paddingRight: "1%", marginRight: "2%" }}>
-      <img src={bell} onClick={toggleShow} id='bell'></img>
+      <img src={bell} onClick={toggleShow} id="bell"></img>
       {show && (
         <>
           <div id="NotificationDrop">
-            {displayNotifications && notifications.slice().reverse().map((notification, index) => (
-              <div key={index} className="NotificationEntry" style={{ width: "100%" }} onClick={() => handleNotification(notification)}>
-              <div className="NotificationIcon">
-                <img src={event} alt="Event Icon" />
-              </div>
-              <div className="NotificatioTitles">
-                <h3>{notification[3]}</h3>
-                <h4>{notification[2]}</h4>
-                <h4>{notification[1]}</h4>
-              </div>
-            </div>
-            ))}
+            {displayNotifications &&
+              notifications
+                .slice()
+                .reverse()
+                .map((notification, index) => (
+                  <div
+                    key={index}
+                    className="NotificationEntry"
+                    style={{ width: "100%" }}
+                    onClick={() => handleNotification(notification)}
+                  >
+                    <div className="NotificationIcon">
+                      <img src={event} alt="Event Icon" />
+                    </div>
+                    <div className="NotificatioTitles">
+                      <h3>{notification[3]}</h3>
+                      <h4>{notification[2]}</h4>
+                      <h4>{notification[1]}</h4>
+                    </div>
+                  </div>
+                ))}
             {!displayNotifications && (
               <div className="NotificationEntry" style={{ width: "100%" }}>
                 <div className="NotificationIcon">

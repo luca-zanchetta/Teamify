@@ -9,6 +9,7 @@ import team from "./icons/team.png";
 import profile from "./icons/users.png";
 import back from "./img/background_green.jpeg";
 import chat from "./icons/chat.png";
+import event from "./icons/event_icon.png";
 
 const loggedIn = localStorage.getItem("LoggedUser");
 
@@ -83,7 +84,7 @@ function Home() {
           </div>
           <div className="Card">
             <div className="CardIcon">
-              <img src={profile}></img>
+              <img src={event}></img>
             </div>
             <div className="CardText" style={{ marginLeft: "3%" }}>
               <h4>Personal task and shared event</h4>

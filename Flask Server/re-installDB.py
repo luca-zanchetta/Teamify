@@ -115,6 +115,7 @@ notification = """CREATE TABLE notification (
         OR type = 'survey'
         OR type = 'event'
         OR type = 'admin'
+        OR type = 'modifyevent'
     )
 )"""
 try:
