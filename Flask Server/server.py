@@ -688,12 +688,12 @@ def get_joined_teams():
     if not tmp:
         print("[INFO] No joined team.")
         return jsonify({"message": "No joined team.", "status": 201})
-    
+
     for team in tmp:
         ids.append(team[0])
         teams.append(team[1])
 
-    return jsonify({"teams": teams, "ids":ids, "status": 200})
+    return jsonify({"teams": teams, "ids": ids, "status": 200})
 
 
 # team details given team id
@@ -864,21 +864,21 @@ def members_given_team():
     curr = conn.cursor()
     data = request.get_json()
 
-    teamId = data['teamId']
+    teamId = data["teamId"]
     curr.execute(
         "SELECT username FROM joinTeam WHERE team = %s",
         (teamId,),
     )
     members = curr.fetchall()
     if not members:
-        print('[ERROR] There is no member for this team!')
-        return jsonify({"message":"There is no member for this team!", "status":400})
+        print("[ERROR] There is no member for this team!")
+        return jsonify({"message": "There is no member for this team!", "status": 400})
 
     member_list = []
     for member in members:
         member_list.append(member[0])
 
-    return jsonify({"members":member_list, "status":200})
+    return jsonify({"members": member_list, "status": 200})
 
 
 # leave a team API
@@ -1608,16 +1608,16 @@ def reject_event_invite():
 
 
 # Send message to team
-@app.route("/sendMessageToTeam", methods=['POST'])
+@app.route("/sendMessageToTeam", methods=["POST"])
 def send_chat_message():
     data = request.get_json()
     curr = conn.cursor()
 
-    text = data['text']
-    sender = data['username']
+    text = data["text"]
+    sender = data["username"]
     sender = decrypt_username(sender)
-    team = data['teamId']
-    members = data['members']
+    team = data["teamId"]
+    members = data["members"]
 
     message = []
     date = str(datetime.datetime.now().date())
@@ -1629,31 +1629,40 @@ def send_chat_message():
 
     # message: [sender, text, date, time]
 
-    query_message = "INSERT INTO message (datetime, content, sender, team) VALUES (%s,%s,%s,%s)"
+    query_message = (
+        "INSERT INTO message (datetime, content, sender, team) VALUES (%s,%s,%s,%s)"
+    )
     params_message = (datetime.datetime.now(), text, sender, team)
 
     try:
         curr.execute(query_message, params_message)
     except Exception as err:
-        print('[ERROR] The message has not been registered into the DB. Err: '+str(err))
-        return jsonify({"message":"The message has not been registered into the DB.", "status":500})
+        print(
+            "[ERROR] The message has not been registered into the DB. Err: " + str(err)
+        )
+        return jsonify(
+            {
+                "message": "The message has not been registered into the DB.",
+                "status": 500,
+            }
+        )
 
     for member in members:
         socketio.emit("chat_message", message, room=member)
 
-    print('[INFO] Message sent successfully!')
-    return jsonify({"message":"ok", "status":200})
+    print("[INFO] Message sent successfully!")
+    return jsonify({"message": "ok", "status": 200})
 
 
 # Get messages
-@app.route("/getMessages", methods=['POST'])
+@app.route("/getMessages", methods=["POST"])
 def get_chat_messages():
     data = request.get_json()
     curr = conn.cursor()
     records = []
-    messages = [] # [sender, text, date, time]
+    messages = []  # [sender, text, date, time]
 
-    teamId = data['teamId']
+    teamId = data["teamId"]
 
     query_retrieve_messages = "SELECT * FROM message WHERE team = %s"
     params_retrieve_messages = (teamId,)
@@ -1662,9 +1671,9 @@ def get_chat_messages():
 
     records = curr.fetchall()
     if not records:
-        print('[INFO] There is no message available.')
-        return jsonify({"message":"No message available.", "status":201})
-    
+        print("[INFO] There is no message available.")
+        return jsonify({"message": "No message available.", "status": 201})
+
     for message in records:
         msg = []
         date = str(message[1])[:10]
@@ -1676,105 +1685,103 @@ def get_chat_messages():
 
         messages.append(msg)
 
-    print('[INFO] Messages retrieved successfully.')
-    return jsonify({"messages":messages, "status":200})
+    print("[INFO] Messages retrieved successfully.")
+    return jsonify({"messages": messages, "status": 200})
 
 
-
-#INIZIO POLLS
-@app.route('/vote', methods=['POST'])
+# INIZIO POLLS
+@app.route("/vote", methods=["POST"])
 def add_vote():
     data = request.get_json()
-    pool_id = data.get('pool_id')
-    username = data.get('username')
+    pool_id = data.get("pool_id")
+    username = data.get("username")
     username = decrypt_username(username)
-    option_id = data.get('option_id')
+    option_id = data.get("option_id")
 
     curr = conn.cursor()
-    
+
     # check if the pool exists
     curr.execute(
-        'SELECT * FROM survey WHERE id = %s',
-        (
-            pool_id,
-        ),
+        "SELECT * FROM survey WHERE id = %s",
+        (pool_id,),
     )
     pool = curr.fetchone()
     if not pool:
-        return jsonify({'message': 'Pool not found'}), 400
-    
+        return jsonify({"message": "Pool not found"}), 400
+
     # check if the user has already voted
     curr.execute(
-        'SELECT option FROM vote WHERE username = %s',
-        (
-            username,
-        ),
+        "SELECT option FROM vote WHERE username = %s",
+        (username,),
     )
     vote = curr.fetchone()
-    
+
     # add or update the vote
     if vote:
         old_option_id = vote[0]
         curr.execute(
-            'UPDATE vote SET option = %s WHERE username = %s',
+            "UPDATE vote SET option = %s WHERE username = %s",
             (
                 option_id,
                 username,
             ),
         )
         curr.execute(
-            'UPDATE option SET counter = counter - 1 WHERE id = %s',
-            (
-                old_option_id,
-            ),
+            "UPDATE option SET counter = counter - 1 WHERE id = %s",
+            (old_option_id,),
         )
     else:
         curr.execute(
-            'INSERT INTO vote (username, option) VALUES (%s, %s)',
+            "INSERT INTO vote (username, option) VALUES (%s, %s)",
             (
                 username,
                 option_id,
             ),
         )
-    
+
     # update the counter
     curr.execute(
-        'UPDATE option SET counter = counter + 1 WHERE id = %s',
-        (
-            option_id,
-        ),
+        "UPDATE option SET counter = counter + 1 WHERE id = %s",
+        (option_id,),
     )
-    
-    return jsonify({'message': 'Success', 'status':200})
+
+    return jsonify({"message": "Success", "status": 200})
 
 
-@app.route('/createPool', methods=['POST'])
+@app.route("/createPool", methods=["POST"])
 def create_pool():
     data = request.get_json()
-    text = data.get('text')
-    due_date = data.get('due_date')
-    admin = data.get('admin')
+    text = data.get("text")
+    due_date = data.get("due_date")
+    admin = data.get("admin")
     admin = decrypt_username(admin)
-    team = data.get('team')
-    options = data.get('options')
+    team = data.get("team")
+    options = data.get("options")
     members = []
-    
-    
+
     # parse the due date
-    due_date = datetime.datetime.strptime(due_date, '%Y-%m-%d').date()
-    
+    due_date = datetime.datetime.strptime(due_date, "%Y-%m-%d").date()
+
     # create the pool
     cur = conn.cursor()
-    cur.execute('INSERT INTO survey (text, due_date) VALUES (%s, %s) RETURNING id', [text, due_date])
+    cur.execute(
+        "INSERT INTO survey (text, due_date) VALUES (%s, %s) RETURNING id",
+        [text, due_date],
+    )
     survey_id = cur.fetchone()[0]
-    
+
     # update the sended_by table
-    cur.execute('INSERT INTO sended_by (admin, team, survey) VALUES (%s, %s, %s)', [admin, team, survey_id])
-    
+    cur.execute(
+        "INSERT INTO sended_by (admin, team, survey) VALUES (%s, %s, %s)",
+        [admin, team, survey_id],
+    )
+
     # insert the options
     for option_text in options:
-        cur.execute('INSERT INTO option (survey, text) VALUES (%s, %s)', [survey_id, option_text])
-
+        cur.execute(
+            "INSERT INTO option (survey, text) VALUES (%s, %s)",
+            [survey_id, option_text],
+        )
 
     # Register and send notification
     query_get_team = "SELECT name FROM team WHERE id = %s"
@@ -1783,7 +1790,7 @@ def create_pool():
     (team_name,) = cur.fetchone()
     team_name = str(team_name).strip()
 
-    query_get_members = 'SELECT username FROM joinTeam WHERE team = %s'
+    query_get_members = "SELECT username FROM joinTeam WHERE team = %s"
     params_get_members = (team,)
     cur.execute(query_get_members, params_get_members)
     members = cur.fetchall()
@@ -1792,56 +1799,95 @@ def create_pool():
         (user,) = member
 
         if user != admin:
-            query_notification = 'INSERT INTO notification (date, content, type, read, username) VALUES (%s,%s,%s,%s,%s)'
-            params_notification = (datetime.datetime.now(), f"{admin} of team {team_name} created a new survey!", "survey", False, user,)
+            query_notification = "INSERT INTO notification (date, content, type, read, username) VALUES (%s,%s,%s,%s,%s)"
+            params_notification = (
+                datetime.datetime.now(),
+                f"{admin} of team {team_name} created a new survey!",
+                "survey",
+                False,
+                user,
+            )
             cur.execute(query_notification, params_notification)
 
-            socketio.emit('survey_notification', '', room=user)
+            socketio.emit("survey_notification", "", room=user)
 
-        
-    return jsonify({'message': 'Success', 'status':200})
+    return jsonify({"message": "Success", "status": 200})
 
 
-@app.route('/getSurveys', methods=['GET'])
+# check if already voted in a survey
+@app.route("/home/teams/team/survey", methods=["GET"])
+def has_voted():
+    curr = conn.cursor()
+    survey = request.args.get("survey")
+    username = request.args.get("username")
+    curr.execute(
+        "SELECT option FROM vote WHERE username = %s",
+        (username,),
+    )
+    vote = curr.fetchone()
+    curr.execute("SELECT survey FROM option WHERE id=%s", (vote[0],))
+    survey_res = curr.fetchone()
+    if int(survey) == int(survey_res[0]):
+        return jsonify("true"), 200
+    else:
+        return jsonify("false"), 200
+
+
+@app.route("/getSurveys", methods=["GET"])
 def get_surveys():
-    team_id = request.args.get('team_id')
-    username = request.args.get('username')
-    username=username.replace(" ","+")
+    team_id = request.args.get("team_id")
+    username = request.args.get("username")
+    username = username.replace(" ", "+")
     username = decrypt_username(username)
 
     # get the surveys
     cur = conn.cursor()
-    cur.execute('SELECT survey.id, survey.text, survey.due_date, sended_by.admin FROM survey JOIN sended_by ON survey.id = sended_by.survey WHERE sended_by.team = %s AND survey.due_date > %s ORDER BY id ASC ', [team_id, date.today()])
+    cur.execute(
+        "SELECT survey.id, survey.text, survey.due_date, sended_by.admin FROM survey JOIN sended_by ON survey.id = sended_by.survey WHERE sended_by.team = %s AND survey.due_date > %s ORDER BY id ASC ",
+        [team_id, date.today()],
+    )
     surveys = cur.fetchall()
-    
+
     result = []
     for survey in surveys:
         survey_id, survey_text, due_date, survey_author = survey
         # get the options
-        cur.execute('SELECT id, text, counter FROM option WHERE survey = %s ORDER BY option.id ASC', (survey_id,),)
+        cur.execute(
+            "SELECT id, text, counter FROM option WHERE survey = %s ORDER BY option.id ASC",
+            (survey_id,),
+        )
         options = cur.fetchall()
-        
+
         # get the user's vote
-        cur.execute('SELECT option FROM vote WHERE username = %s AND option IN (SELECT id FROM option WHERE survey = %s)', [username, survey_id])
+        cur.execute(
+            "SELECT option FROM vote WHERE username = %s AND option IN (SELECT id FROM option WHERE survey = %s)",
+            [username, survey_id],
+        )
         vote = cur.fetchone()
         vote_option_id = vote[0] if vote else None
-        
-        result.append({
-            'survey_id': survey_id,
-            'survey_text': survey_text,
-            'due_date': due_date.strftime('%Y-%m-%d'),
-            'options': [{'option_id': option[0], 'option_text': option[1], 'option_votes':option[2]} for option in options],
-            'user_voted_this_option_id': vote_option_id,
-            'survey_author': survey_author
-        })
-    
+
+        result.append(
+            {
+                "survey_id": survey_id,
+                "survey_text": survey_text,
+                "due_date": due_date.strftime("%Y-%m-%d"),
+                "options": [
+                    {
+                        "option_id": option[0],
+                        "option_text": option[1],
+                        "option_votes": option[2],
+                    }
+                    for option in options
+                ],
+                "user_voted_this_option_id": vote_option_id,
+                "survey_author": survey_author,
+            }
+        )
+
     return jsonify(result)
 
-#FINE POLLS
 
-
-
-
+# FINE POLLS
 
 
 ############################ END REST APIs ####################################
@@ -1850,4 +1896,4 @@ if __name__ == "__main__":
     # app.run(debug=True, host="localhost", port=5000)
     local = "localhost"
     docker = "0.0.0.0"
-    socketio.run(app, host=docker, port=5000, debug=True)
+    socketio.run(app, host=local, port=5000, debug=True)
