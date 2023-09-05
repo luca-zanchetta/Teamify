@@ -1146,6 +1146,40 @@ def edit_member_event():
 
     return jsonify({"member_list": member_list, "status": 200})
 
+@app.route("/team/editName", methods=["GET"])
+def editTeamName():
+    curr = conn.cursor()
+    teamId = request.args.get("teamId")
+    newName = request.args.get("teamName")
+
+    curr.execute(
+        "UPDATE team SET name = %s WHERE id = %s",
+        (
+            newName,
+            teamId,  
+        ),
+    )
+
+    return jsonify({"message": "Success", "status": 200})
+
+@app.route("/team/editDescription", methods=["GET"])
+def editTeamDescription():
+    curr = conn.cursor()
+    teamId = request.args.get("teamId")
+    newDescription = request.args.get("teamDescription")
+
+    curr.execute(
+        "UPDATE team SET description = %s WHERE id = %s",
+        (
+            newDescription,
+            teamId,       
+        ),
+    )
+
+    return jsonify({"message": "Success", "status": 200})
+
+
+
 
 # Get list of members included in a certain event the one that accepted
 @app.route("/home/event/members", methods=["GET"])

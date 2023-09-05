@@ -1,5 +1,6 @@
 import "./css/App.css";
 import "./css/Homepage.css";
+import "./css/Login.css"
 
 import NavBar from "./components/NavBar";
 import TopBar from "./components/TopBar";
@@ -9,6 +10,7 @@ import { Container } from "./css/Navigator.css";
 import { Accordion, Col, Row } from "react-bootstrap";
 import React, { useState, useEffect, useCallback } from "react";
 
+import edit from "./icons/edit.png"
 import axios from "axios";
 import { Link, useNavigate, Navigate, useLocation } from "react-router-dom";
 import UserIcon from "./components/UserIcon";
@@ -87,6 +89,48 @@ function TeamView() {
   const not_auth = sessionStorage.getItem("not_auth") === "true";
   const new_task = sessionStorage.getItem("new_task") === "true";
   const task_deleted = sessionStorage.getItem("task_deleted") == "true";
+
+  const [editName, setEditName] = useState(false)
+  const [editDescription, setEditDescription] = useState(false)
+
+  function ToggleEditName() {
+    if(editName){
+      //richiesta axios
+      var value = document.getElementById("teamName").value
+      axios.get(address + flask_port + "/team/editName", {
+        params : {
+          teamId: id,
+          teamName: value,
+        }
+      }).then((response) =>{
+        if (response.data.status === 200) {
+          window.location.replace(window.location.href);
+        }
+      })
+     
+    }
+
+    setEditName(!editName)
+  }
+
+  function ToggleEditDescription() {
+    if(editDescription) {
+      //richiesta axios
+      var value = document.getElementById("teamDescription").value
+      axios.post(address + flask_port + "/team/editDescription", {
+        params : {
+          teamId: id,
+          teamDescription: value,
+        }
+      }).then((response) =>{
+        if (response.data.status === 200) {
+          window.location.replace(window.location.href);
+        }
+      })
+      console.log(value)
+    }
+    setEditDescription(!editDescription)
+  }
 
   const updateDimensions = () => {
     setWindowWidth(window.innerWidth);
@@ -543,9 +587,42 @@ function TeamView() {
                 <Accordion.Header>Team Info</Accordion.Header>
                 <Accordion.Body>
                   {data.map((item) => (
-                    <div>
-                      <p>{item.description}</p>
+                  <>
+                    <div className="ContentEntry">
+                      <div className="VerticalContainer">
+                        <div className="Row">
+                          <div className="Title">Team name</div>
+                          <div className="EditButton" onClick={ToggleEditName}>
+                            { !editName && (<img src={edit}></img>) }
+                            { editName && (<>Confirm</>) }
+                          </div>
+                        </div>
+                        <div className="Row">
+                          <div className="TextEntry">
+                            { !editName && (<h4>{item.teamName}</h4>)}
+                            { editName && (<input type="text" id="teamName" defaultValue={item.teamName} />)}
+                          </div>
+                        </div>
+                      </div>
                     </div>
+                    <div className="ContentEntry">
+                      <div className="VerticalContainer">
+                        <div className="Row">
+                          <div className="Title">Team description</div>
+                          <div className="EditButton" onClick={ToggleEditDescription}>
+                            { !editDescription && (<img src={edit}></img>) }
+                            { editDescription && (<>Confirm</>) }
+                          </div>
+                        </div>
+                        <div className="Row">
+                          <div className="TextEntry">
+                            { !editDescription && (<h4>{item.description}</h4>)}
+                            { editDescription && (<input type="text" id="teamDescription" defaultValue={item.description === "This team has no description"? "": item.description} />)}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </>
                   ))}
                 </Accordion.Body>
               </Accordion.Item>
