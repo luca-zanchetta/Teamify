@@ -111,7 +111,7 @@ function Teams() {
           )}
           {team_leaved && (
             <Alert onClick={handleAlertTeamLeaved} state="success">
-              Team successfully Leaved
+              Team successfully left
             </Alert>
           )}
           <div className="row mt-4 mb-2" style={{ textAlign: "left" }}>

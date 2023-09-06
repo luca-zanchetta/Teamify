@@ -23,7 +23,10 @@ function Login() {
       sessionStorage.setItem("reset_done", "false");
     }, 1000);
 
-    return () => clearTimeout(timeout);
+  }, []);
+
+  useEffect(() => {
+    setUsername(localStorage.getItem("username"));
   }, []);
 
 

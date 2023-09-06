@@ -919,7 +919,7 @@ def exit_from_team():
                     500,
                 )  # Return a valid response
 
-    if len(admin_list) <= 1:
+    if len(admin_list) < 1:
         # Find a new admin
         curr.execute(
             "SELECT username FROM joinTeam WHERE team = %s AND username != %s ",
@@ -983,7 +983,7 @@ def exit_from_team():
                     200,
                 )
             except Exception as err:
-                print("[ERROR] impossible to delete the team without admin : ", err)
+                print("[ERROR] can't delete the team without admin : ", err)
                 return (
                     jsonify({"error": "An error occurred"}),
                     500,
@@ -1429,6 +1429,12 @@ def invite():
     admin = decrypt_username(admin)
     if username==admin:
         return jsonify("ko"), 400 
+
+    # Check if the user is already present in the team
+    curr.execute("SELECT * FROM jointeam WHERE username = %s AND team = %s", (username, id))
+    if curr.fetchone() is not None:
+        # User is already present in the team
+        return jsonify("ko"), 400
 
     query_invite = "INSERT INTO invite (username, admin, team) VALUES (%s,%s,%s)"
     params_invite = (

@@ -110,7 +110,8 @@ function Invite() {
           });
   
         if (response.data.status === 200) {
-          navigate("/home");
+          const link='/teamview?id='+teamId;
+          navigate(link);
         }
       } catch (error) {
         // Request failed

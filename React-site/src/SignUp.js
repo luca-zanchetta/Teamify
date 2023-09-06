@@ -13,11 +13,23 @@ const loggedIn = localStorage.getItem("LoggedUser");
 
 function SignUp() {
   useEffect(() => {
-    //useEffect viene chiamato a fine render del component
-    handleMissingFields();
-    handleRequestFailed();
-    handlePasswordsNotMatching();
-    handlePasswordNotOf8Characters();
+    setName(localStorage.getItem("name"));
+    setSurname(localStorage.getItem("surname"));
+    setBirth(localStorage.getItem("birth"));
+    setEmail(localStorage.getItem("email"));
+    setUsername(localStorage.getItem("username"));
+  }, []);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      handleMissingFields();
+      handleRequestFailed();
+      handlePasswordsNotMatching();
+      handlePasswordNotOf8Characters();
+      handleusernameExists();
+    }, 1000);
+
+    return () => clearTimeout(timeout);
   }, []);
 
 
@@ -62,6 +74,12 @@ function SignUp() {
     sessionStorage.setItem("request_failed_alert", "false");
   };
 
+  const usernameExists =
+    sessionStorage.getItem("username_exists_alert") === "true";
+  const handleusernameExists = () => {
+    sessionStorage.setItem("username_exists_alert", "false");
+  };
+
   /* END OF ALERT SECTION */
 
   // Handler for the event 'Submit of a form'
@@ -76,62 +94,64 @@ function SignUp() {
     localStorage.setItem("username", username);
 
     if (
-      name !== "" &&
-      surname !== "" &&
-      birth !== "" &&
-      email !== "" &&
-      username !== "" &&
-      password !== "" &&
-      password_again !== ""
+      name === "" ||
+      surname === "" ||
+      birth === "" ||
+      email === "" ||
+      username === "" ||
+      password === "" ||
+      password_again === ""
     ) {
-      if (password === password_again) {
-        if (password.length >= 8) {
-          try {
-            // Send a POST request to the /signup endpoint of the Flask server
-            const response = await axios.post(endpoint, {
-              name,
-              surname,
-              birth,
-              email,
-              username,
-              password,
-            });
-
-            // If the signup has been successfully performed, then redirect the user to the Login page.
-            if (response.status === 200) {
-              sessionStorage.setItem("sign_up_alert", "true");
-
-              // Erase form values
-              localStorage.clear();
-
-              // Redirect
-              navigate("/login");
-            }
-          } catch (error) {
-            // Request failed
-            sessionStorage.setItem("request_failed_alert", "true");
-            window.location.replace(window.location.href); // For alert purposes only
-            console.log("[ERROR] Request failed: " + error);
-          }
-        } else {
-          // The password does not contain at least 8 characters
-          sessionStorage.setItem("password8_alert", "true");
-          window.location.replace(window.location.href); // For alert purposes only
-          console.log("The password must contain at least 8 characters!");
-        }
-      } else {
-        // Passwords do not match
-        sessionStorage.setItem("passwords_alert", "true");
-        window.location.replace(window.location.href); // For alert purposes only
-        console.log("The inserted passwords do not match!");
-      }
-    } else {
       // There is at least one mandatory field that has not been filled
       sessionStorage.setItem("fields_alert", "true");
       window.location.replace(window.location.href); // For alert purposes only
       console.log("All the fields must be filled!");
+    } else if (password !== password_again) {
+      // Passwords do not match
+      sessionStorage.setItem("passwords_alert", "true");
+      window.location.replace(window.location.href); // For alert purposes only
+      console.log("The inserted passwords do not match!");
+    } else if (password.length < 8) {
+      // The password does not contain at least 8 characters
+      sessionStorage.setItem("password8_alert", "true");
+      window.location.replace(window.location.href); // For alert purposes only
+      console.log("The password must contain at least 8 characters!");
+    } else {
+      try {
+        // Send a POST request to the /signup endpoint of the Flask server
+        const response = await axios.post(endpoint, {
+          name,
+          surname,
+          birth,
+          email,
+          username,
+          password,
+        });
+    
+        // If the signup has been successfully performed, then redirect the user to the Login page.
+        if (response.status === 200) {
+          sessionStorage.setItem("sign_up_alert", "true");
+    
+          // Erase form values
+          localStorage.clear();
+    
+          // Redirect
+          navigate("/login");
+        }
+        else if (response.status === 400){
+          sessionStorage.setItem("username_exists_alert", "true");
+          window.location.replace(window.location.href); // For alert purposes only
+          console.log("[ERROR] Request failed: ");
+        }
+      } catch (error) {
+        // Request failed
+        sessionStorage.setItem("request_failed_alert", "true");
+        window.location.replace(window.location.href); // For alert purposes only
+        console.log("[ERROR] Request failed: " + error);
+      }
     }
-  };
+  }
+    
 
   return (
     <div className="App">
@@ -172,7 +192,12 @@ function SignUp() {
 
       {requestFailed && (
         <Alert onClick={handleRequestFailed} state="danger">
-          Error: Signup failed.
+          Error: Signup failed
+        </Alert>
+      )}
+      {usernameExists && (
+        <Alert onClick={handleusernameExists} state="danger">
+          Error: This username is already registered
         </Alert>
       )}
       <div className="SignUpBackground">
