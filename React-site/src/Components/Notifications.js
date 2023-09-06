@@ -222,7 +222,7 @@ function Notifications() {
   }
 
   return (
-    <div className="UserIcon" style={{ paddingRight: "1%", marginRight: "2%" }}>
+    <div className="UserIcon" style={{ paddingRight: "0.3%", marginRight: "2%" }}>
       <img src={bell} onClick={toggleShow} id='bell'></img>
       {show && (
         <>

@@ -36,7 +36,7 @@ function UserIcon() {
 
   return (
     <div className="UserIcon">
-      <img src={face} onClick={ToggleUserMenu}></img>
+      <img src={user} onClick={ToggleUserMenu}></img>
       {show && (
         <>
           <div id="ProfileDrop">

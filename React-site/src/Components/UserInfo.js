@@ -2,6 +2,7 @@ import "../css/Navigator.css";
 import edit from "../icons/edit.png";
 import face from "../img/face.jpeg";
 import "../css/Profile.css";
+import user from "../icons/user.png";
 
 import axios from "axios";
 import { useEffect, useState } from "react";
@@ -197,7 +198,7 @@ function UserInfo() {
       <div className="ContentEntry">
         <div className="HorizontalContainer">
           <div className="ProfileIcon">
-            <img src={face}></img>
+            <img src={user}></img>
           </div>
           <div className="ProfileInfos">
             <h2>{decryptedusername}</h2>
