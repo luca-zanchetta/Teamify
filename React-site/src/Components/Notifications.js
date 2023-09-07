@@ -248,7 +248,6 @@ function Notifications() {
         deault: console.log("Not the right case!");
     }
   }
-
   return (
     <div className="UserIcon" style={{ paddingRight: "1%", marginRight: "2%" }}>
       <img src={bell} onClick={toggleShow} id="bell"></img>
@@ -270,7 +269,11 @@ function Notifications() {
                       <img src={event} alt="Event Icon" />
                     </div>
                     <div className="NotificatioTitles">
-                      <h3>{notification[3]}</h3>
+                      <h3>
+                        {"modifyevent" === notification[3]
+                          ? "Event modified"
+                          : notification[3]}
+                      </h3>
                       <h4>{notification[2]}</h4>
                       <h4>{notification[1]}</h4>
                     </div>
