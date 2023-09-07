@@ -49,6 +49,9 @@ function NewTask() {
   const [eventMembers, setEventMembers] = useState([]);
   const [modifyEvent, setModifyEvent] = useState(false);
   const endpoint2 = address + flask_port + "/home/event/members";
+  const [checkboxStates, setCheckboxStates] = useState({});
+  const [selectedMembers, setSelectedMembers] = useState([]);
+
   const handleClosure = () => {
     sessionStorage.setItem("error_alert", false);
   };
@@ -191,6 +194,7 @@ function NewTask() {
         if (response.status == 200) {
           sessionStorage.setItem("event_modified", true);
           if (task.type === "event") {
+            console.log(eventMembers);
             try {
               const response = await axios.post(
                 address + flask_port + "/home/team/event/editmember",
@@ -215,7 +219,6 @@ function NewTask() {
   };
 
   const handleBack = () => {
-    console.log(previousPage);
     window.location.replace(previousPage);
   };
 
@@ -267,6 +270,37 @@ function NewTask() {
       }
     }
   }, [location.state]);
+
+  const handleCheckboxChange = (memberId) => {
+    setCheckboxStates((prevCheckboxStates) => {
+      return {
+        ...prevCheckboxStates,
+        [memberId]: !prevCheckboxStates[memberId],
+      };
+    });
+    if (checkboxStates[memberId]) {
+      // Member is being unchecked, so remove them from eventMembers
+      removeMemberFromEvent(memberId);
+    }
+  };
+
+  console.log(eventMembers);
+  useEffect(() => {
+    const initialCheckboxStates = {};
+    eventMembers.forEach((memberObj) => {
+      const member = memberObj.member;
+      initialCheckboxStates[member] = true;
+    });
+    setCheckboxStates(initialCheckboxStates);
+  }, [eventMembers]);
+
+  const removeMemberFromEvent = (memberId) => {
+    setEventMembers((prevEventMembers) => {
+      return prevEventMembers.filter(
+        (memberObj) => memberObj.member !== memberId
+      );
+    });
+  };
 
   return (
     <div>
@@ -447,29 +481,15 @@ function NewTask() {
                               key={member.id}
                               type="checkbox"
                               label={
-                                typeof member === "object"
-                                  ? member.member
-                                  : member
+                                member.member === decryptedUsername
+                                  ? "You"
+                                  : member.member
                               }
                               id={`member-${member.id}`}
-                              disabled={member.member === task.member}
-                              defaultChecked={
-                                isMemberIncluded(
-                                  member.member,
-                                  eventMembers,
-                                  task.member
-                                ).toString() === "true"
-                              }
-                              onChange={(event) =>
-                                setEventMembers((prevMembers) => {
-                                  if (event.target.checked) {
-                                    return [...prevMembers, member];
-                                  } else {
-                                    return prevMembers.filter(
-                                      (prevMember) => prevMember !== member
-                                    );
-                                  }
-                                })
+                              disabled={member.member === decryptedUsername}
+                              checked={checkboxStates[member.member]}
+                              onChange={() =>
+                                handleCheckboxChange(member.member)
                               }
                             />
                           ))}

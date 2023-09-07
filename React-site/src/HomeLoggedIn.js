@@ -270,45 +270,34 @@ function HomeLoggedIn() {
         <NavBar></NavBar>
         <div className="CenterContainer">
           {!ProfileData && (
-            <div className="container mt-5" width="100%">
-              <div className="row text-center">
-                <div className="col">
-                  <h3 className="mb-3 mr-10">Personal Agenda</h3>
-                  <div className="container" style={{ display: "flex" }}>
-                    <WeeklyCalendar
-                      width={(windowWidth * 60) / 100}
-                      height={570}
-                      handleSelectEvent={handleSelectEvent}
-                    />
-                  </div>
-                </div>
-                <div
-                  className="col"
-                  style={{ marginLeft: 10, Display: "flex" }}
+            <div className="container mt-3 mb-2 ">
+              <h3 className="mb-3 mt-3">Personal Agenda</h3>
+              <div className="row text-center justify-content-center mb-3 mt-3">
+                <WeeklyCalendar
+                  width={(windowWidth * 60) / 100}
+                  height={570}
+                  handleSelectEvent={handleSelectEvent}
+                />
+              </div>
+              <div className="row d-flex justify-content-center align-items-center mt-3">
+                <Link
+                  to={{
+                    pathname: "/home/newtask",
+                    state: { previousPage: window.location.href },
+                  }}
+                  className="btn"
+                  style={{
+                    textDecoration: "inherit",
+                    backgroundColor: "#c5fdc8",
+                    width: "100px",
+                  }}
                 >
-                  <div className="row text-center mt-5">
-                    <h5>Filter</h5>
-                  </div>
-                  <div className="row d-flex justify-content-center align-items-center">
-                    <Link
-                      to={{
-                        pathname: "/home/newtask",
-                        state: { previousPage: window.location.pathname },
-                      }}
-                      className="btn"
-                      style={{
-                        textDecoration: "inherit",
-                        backgroundColor: "#c5fdc8",
-                        width: "100px",
-                      }}
-                    >
-                      New Task
-                    </Link>
-                  </div>
-                </div>
+                  New Task
+                </Link>
               </div>
             </div>
           )}
+
           {ProfileData && <Profile></Profile>}
         </div>
       </div>

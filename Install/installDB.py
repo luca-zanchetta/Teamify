@@ -2,10 +2,10 @@ import psycopg2
 from DBConnection import get_connection, user, psw
 from hashlib import sha256
 
-local="localhost"
-docker="db"
+local = "localhost"
+docker = "db"
 # Create connection
-conn = psycopg2.connect(host=docker, port=5432, user=user, password=psw)
+conn = psycopg2.connect(host=local, port=5432, user=user, password=psw)
 conn.set_session(autocommit=True)
 if not conn:
     print("Error during db connection")
@@ -108,6 +108,7 @@ notification = """CREATE TABLE notification (
         OR type = 'survey'
         OR type = 'event'
         OR type = 'admin'
+        OR type = 'modifyevent'
     )
 )"""
 try:

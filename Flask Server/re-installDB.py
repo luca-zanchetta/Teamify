@@ -3,9 +3,9 @@ from DBConnection import get_connection, user, psw
 from hashlib import sha256
 
 # Create connection
-host="localhost"
-docker="db"
-conn = psycopg2.connect(host=host, port=5432, user=user, password=psw)
+host = "localhost"
+docker = "db"
+conn = psycopg2.connect(host="localhost", port=5432, user=user, password=psw)
 conn.set_session(autocommit=True)
 if not conn:
     print("Error during db connection")
@@ -115,6 +115,7 @@ notification = """CREATE TABLE notification (
         OR type = 'survey'
         OR type = 'event'
         OR type = 'admin'
+        OR type = 'modifyevent'
     )
 )"""
 try:
@@ -269,7 +270,7 @@ except Exception as err:
 
 
 # Table 'survey'
-dropSurvey= "DROP TABLE IF EXISTS survey CASCADE"
+dropSurvey = "DROP TABLE IF EXISTS survey CASCADE"
 survey = """CREATE TABLE survey (
     id SERIAL PRIMARY KEY,
     text VARCHAR(500) NOT NULL,
@@ -287,7 +288,7 @@ except Exception as err:
 
 
 # Table 'sended_by'
-dropSendedBy= "DROP TABLE IF EXISTS sended_by CASCADE"
+dropSendedBy = "DROP TABLE IF EXISTS sended_by CASCADE"
 sendedBy = """CREATE TABLE sended_by (
     admin VARCHAR(100) NOT NULL,
     team INT NOT NULL,
@@ -313,7 +314,7 @@ except Exception as err:
 
 
 # Table 'option'
-dropOption= "DROP TABLE IF EXISTS option CASCADE"
+dropOption = "DROP TABLE IF EXISTS option CASCADE"
 option = """CREATE TABLE option (
     survey INT NOT NULL,
     id SERIAL PRIMARY KEY,
@@ -336,7 +337,7 @@ except Exception as err:
 
 
 # Table 'vote'
-dropVote= "DROP TABLE IF EXISTS vote CASCADE"
+dropVote = "DROP TABLE IF EXISTS vote CASCADE"
 vote = """CREATE TABLE vote (
     option INT,
     username VARCHAR(100),
@@ -363,7 +364,7 @@ except Exception as err:
 
 
 # Table 'message'
-dropMessage= "DROP TABLE IF EXISTS message CASCADE"
+dropMessage = "DROP TABLE IF EXISTS message CASCADE"
 message = """CREATE TABLE message (
     id SERIAL PRIMARY KEY,
     datetime TIMESTAMP NOT NULL,
@@ -391,7 +392,7 @@ except Exception as err:
 
 
 # Table 'add'
-dropAdd= "DROP TABLE IF EXISTS add CASCADE"
+dropAdd = "DROP TABLE IF EXISTS add CASCADE"
 add = """CREATE TABLE add (
     personal_task INT PRIMARY KEY,
     username VARCHAR(100) NOT NULL,

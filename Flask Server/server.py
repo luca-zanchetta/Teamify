@@ -18,11 +18,6 @@ import requests
 from datetime import date, timedelta
 
 
-address = "http://localhost:"
-react_port = "3000"
-flask_port = "5000"
-address2 = "http://backend:"
-
 # Server setup
 app = Flask(__name__)
 CORS(app)
@@ -393,12 +388,10 @@ def create_new_task():
 # Modify a task API
 @app.route("/home/updatetask", methods=["POST"])
 def update_task():
+    curr = conn.cursor()
     data = request.get_json()
     username = data["local_user"]
     task_id = data["task_id"]
-
-    print(request.json)
-    curr = conn.cursor()
     username = decrypt_username(username)
 
     title = data.get("title")
@@ -407,10 +400,10 @@ def update_task():
     description = data.get("description")
     duration = data.get("duration")
 
-    curr.execute("SELECT * FROM task WHERE id = %s", (task_id,))
+    curr.execute("SELECT type FROM task WHERE id = %s", (task_id,))
     existing_task = curr.fetchone()
+
     if not existing_task:
-        print(existing_task)
         return jsonify({"message": "Task not found"}), 404
 
     update_query = "UPDATE task SET title = %s, date = %s, time = %s, description = %s, member = %s, duration = %s WHERE id = %s"
@@ -418,9 +411,31 @@ def update_task():
 
     try:
         curr.execute(update_query, update_values)
-        conn.commit()
+
+        if existing_task[0] == "event":
+            curr.execute("SELECT username FROM includes WHERE event = %s", (task_id,))
+            members = curr.fetchall()
+            # send the notification when the event is updated
+
+            for member in members:
+                if member[0] != username:
+                    query_notification = "INSERT INTO notification (date, content, type, read, username) VALUES (%s,%s,%s,%s,%s)"
+                    params_notification = (
+                        datetime.datetime.now(),
+                        f"{username} modify event {title} with id {task_id}.",
+                        "modifyevent",
+                        False,
+                        member[0],
+                    )
+                    try:
+                        curr.execute(query_notification, params_notification)
+                        socketio.emit("event_notification", "", room=member[0])
+                    except Exception as err:
+                        print("[ERROR] /home/edittask (notification): " + err)
+                        return jsonify("ko"), 400
+
     except Exception as err:
-        print("[ERROR] /updatetask: ", err)
+        print("[ERROR] /updatetask: An error occurred:", err)
         return jsonify({"message": "Update failed"}), 400
 
     return jsonify({"message": "Task updated successfully"}), 200
@@ -493,48 +508,44 @@ def get_tasks():
         )
 
     curr.execute(
-        "SELECT event from includes where username=%s and state=%s",
+        "SELECT event from includes where state=%s and username=%s",
         (
-            local_user,
             "accepted",
+            local_user,
         ),
     )
+    set_e = curr.fetchall()
 
-    events = curr.fetchall()
-
-    for event in events:
+    events = []
+    for event in set_e:
         curr.execute(
-            "SELECT title, description, date, time, duration, id, status, type, member FROM task WHERE id = %s AND type=%s",
+            "SELECT title, description, date, time, duration, id, status, type, member FROM task WHERE type=%s AND id= %s",
             (
-                event[0],
                 "event",
+                event[0],
             ),
         )
-        exist = curr.fetchone()
+        events.append(curr.fetchone())
 
-        if str(exist) != "":
-            start_date = (
-                exist[2].strftime("%Y-%m-%d") + " " + exist[3].strftime("%H:%M:%S")
-            )
-            end_date = (
-                exist[2].strftime("%Y-%m-%d") + " " + exist[3].strftime("%H:%M:%S")
-            )
+    for event in events:
+        start_date = event[2].strftime("%Y-%m-%d") + " " + event[3].strftime("%H:%M:%S")
+        end_date = event[2].strftime("%Y-%m-%d") + " " + event[3].strftime("%H:%M:%S")
 
-            new_end_date = convert_date(end_date, exist[4])
+        new_end_date = convert_date(end_date, event[4])
 
-            tasks_list.append(
-                {
-                    "title": exist[0],
-                    "start": start_date,
-                    "end": new_end_date,
-                    "description": exist[1],
-                    "duration": exist[4],
-                    "id": exist[5],
-                    "status": exist[6],
-                    "type": exist[7],
-                    "member": exist[8],
-                }
-            )
+        tasks_list.append(
+            {
+                "title": event[0],
+                "start": start_date,
+                "end": new_end_date,
+                "description": event[1],
+                "duration": event[4],
+                "id": event[5],
+                "status": event[6],
+                "type": event[7],
+                "member": event[8],
+            }
+        )
 
     return jsonify(tasks_list), 200
 
@@ -604,13 +615,14 @@ def get_tasks_events():
         )
         events_ids = curr.fetchall()
 
+        events = []
         for eventid in events_ids:
             print("ID\n", eventid[0])
             curr.execute(
                 "SELECT title, description, date, time, duration, id, member, type,status FROM task WHERE id = %s",
                 (eventid[0],),
             )
-        events = curr.fetchall()
+            events.append(curr.fetchone())
         # here i get also the id of event i need another query to retrieve event
         for event in events:
             start_date = (
@@ -1146,6 +1158,7 @@ def edit_member_event():
 
     return jsonify({"member_list": member_list, "status": 200})
 
+
 @app.route("/team/editName", methods=["GET"])
 def editTeamName():
     curr = conn.cursor()
@@ -1156,11 +1169,12 @@ def editTeamName():
         "UPDATE team SET name = %s WHERE id = %s",
         (
             newName,
-            teamId,  
+            teamId,
         ),
     )
 
     return jsonify({"message": "Success", "status": 200})
+
 
 @app.route("/team/editDescription", methods=["GET"])
 def editTeamDescription():
@@ -1172,13 +1186,11 @@ def editTeamDescription():
         "UPDATE team SET description = %s WHERE id = %s",
         (
             newDescription,
-            teamId,       
+            teamId,
         ),
     )
 
     return jsonify({"message": "Success", "status": 200})
-
-
 
 
 # Get list of members included in a certain event the one that accepted
@@ -1417,6 +1429,17 @@ def read_notification():
     )
 
 
+# given event id return team id
+@app.route("/evevnt/teamview", methods=["GET"])
+def give_team_id():
+    curr = conn.cursor()
+    data = request.get_json()
+    event_id = data["event"]
+    curr.execute("SELECT team FROM includes WHERE event=%s", (event_id))
+    team_id = curr.fetchone()
+    return jsonify(team_id), 200
+
+
 # given team id and username, invites the user to the team
 @app.route("/invite", methods=["POST"])
 def invite():
@@ -1427,11 +1450,13 @@ def invite():
     id = data["id"]
     admin = data["admin"]
     admin = decrypt_username(admin)
-    if username==admin:
-        return jsonify("ko"), 400 
+    if username == admin:
+        return jsonify("ko"), 400
 
     # Check if the user is already present in the team
-    curr.execute("SELECT * FROM jointeam WHERE username = %s AND team = %s", (username, id))
+    curr.execute(
+        "SELECT * FROM jointeam WHERE username = %s AND team = %s", (username, id)
+    )
     if curr.fetchone() is not None:
         # User is already present in the team
         return jsonify("ko"), 400
@@ -1788,7 +1813,10 @@ def add_vote():
     # check if the user has already voted
     curr.execute(
         "select * from vote, option where username = %s and option.id = vote.option and option.survey = %s",
-        (username,pool_id,),
+        (
+            username,
+            pool_id,
+        ),
     )
     vote = curr.fetchone()
 
@@ -1889,6 +1917,25 @@ def create_pool():
             socketio.emit("survey_notification", "", room=user)
 
     return jsonify({"message": "Success", "status": 200})
+
+
+# check if already voted in a survey
+@app.route("/home/teams/team/survey", methods=["GET"])
+def has_voted():
+    curr = conn.cursor()
+    survey = request.args.get("survey")
+    username = request.args.get("username")
+    curr.execute(
+        "SELECT option FROM vote WHERE username = %s",
+        (username,),
+    )
+    vote = curr.fetchone()
+    curr.execute("SELECT survey FROM option WHERE id=%s", (vote[0],))
+    survey_res = curr.fetchone()
+    if int(survey) == int(survey_res[0]):
+        return jsonify("true"), 200
+    else:
+        return jsonify("false"), 200
 
 
 @app.route("/getSurveys", methods=["GET"])
