@@ -51,6 +51,7 @@ function NewTask() {
   const [eventMembers, setEventMembers] = useState([]);
   const [modifyEvent, setModifyEvent] = useState(false);
   const endpoint2 = address + flask_port + "/home/event/members";
+  const [checkboxStates, setCheckboxStates] = useState({});
 
   const handleClosure = () => {
     sessionStorage.setItem("error_alert", false);
@@ -270,6 +271,13 @@ function NewTask() {
     }
   }, [location.state]);
 
+  const handleCheckboxChange = (memberId) => {
+    setCheckboxStates((prevState) => ({
+      ...prevState,
+      [memberId]: !prevState[memberId],
+    }));
+  };
+
   return (
     <div>
       <div className="App">
@@ -455,14 +463,9 @@ function NewTask() {
                               }
                               id={`member-${member.id}`}
                               disabled={member.member === task.member}
-                              defaultChecked={
-                                isMemberIncluded(
-                                  member.member,
-                                  eventMembers,
-                                  task.member
-                                ).toString() === "true"
-                              }
-                              onChange={(event) =>
+                              checked={checkboxStates[member.id] || false} // Use the state to determine if checked
+                              onChange={(event) => {
+                                handleCheckboxChange(member.id); // Toggle the state when the checkbox changes
                                 setEventMembers((prevMembers) => {
                                   if (event.target.checked) {
                                     return [...prevMembers, member];
@@ -471,8 +474,8 @@ function NewTask() {
                                       (prevMember) => prevMember !== member
                                     );
                                   }
-                                })
-                              }
+                                });
+                              }}
                             />
                           ))}
                         </div>
