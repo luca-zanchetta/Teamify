@@ -903,13 +903,9 @@ def members_given_team():
 # leave a team API
 @app.route("/home/teams/leaveteam", methods=["DELETE"])
 def exit_from_team():
+    curr = conn.cursor()
     team_id = request.args.get("teamId")
     username = request.args.get("username")
-
-    curr = conn.cursor()
-
-    query_delete = "DELETE FROM joinTeam WHERE username = %s and team=%s"
-    param_delete = (username, team_id)
 
     # Fetch admins for the team
     curr.execute(
@@ -917,11 +913,14 @@ def exit_from_team():
         (team_id,),
     )
     admins = curr.fetchall()
-
+    # otteniamo la lista degli admin del gruppo
+    # eliminiamo l'utente dagli admin
+    print("ADMINS\n\n", admins)
     admin_list = []
+
     for admin in admins:
-        admin_list.append({"admin": admin[0]})
         if username == admin[0]:
+            print("your user")
             try:
                 curr.execute("DELETE FROM manage WHERE admin=%s", (username,))
             except Exception as error:
@@ -930,7 +929,10 @@ def exit_from_team():
                     jsonify({"error": "An error occurred"}),
                     500,
                 )  # Return a valid response
+        else:
+            admin_list.append({"admin": admin[0]})
 
+    # se non ci sono admin, cancelliamo in gruppo
     if len(admin_list) < 1:
         # Find a new admin
         curr.execute(
@@ -941,7 +943,7 @@ def exit_from_team():
             ),
         )
         new_admin = curr.fetchone()
-        if new_admin:
+        if new_admin != None:
             query_new_admin = "INSERT INTO manage (admin, team) VALUES (%s,%s)"
             query_new_params = (
                 new_admin[0],
@@ -950,7 +952,11 @@ def exit_from_team():
             try:
                 curr.execute(query_new_admin, query_new_params)
                 try:
-                    curr.execute("DELETE FROM manage WHERE admin =%s", (username,))
+                    curr.execute(
+                        "UPDATE task SET member = %s WHERE member = %s AND type=%s",
+                        (new_admin[0], username, "event"),
+                    )
+                    curr.execute("DELETE FROM manage WHERE admin = %s", (username,))
                 except Exception as error:
                     print("[ERROR] error in deleting admin ")
                     return (
@@ -965,10 +971,13 @@ def exit_from_team():
                 )  # Return a valid response
 
         else:
+            print("NO ADM")
             # Delete the team if there is no new admin
+
             query_delete_team = "DELETE FROM team WHERE id=%s"
             delete_team_params = (team_id,)
             try:
+                # se cancelliamo il team, dobbiamo cancellare tutti gli eventi collegati ad esso
                 curr.execute("SELECT event FROM includes WHERE team=%s", (team_id,))
                 events = curr.fetchall()
                 for event in events:
@@ -1002,9 +1011,17 @@ def exit_from_team():
                 )  # Return a valid response
 
     try:
+        curr.execute(
+            "DELETE FROM includes WHERE team=%s AND username=%s",
+            (
+                team_id,
+                username,
+            ),
+        )
+        query_delete = "DELETE FROM joinTeam WHERE username = %s and team=%s"
+        param_delete = (username, team_id)
+
         curr.execute(query_delete, param_delete)
-        conn.commit()  # Don't forget to commit changes
-        # i call the already existent API
         return jsonify(
             {"message": f"[INFO] /home/exitfromteam: id {team_id} successfully left"}
         )
@@ -1113,8 +1130,6 @@ def edit_member_event():
         member_list.append(member[0])
         team_id = member[1]
 
-    print("OLD MEMBERS", member_list, "\nNEW MEMBERS", new_members, "\n")
-
     for member in member_list:
         if member not in new_set and member != admin:
             print("NOT IN NEW", member)
@@ -1153,8 +1168,6 @@ def edit_member_event():
             except Exception as err:
                 print("[ERROR] /home/team/event/editmemeber: (insert:)", err)
                 return jsonify("ko"), 400
-
-    # TODO: here we must send the invites
 
     return jsonify({"member_list": member_list, "status": 200})
 

@@ -272,7 +272,10 @@ function HomeLoggedIn() {
           {!ProfileData && (
             <div className="container mt-3 mb-2 ">
               <h3 className="mb-3 mt-3">Personal Agenda</h3>
-              <div className="row text-center justify-content-center mb-3 mt-3">
+              <div
+                className="row text-center justify-content-center mb-3 mt-3"
+                style={{ marginRight: "10%", marginLeft: "10%" }}
+              >
                 <WeeklyCalendar
                   width={(windowWidth * 60) / 100}
                   height={570}

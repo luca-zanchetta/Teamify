@@ -281,6 +281,8 @@ function NewTask() {
     if (checkboxStates[memberId]) {
       // Member is being unchecked, so remove them from eventMembers
       removeMemberFromEvent(memberId);
+    } else {
+      addMemberToEvent(memberId);
     }
   };
 
@@ -300,6 +302,13 @@ function NewTask() {
         (memberObj) => memberObj.member !== memberId
       );
     });
+  };
+  const addMemberToEvent = (memberId) => {
+    if (!eventMembers.some((memberObj) => memberObj.member === memberId)) {
+      setEventMembers((prevEventMembers) => {
+        return [...prevEventMembers, { member: memberId }];
+      });
+    }
   };
 
   return (
