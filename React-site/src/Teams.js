@@ -169,6 +169,11 @@ function Teams() {
                         },
                       })
                     }
+                    style={{
+                      cursor: "pointer",
+                      color: "blue",
+                      textDecoration: "underline",
+                    }}
                   >
                     {team.title}
                   </div>
