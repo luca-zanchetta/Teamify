@@ -657,19 +657,14 @@ def getColor():
     curr = conn.cursor()
     event_ids = request.args.get("event")
     event_id_list = event_ids.split(",")
-    print("EVENT IDs:", event_id_list, "\n\n")
     list_color = {}
     for event in event_id_list:
         curr.execute("SELECT team FROM includes WHERE event=%s", (event,))
         data = curr.fetchone()
         if data != None:
-            print("TEAM\n", data[0])
             curr.execute("SELECT color FROM team WHERE id=%s", (data[0],))
             color = curr.fetchone()
-            print("COLOR\n", color[0])
             list_color[event] = color[0]
-
-    print("LIST COLOR\n", list_color)
 
     return jsonify(list_color), 200
 
