@@ -16,6 +16,7 @@ from flask_mail import Mail, Message
 import time
 import requests
 from datetime import date, timedelta
+import random
 
 
 # Server setup
@@ -650,6 +651,29 @@ def get_tasks_events():
     return jsonify(tasks_list), 200
 
 
+# get color API
+@app.route("/getColor", methods=["GET"])
+def getColor():
+    curr = conn.cursor()
+    event_ids = request.args.get("event")
+    event_id_list = event_ids.split(",")
+    print("EVENT IDs:", event_id_list, "\n\n")
+    list_color = {}
+    for event in event_id_list:
+        curr.execute("SELECT team FROM includes WHERE event=%s", (event,))
+        data = curr.fetchone()
+        if data != None:
+            print("TEAM\n", data[0])
+            curr.execute("SELECT color FROM team WHERE id=%s", (data[0],))
+            color = curr.fetchone()
+            print("COLOR\n", color[0])
+            list_color[event] = color[0]
+
+    print("LIST COLOR\n", list_color)
+
+    return jsonify(list_color), 200
+
+
 ############################ END TASK APIs ##################################
 
 
@@ -762,6 +786,25 @@ def team_details():
     return jsonify(result), 200
 
 
+pastel_colors = [
+    "#FFB6C1",  # Light Pink
+    "#FFC0CB",  # Pink
+    "#FFD700",  # Gold
+    "#FF69B4",  # Hot Pink
+    "#FFE4E1",  # Misty Rose
+    "#FFA07A",  # Light Salmon
+    "#FFFFE0",  # Light Yellow
+    "#ADD8E6",  # Light Blue
+    "#E0FFFF",  # Light Cyan
+    "#DDA0DD",  # Plum
+    "#FFE4B5",  # Moccasin
+    "#F0E68C",  # Khaki
+    "#D8BFD8",  # Thistle
+    "#B0E0E6",  # Powder Blue
+    "#FFDEAD",  # Navajo White
+]
+
+
 # Create a team
 @app.route("/home/newteam", methods=["POST"])
 def team_create():
@@ -772,13 +815,15 @@ def team_create():
     username = decrypt_username(username)
     name = data["name"]
     description = data["description"]
+    random_pastel_color = random.choice(pastel_colors)
 
     # Fetch the ID of the last inserted task
     curr.execute(
-        "INSERT INTO team (name, description) VALUES (%s,%s)",
+        "INSERT INTO team (name, description,color) VALUES (%s,%s,%s)",
         (
             name,
             description,
+            random_pastel_color,
         ),
     )
     curr.execute(

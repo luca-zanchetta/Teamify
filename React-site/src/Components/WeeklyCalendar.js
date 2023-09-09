@@ -43,19 +43,50 @@ const WeeklyCalendar = ({
   const [events, setEvents] = useState([]);
   const localUser = localStorage.getItem("LoggedUser");
   const localTeam = 0; //da gestire quando si implementano i team
+  const endpoint_event = address + flask_port + "/getColor";
   const currentPath = window.location.href; //get the current position
+  const [colors, setColors] = useState({});
+
+  useEffect(() => {
+    const eventIds = events.map((event) => event.id).join(",");
+    axios
+      .get(endpoint_event, {
+        params: {
+          event: eventIds,
+        },
+      })
+      .then((response) => {
+        setColors(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching color:", error);
+      });
+  }, [events]);
 
   const eventStyleGetter = (event, start, end, isSelected) => {
-    const style = {
-      backgroundColor: "#07fcaf",
-      borderRadius: "10px",
-      color: "black",
-      border: "0px",
-      display: "inline-block",
-    };
-    return {
-      style: style,
-    };
+    if (event.type === "personal") {
+      const style = {
+        backgroundColor: "#07fcaf",
+        borderRadius: "10px",
+        color: "black",
+        border: "0px",
+        display: "inline-block",
+      };
+      return {
+        style: style,
+      };
+    } else {
+      const style = {
+        backgroundColor: colors[event.id],
+        borderRadius: "10px",
+        color: "black",
+        border: "0px",
+        display: "inline-block",
+      };
+      return {
+        style: style,
+      };
+    }
   };
 
   const hSE = useCallback((event) => {
