@@ -118,8 +118,9 @@ function TeamView() {
     if (editDescription) {
       //richiesta axios
       var value = document.getElementById("teamDescription").value;
+      console.log('description', value );
       axios
-        .post(address + flask_port + "/team/editDescription", {
+        .get(address + flask_port + "/team/editDescription", {
           params: {
             teamId: id,
             teamDescription: value,
@@ -130,7 +131,7 @@ function TeamView() {
             window.location.replace(window.location.href);
           }
         });
-      console.log(value);
+      // console.log(value);
     }
     setEditDescription(!editDescription);
   }
