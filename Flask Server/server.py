@@ -112,6 +112,12 @@ def handle_disconnect():
 
 
 # Login API
+@app.root("/", methods=['POST', 'GET'])
+def fetch():
+    return jsonify({"message":"fetch succesfull!","status":200})
+
+
+
 @app.route("/login", methods=["POST"])
 def login():
     data = request.get_json()

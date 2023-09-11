@@ -7,8 +7,9 @@ import React, { useState, useEffect } from 'react';
 import axios from "axios";
 
 import { address, flask_port } from "./components/Endpoint";
+import FetchEnpoint from "./components/EndpointFinder";
 
-var endpoint = address+flask_port+"/login";
+var endpoint = FetchEnpoint()+"/login";
 const loggedIn = localStorage.getItem("LoggedUser");
 
 function Login() {
