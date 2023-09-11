@@ -1,23 +1,26 @@
 import { address, flask_port, flask_port_2 } from "./Endpoint";
 import axios from "axios";
 
-export default function FetchEnpoint() {
+export default async function FetchEnpoint() {
     //Lista di tutti gli endpoint possibili
     var EndpointList = [address + flask_port, address + flask_port_2];
     shuffle(EndpointList);
-    console.log(EndpointList)
-    EndpointList.map(
-        (data) => {
-            console.log(data)
-            fetch(data).then( res => {
-                if(res.status >= 400){
-                    //error
-                }else{
-                    return data;
-                }
-            })
+
+    let endpoint = "";
+
+    for(let i = 0; i<EndpointList.length; i++) {
+        endpoint = EndpointList[i];
+        try {
+            await fetch(endpoint);
         }
-    )   
+        catch(error) {
+            continue;
+        }
+        console.log(endpoint);
+        return endpoint;
+    }
+
+    return ""; 
 }
 
 
