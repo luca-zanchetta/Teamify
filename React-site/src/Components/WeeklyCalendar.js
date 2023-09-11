@@ -62,6 +62,7 @@ const WeeklyCalendar = ({
         console.error("Error fetching color:", error);
       });
   }, [events]);
+  console.log("PERSONAL:", events);
 
   const eventStyleGetter = (event, start, end, isSelected) => {
     if (event.type === "personal") {
@@ -88,10 +89,18 @@ const WeeklyCalendar = ({
       };
     }
   };
-
-  const hSE = useCallback((event) => {
-    alert(event.title);
-  });
+  function filterEventsWithUniqueIds(events) {
+    const eventIds = new Set();
+    return events.filter((event) => {
+      if (eventIds.has(event.id)) {
+        // This event has the same id as a previously seen event, so filter it out
+        return false;
+      }
+      // This event has a unique id, so add it to the set and keep it
+      eventIds.add(event.id);
+      return true;
+    });
+  }
 
   const MyEvent = ({ event }) => <div>{event.title}</div>;
 
@@ -125,18 +134,20 @@ const WeeklyCalendar = ({
             member: task.member,
           }));
 
-          setEvents(formattedEvents);
+          // Clear existing events and set the new ones
+          setEvents([]);
+          setEvents(filterEventsWithUniqueIds(formattedEvents));
         })
         .catch((error) => {
           console.error("Error fetching data:", error);
         });
     } else {
-      //If i'm not on the home and so i'm on the team view, i want to visualize my tasks and all the events created in the group
+      // If I'm not on the home and so I'm on the team view, I want to visualize my tasks and all the events created in the group
       axios
         .get(endpoint2, {
           params: {
             user: localUser,
-            team: localTeam, //da gestire quando si implementano i team
+            team: localTeam, // To be handled when implementing teams
           },
         })
         .then((response) => {
@@ -154,7 +165,11 @@ const WeeklyCalendar = ({
             member: task.member,
           }));
 
-          setEvents(formattedEvents);
+          // Clear existing events and set the new ones
+          const noduplicates = filterEventsWithUniqueIds(formattedEvents);
+          console.log("NO DUPS", noduplicates);
+          setEvents([]);
+          setEvents(filterEventsWithUniqueIds(formattedEvents));
         })
         .catch((error) => {
           console.error("Error fetching data:", error);

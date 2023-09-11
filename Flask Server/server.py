@@ -1164,15 +1164,20 @@ def edit_member_event():
         "SELECT username, team FROM includes WHERE event = %s",
         (event_id,),
     )
+
     members = curr.fetchall()
     member_list = []
     for member in members:
         member_list.append(member[0])
         team_id = member[1]
 
+    curr.execute("SELECT title FROM task WHERE id=%s", (event_id,))
+    title = curr.fetchone()
+    curr.execute("SELECT name from team WHERE id=%s", (team_id,))
+    team_name = curr.fetchone()
+
     for member in member_list:
         if member not in new_set and member != admin:
-            print("NOT IN NEW", member)
             query_member = "DELETE FROM includes WHERE username = %s"
             param_member = (member,)
             try:
@@ -1194,7 +1199,7 @@ def edit_member_event():
                 query_notification = "INSERT INTO notification (date, content, type, read, username) VALUES (%s,%s,%s,%s,%s)"
                 params_notification = (
                     datetime.datetime.now(),
-                    f"{admin}  has invited you to join the event '.",
+                    f"{admin} of team {team_name[0]} has invited you to join the event '{title[0]}'.",
                     "event",
                     False,
                     member["member"],

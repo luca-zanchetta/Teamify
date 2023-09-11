@@ -171,7 +171,7 @@ function Teams() {
                     }
                     style={{
                       cursor: "pointer",
-                      color: "blue",
+                      color: "#507C5C",
                       textDecoration: "underline",
                     }}
                   >
