@@ -11,6 +11,7 @@ import axios from "axios";
 
 function Survey(props) {
   const [vote, setShow] = useState(false);
+
   const [checkedVote, setCheckedVote] = useState(
     props.entries.map((data) => {
       if (data[2]) return data[3];
@@ -19,10 +20,10 @@ function Survey(props) {
   const [poolID, SetPool] = useState(props.id);
   const decryptedUsername = localStorage.getItem("username");
   const username = localStorage.getItem("LoggedUser");
-
   const [voted, setVoted] = useState(false);
+
   const endpoint1 = address + flask_port + "/home/teams/team/survey";
-  console.log(vote);
+
   async function ToggleVote() {
     if (vote) {
       await axios
@@ -50,7 +51,6 @@ function Survey(props) {
   }
 
   function OnSurveyChange(e) {
-    console.log(e.target.value);
     setCheckedVote(e.target.value);
   }
 
@@ -70,6 +70,7 @@ function Survey(props) {
         },
       })
       .then((response) => {
+        console.log(poolID, response.data);
         setVoted(response.data === "true");
       })
       .catch((error) => console.log(error));

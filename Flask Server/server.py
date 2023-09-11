@@ -1983,17 +1983,22 @@ def has_voted():
     curr = conn.cursor()
     survey = request.args.get("survey")
     username = request.args.get("username")
+
+    print("SURVEY ID", survey, "\n\n")
+
     curr.execute(
         "SELECT option FROM vote WHERE username = %s",
         (username,),
     )
-    vote = curr.fetchone()
-    curr.execute("SELECT survey FROM option WHERE id=%s", (vote[0],))
-    survey_res = curr.fetchone()
-    if int(survey) == int(survey_res[0]):
-        return jsonify("true"), 200
-    else:
-        return jsonify("false"), 200
+    options = curr.fetchall()
+    for option in options:
+        curr.execute("SELECT survey FROM option WHERE id=%s", (option[0],))
+        survey_res = curr.fetchone()
+        print(survey, survey_res[0])
+        if int(survey) == int(survey_res[0]):
+            return jsonify("true"), 200
+
+    return jsonify("false"), 200
 
 
 @app.route("/getSurveys", methods=["GET"])

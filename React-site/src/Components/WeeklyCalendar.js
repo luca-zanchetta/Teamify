@@ -62,7 +62,6 @@ const WeeklyCalendar = ({
         console.error("Error fetching color:", error);
       });
   }, [events]);
-  console.log("PERSONAL:", events);
 
   const eventStyleGetter = (event, start, end, isSelected) => {
     if (event.type === "personal") {
