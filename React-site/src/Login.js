@@ -27,6 +27,7 @@ function Login() {
 
   useEffect(() => {
     setUsername(localStorage.getItem("username"));
+    if(username=="null") setUsername("");
   }, []);
 
 
