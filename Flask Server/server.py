@@ -51,6 +51,7 @@ conn.set_session(autocommit=True)
 if conn is None:
     print("[ERROR] DB Connection failed.")
     exit()
+conn.close()
 
 
 ############################ WEBSOCKET ROUTES ############################
@@ -120,6 +121,8 @@ def fetch():
 
 @app.route("/login", methods=["POST"])
 def login():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     data = request.get_json()
     curr = conn.cursor()
 
@@ -139,19 +142,24 @@ def login():
 
         if encoded_password != retrieved_password:
             print("[ERROR] /login: Wrong password.")
+            conn.close()
             return jsonify("ko"), 400
 
     except Exception:
         print("[ERROR] /login: User not found.")
+        conn.close()
         return jsonify("not found"), 404
 
     print("[INFO] /login: Login performed.")
+    conn.close()
     return jsonify({"encryptedUsername": encryptedUsername}), 200
 
 
 # Signup API
 @app.route("/signup", methods=["POST"])
 def signup():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     data = request.get_json()
     curr = conn.cursor()
 
@@ -170,15 +178,19 @@ def signup():
         curr.execute(query, params)
     except Exception as err:
         print("[ERROR] /signup: ", err)
+        conn.close()
         return jsonify("ko"), 400
 
     print("[INFO] /signup: New user created.")
+    conn.close()
     return jsonify("ok"), 200
 
 
 # Reset request API
 @app.route("/resetRequest", methods=["POST"])
 def reset_request():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     data = request.get_json()
     curr = conn.cursor()
 
@@ -192,6 +204,7 @@ def reset_request():
     email = curr.fetchone()
     if str(email) == "":
         print("[ERROR] /reset: User not found.")
+        conn.close()
         return jsonify("ko"), 404
     email = email[0]
     # The user exists; therefore, I can update his/her credentials.
@@ -212,14 +225,15 @@ def reset_request():
         + encryptedUsername
     )
     mail.send(msg)
-    # time.sleep(80)
-
+    conn.close()
     return jsonify("ok"), 200
 
 
 # Reset password API
 @app.route("/reset", methods=["POST"])
 def reset():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     data = request.get_json()
     curr = conn.cursor()
 
@@ -237,6 +251,7 @@ def reset():
     retrieved_username = str(curr.fetchone()).strip()
     if retrieved_username == "":
         print("[ERROR] /reset: User not found.")
+        conn.close()
         return jsonify("ko"), 404
 
     # The user exists; therefore, I can update his/her credentials.
@@ -246,15 +261,19 @@ def reset():
         curr.execute(query_update, params_update)
     except Exception as err:
         print("[ERROR] /reset: ", err)
+        conn.close()
         return jsonify("ko"), 400
 
     print("[INFO] /reset: Reset password was successful.")
+    conn.close()
     return jsonify("ok"), 200
 
 
 # Delete account
 @app.route("/home/delete-account", methods=["POST"])
 def delete_account():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     curr = conn.cursor()
     data = request.get_json()
     user = data["username"]
@@ -266,6 +285,7 @@ def delete_account():
         curr.execute(query_task, param_task)
     except Exception as err:
         print("[ERROR] /home/profile (tasks): ", err)
+        conn.close()
         return jsonify("ko"), 400
 
     # remove the user
@@ -275,9 +295,11 @@ def delete_account():
         curr.execute(query_member, param_member)
     except Exception as err:
         print("[ERROR] /home/profile: (member:)", err)
+        conn.close()
         return jsonify("ko"), 400
 
-    print("[INFO] /home/profile: user {username} succesfully deleted")
+    print(f"[INFO] /home/profile: user {username} succesfully deleted")
+    conn.close()
     return jsonify("ok"), 200
 
 
@@ -287,6 +309,8 @@ def delete_account():
 # New Task API
 @app.route("/home/newtask", methods=["POST"])
 def create_new_task():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     curr = conn.cursor()
 
     # Fetch the ID of the last inserted task
@@ -317,8 +341,10 @@ def create_new_task():
             curr.execute(query, values)
         except Exception as err:
             print("[ERROR] /new_task: ", err)
+            conn.close()
             return jsonify("ko"), 400
 
+        conn.close()
         return jsonify({"message": "Task created successfully", "id": new_id}), 200
 
     else:  # Shared task
@@ -339,6 +365,7 @@ def create_new_task():
         member_db = curr.fetchone()
 
         if not member_db:
+            conn.close()
             return jsonify("Not auth"), 401
 
         query = "INSERT INTO task (id, title, date, time, description, member, duration,type) VALUES (%s, %s, %s, %s, %s, %s, %s,%s)"
@@ -348,6 +375,7 @@ def create_new_task():
             curr.execute(query, values)
         except Exception as err:
             print("[ERROR] /new_task: ", err)
+            conn.close()
             return jsonify("ko"), 400
 
         # here i include the user that creates the event
@@ -360,6 +388,7 @@ def create_new_task():
             curr.execute(query_inclues, params_includes)
         except Exception as err:
             print("[ERROR] /new_event: ", err)
+            conn.close()
             return jsonify("ko"), 400
 
         for person in event_members:
@@ -371,6 +400,7 @@ def create_new_task():
                 curr.execute(query_inclues_member, params_includes_member)
             except Exception as err:
                 print("[ERROR] /new_event (event member): ", err)
+                conn.close()
                 return jsonify("ko"), 400
 
             if person != member:
@@ -387,14 +417,18 @@ def create_new_task():
                     socketio.emit("event_notification", "", room=person)
                 except Exception as err:
                     print("[ERROR] /home/newtask: " + err)
+                    conn.close()
                     return jsonify("ko"), 400
 
+        conn.close()
         return jsonify({"message": "Task created successfully", "id": new_id}), 200
 
 
 # Modify a task API
 @app.route("/home/updatetask", methods=["POST"])
 def update_task():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     curr = conn.cursor()
     data = request.get_json()
     username = data["local_user"]
@@ -411,6 +445,7 @@ def update_task():
     existing_task = curr.fetchone()
 
     if not existing_task:
+        conn.close()
         return jsonify({"message": "Task not found"}), 404
 
     update_query = "UPDATE task SET title = %s, date = %s, time = %s, description = %s, member = %s, duration = %s WHERE id = %s"
@@ -439,23 +474,29 @@ def update_task():
                         socketio.emit("event_notification", "", room=member[0])
                     except Exception as err:
                         print("[ERROR] /home/edittask (notification): " + err)
+                        conn.close()
                         return jsonify("ko"), 400
 
     except Exception as err:
         print("[ERROR] /updatetask: An error occurred:", err)
+        conn.close()
         return jsonify({"message": "Update failed"}), 400
 
+    conn.close()
     return jsonify({"message": "Task updated successfully"}), 200
 
 
 # Complete a task API
 @app.route("/home/completetask/<int:task_id>", methods=["PUT"])
 def complete_task(task_id):
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     curr = conn.cursor()
 
     curr.execute("SELECT * FROM task WHERE id = %s", (task_id,))
     existing_task = curr.fetchone()
     if not existing_task:
+        conn.close()
         return jsonify({"message": "Task not found"}), 404
 
     status = existing_task[5]
@@ -472,14 +513,18 @@ def complete_task(task_id):
         conn.commit()
     except Exception as err:
         print("[ERROR] /updatetask: ", err)
+        conn.close()
         return jsonify({"message": "Update failed"}), 400
 
+    conn.close()
     return jsonify({"message": "Task change successfully"}, change), 200
 
 
 # Get all tasks API
 @app.route("/tasks", methods=["GET"])
 def get_tasks():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     curr = conn.cursor()
     # Fetch the ID of the last inserted task
     local_user = request.args.get("user")  # get back the params from the request
@@ -554,12 +599,15 @@ def get_tasks():
             }
         )
 
+    conn.close()
     return jsonify(tasks_list), 200
 
 
 # delete a task API
 @app.route("/home/deletetask/<int:task_id>", methods=["DELETE"])
 def delete_task(task_id):
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     curr = conn.cursor()
 
     # remove all the task connected to the user
@@ -568,17 +616,21 @@ def delete_task(task_id):
     print("PROBLEM")
     try:
         curr.execute(query_delete, param_delete)
+        conn.close()
         return jsonify(
             {"message": f"[INFO] /home/deletetask: id {task_id} successfully deleted"}
         )
     except Exception as err:
         print("[ERROR] /home/deletetask : ", err)
+        conn.close()
         return jsonify("ko"), 400
 
 
 # Get events/tasks for shared agenda API
 @app.route("/teamview", methods=["GET"])
 def get_tasks_events():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     curr = conn.cursor()
     # Fetch the ID of the last inserted task
     local_user = request.args.get("user")  # get back the params from the request
@@ -654,24 +706,31 @@ def get_tasks_events():
                     "status": event[8],
                 }
             )
+    conn.close()
     return jsonify(tasks_list), 200
 
 
 # get color API
 @app.route("/getColor", methods=["GET"])
 def getColor():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     curr = conn.cursor()
+
     event_ids = request.args.get("event")
     event_id_list = event_ids.split(",")
     list_color = {}
+    
     for event in event_id_list:
-        curr.execute("SELECT team FROM includes WHERE event=%s", (event,))
-        data = curr.fetchone()
-        if data != None:
-            curr.execute("SELECT color FROM team WHERE id=%s", (data[0],))
-            color = curr.fetchone()
-            list_color[event] = color[0]
+        if event != '':
+            curr.execute("SELECT team FROM includes WHERE event=%s", (event,))
+            data = curr.fetchone()
+            if data != None:
+                curr.execute("SELECT color FROM team WHERE id=%s", (data[0],))
+                color = curr.fetchone()
+                list_color[event] = color[0]
 
+    conn.close()
     return jsonify(list_color), 200
 
 
@@ -681,6 +740,8 @@ def getColor():
 # Get the list of teams releted to a certain user
 @app.route("/home/teams", methods=["GET"])
 def team_list():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     curr = conn.cursor()
     # Fetch the ID of the last inserted task
     user = request.args.get("user")
@@ -709,12 +770,15 @@ def team_list():
             {"id": entry[0], "name": entry[1], "description": entry[2], "role": isAdmin}
         )
 
+    conn.close()
     return jsonify(teams), 200
 
 
 # Get joined teams from username
 @app.route("/getJoinedTeams", methods=["POST"])
 def get_joined_teams():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     data = request.get_json()
     curr = conn.cursor()
     tmp = []
@@ -731,18 +795,22 @@ def get_joined_teams():
     tmp = curr.fetchall()
     if not tmp:
         print("[INFO] No joined team.")
+        conn.close()
         return jsonify({"message": "No joined team.", "status": 201})
 
     for team in tmp:
         ids.append(team[0])
         teams.append(team[1])
 
+    conn.close()
     return jsonify({"teams": teams, "ids": ids, "status": 200})
 
 
 # team details given team id
 @app.route("/teamDetails", methods=["GET"])
 def team_details():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     curr = conn.cursor()
     # Fetch the ID of the last inserted task
     team_id = request.args.get("id")
@@ -784,6 +852,7 @@ def team_details():
         }
     )
 
+    conn.close()
     return jsonify(result), 200
 
 
@@ -809,6 +878,8 @@ pastel_colors = [
 # Create a team
 @app.route("/home/newteam", methods=["POST"])
 def team_create():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     curr = conn.cursor()
 
     data = request.get_json()
@@ -850,13 +921,15 @@ def team_create():
         ),
     )
 
+    conn.close()
     return jsonify("ok"), 200
 
 
-# TODO:
 # ottenere la lista degli admin dato un team id
 @app.route("/adminGivenTeam", methods=["GET"])
 def admin_given_team():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     curr = conn.cursor()
     # Fetch the ID of the last inserted task
     teamId = request.args.get("teamId")  # get back the params from the request
@@ -871,14 +944,18 @@ def admin_given_team():
         admin_list.append({"admin": admin[0]})
 
     if not admin_list:
+        conn.close()
         return jsonify([])  # Return a 404 Not Found status
 
+    conn.close()
     return jsonify(admin_list), 200
 
 
 # remove admin API
 @app.route("/home/teams/team/removeadmin", methods=["DELETE"])
 def remove_admin():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     curr = conn.cursor()
     team_id = request.args.get("teamId")
     admin = request.args.get("admin_to_remove")
@@ -890,10 +967,12 @@ def remove_admin():
                 team_id,
             ),
         )
+        conn.close()
         return jsonify("Admin correctly removed"), 200
 
     except Exception as error:
         print("[ERROR] error in removing admin")
+        conn.close()
         return (
             jsonify({"error": "An error occurred"}),
             500,
@@ -903,6 +982,8 @@ def remove_admin():
 # add a new admin API
 @app.route("/home/teams/team/newadmin", methods=["POST"])
 def new_admin():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     curr = conn.cursor()
     data = request.json
     team_id = data.get("teamId")
@@ -916,16 +997,20 @@ def new_admin():
                 team_id,
             ),
         )
+        conn.close()
         return jsonify("member addes"), 200
 
     except Exception as err:
         print("[ERROR] /home/deleteteam : ", err)
+        conn.close()
         return jsonify("ko"), 400
 
 
 # ottenere la lista dei membri dato un team id
 @app.route("/membersGivenTeam", methods=["POST"])
 def members_given_team():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     curr = conn.cursor()
     data = request.get_json()
 
@@ -937,18 +1022,22 @@ def members_given_team():
     members = curr.fetchall()
     if not members:
         print("[ERROR] There is no member for this team!")
+        conn.close()
         return jsonify({"message": "There is no member for this team!", "status": 400})
 
     member_list = []
     for member in members:
         member_list.append(member[0])
 
+    conn.close()
     return jsonify({"members": member_list, "status": 200})
 
 
 # leave a team API
 @app.route("/home/teams/leaveteam", methods=["DELETE"])
 def exit_from_team():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     curr = conn.cursor()
     team_id = request.args.get("teamId")
     username = request.args.get("username")
@@ -971,6 +1060,7 @@ def exit_from_team():
                 curr.execute("DELETE FROM manage WHERE admin=%s", (username,))
             except Exception as error:
                 print("[ERROR] error in deleting admin from manage")
+                conn.close()
                 return (
                     jsonify({"error": "An error occurred"}),
                     500,
@@ -1005,12 +1095,14 @@ def exit_from_team():
                     curr.execute("DELETE FROM manage WHERE admin = %s", (username,))
                 except Exception as error:
                     print("[ERROR] error in deleting admin ")
+                    conn.close()
                     return (
                         jsonify({"error": "An error occurred"}),
                         500,
                     )  # Return a valid response
             except Exception as error:
                 print("[ERROR] error in adding the new admin")
+                conn.close()
                 return (
                     jsonify({"error": "An error occurred"}),
                     500,
@@ -1034,13 +1126,14 @@ def exit_from_team():
                             "[ERROR] impossible to delete the events correleted to the team  : ",
                             err,
                         )
+                        conn.close()
                         return (
                             jsonify({"error": "An error occurred"}),
                             500,
                         )  # Return a valid response
 
                 curr.execute(query_delete_team, delete_team_params)
-
+                conn.close()
                 return (
                     jsonify(
                         {
@@ -1051,6 +1144,7 @@ def exit_from_team():
                 )
             except Exception as err:
                 print("[ERROR] can't delete the team without admin : ", err)
+                conn.close()
                 return (
                     jsonify({"error": "An error occurred"}),
                     500,
@@ -1068,18 +1162,22 @@ def exit_from_team():
         param_delete = (username, team_id)
 
         curr.execute(query_delete, param_delete)
+        conn.close()
         return jsonify(
             {"message": f"[INFO] /home/exitfromteam: id {team_id} successfully left"}
         )
 
     except Exception as err:
         print("[ERROR] /home/leaveteam : ", err)
+        conn.close()
         return jsonify({"error": "An error occurred"}), 500  # Return a valid response
 
 
 # delete a team API
 @app.route("/home/teams/deleteteam", methods=["DELETE"])
 def delete_team():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     team_id = request.args.get("teamId")
 
     curr = conn.cursor()
@@ -1098,22 +1196,27 @@ def delete_team():
                     "[ERROR] impossible to delete the events correleted to the team  : ",
                     err,
                 )
+                conn.close()
                 return (
                     jsonify({"error": "An error occurred"}),
                     500,
                 )
         curr.execute(query_delete, param_delete)
+        conn.close()
         return jsonify(
             {"message": f"[INFO] /home/deleteteam: id {team_id} successfully delete"}
         )
     except Exception as err:
         print("[ERROR] /home/deleteteam : ", err)
+        conn.close()
         return jsonify("ko"), 400
 
 
 # ottenere la lista dei membri dato un team id
 @app.route("/teamGivenID", methods=["GET"])
 def team_given_id():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     curr = conn.cursor()
     # Fetch the ID of the last inserted task
     teamId = request.args.get("id")  # get back the params from the request
@@ -1124,12 +1227,15 @@ def team_given_id():
     (name,) = curr.fetchone()
     name = str(name).strip()
 
+    conn.close()
     return jsonify({"name": name, "status": 200})
 
 
 # get the list of members of a certain team given an event id
 @app.route("/home/team/member", methods=["GET"])
 def team_members_given_event_id():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     curr = conn.cursor()
     # Fetch the ID of the last inserted task
     eventID = request.args.get("id")  # get back the params from the request
@@ -1150,13 +1256,15 @@ def team_members_given_event_id():
         member_list.append({"member": member[0]})
 
     print(member_list)
-
+    conn.close()
     return jsonify({"member_list": member_list, "status": 200})
 
 
 # edit member API
 @app.route("/home/team/event/editmember", methods=["POST"])
 def edit_member_event():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     curr = conn.cursor()
     data = request.get_json()  # Fetch the ID of the last inserted task
     event_id = data["id"]  # get back the params from the request
@@ -1190,6 +1298,7 @@ def edit_member_event():
                 curr.execute(query_member, param_member)
             except Exception as err:
                 print("[ERROR] /home/team/event/editmember: (delete)", err)
+                conn.close()
                 return jsonify("ko"), 400
 
     for member in new_members:
@@ -1215,16 +1324,21 @@ def edit_member_event():
                     socketio.emit("event_notification", "", room=member["member"])
                 except Exception as err:
                     print("[ERROR] /home/newtask: " + err)
+                    conn.close()
                     return jsonify("ko"), 400
             except Exception as err:
                 print("[ERROR] /home/team/event/editmemeber: (insert:)", err)
+                conn.close()
                 return jsonify("ko"), 400
 
+    conn.close()
     return jsonify({"member_list": member_list, "status": 200})
 
 
 @app.route("/team/editName", methods=["GET"])
 def editTeamName():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     curr = conn.cursor()
     teamId = request.args.get("teamId")
     newName = request.args.get("teamName")
@@ -1237,11 +1351,14 @@ def editTeamName():
         ),
     )
 
+    conn.close()
     return jsonify({"message": "Success", "status": 200})
 
 
 @app.route("/team/editDescription", methods=["GET"])
 def editTeamDescription():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     curr = conn.cursor()
     teamId = request.args.get("teamId")
     newDescription = request.args.get("teamDescription")
@@ -1254,12 +1371,15 @@ def editTeamDescription():
         ),
     )
 
+    conn.close()
     return jsonify({"message": "Success", "status": 200})
 
 
 # Get list of members included in a certain event the one that accepted
 @app.route("/home/event/members", methods=["GET"])
 def members_given_event():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     curr = conn.cursor()
     # Fetch the ID of the last inserted task
     event_id = request.args.get("eventId")  # get back the params from the request
@@ -1276,12 +1396,15 @@ def members_given_event():
     for member in members:
         member_list.append({"member": member[0]})
 
+    conn.close()
     return jsonify(member_list), 200
 
 
 # Display user information
 @app.route("/home/profile", methods=["POST"])
 def show_personal_info():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     data = request.get_json()
     curr = conn.cursor()
 
@@ -1300,6 +1423,7 @@ def show_personal_info():
         password = str(password).strip()
 
         print("[INFO] /home/profile: User data have been successfully displayed.")
+        conn.close()
         return (
             jsonify(
                 {
@@ -1313,6 +1437,7 @@ def show_personal_info():
             200,
         )
 
+    conn.close()
     return jsonify("ko"), 404
 
 
@@ -1320,6 +1445,8 @@ def show_personal_info():
 # Notice that here we are not modifying the password
 @app.route("/home/modify-info", methods=["POST"])
 def modify_personal_info():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     data = request.get_json()
     curr = conn.cursor()
 
@@ -1343,13 +1470,16 @@ def modify_personal_info():
         try:
             curr.execute(query, params)
             print("[INFO] /home/modify-info: Update was successful.")
+            conn.close()
             return jsonify({"message": "User data has been updated!", "status": 200})
 
         except Exception as err:
             print("[ERROR] /home/modify-info: ", err)
+            conn.close()
             return jsonify({"message": "Error during data update.", "status": 500})
 
     print("[ERROR] /home/modify-info: Username not found.")
+    conn.close()
     return jsonify({"message": "User not found.", "status": 404})
 
 
@@ -1357,6 +1487,8 @@ def modify_personal_info():
 # Notice that here we modify the password of a logged user
 @app.route("/home/modify-password", methods=["POST"])
 def modify_password():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     data = request.get_json()
     curr = conn.cursor()
 
@@ -1385,6 +1517,7 @@ def modify_password():
             print(
                 "[ERROR] /home/modify-password: The original password was not correct!"
             )
+            conn.close()
             return jsonify(
                 {"message": "The original password was not correct!", "status": 400}
             )
@@ -1400,21 +1533,26 @@ def modify_password():
             try:
                 curr.execute(query, params)
                 print("[INFO] /home/modify-password: Update was successful.")
+                conn.close()
                 return jsonify({"message": "Password has been updated!", "status": 200})
 
             except Exception as err:
                 print("[ERROR] /home/modify-password: ", err)
+                conn.close()
                 return jsonify(
                     {"message": "Error during password update.", "status": 500}
                 )
 
     print("[ERROR] /home/modify-password: Username not found.")
+    conn.close()
     return jsonify({"message": "User not found.", "status": 404})
 
 
 # Display user notifications
 @app.route("/home/notifications", methods=["POST"])
 def get_notifications():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     data = request.get_json()
     curr = conn.cursor()
     records = []
@@ -1431,18 +1569,23 @@ def get_notifications():
         records = curr.fetchall()
         if len(records) == 0:
             print("[INFO] /home/notifications: There is no notification for this user.")
+            conn.close()
             return jsonify({"message": "No notification available.", "status": 201})
 
         print("[INFO] /home/notifications: Display notifications was successful.")
+        conn.close()
         return jsonify({"notifications": records, "status": 200})
 
     print("[ERROR] /home/notifications: Username not found.")
+    conn.close()
     return jsonify({"message": "Username not found.", "status": 404})
 
 
 # Read the notification
 @app.route("/readNotification", methods=["POST"])
 def read_notification():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     data = request.get_json()
     curr = conn.cursor()
 
@@ -1466,6 +1609,7 @@ def read_notification():
                     "[ERROR] /readNotification: The notification has not been read successfully. Err: "
                     + str(err)
                 )
+                conn.close()
                 return (
                     jsonify(
                         {
@@ -1480,11 +1624,13 @@ def read_notification():
             "[ERROR] /readNotification: The notification does not exist. Err: "
             + str(err)
         )
+        conn.close()
         return (
             jsonify({"message": "The notification does not exist.", "status": 500}),
             500,
         )
 
+    conn.close()
     return (
         jsonify(
             {"message": "The notification has been read successfully.", "status": 200}
@@ -1496,17 +1642,25 @@ def read_notification():
 # given event id return team id
 @app.route("/evevnt/teamview", methods=["GET"])
 def give_team_id():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     curr = conn.cursor()
     data = request.get_json()
+
     event_id = data["event"]
     curr.execute("SELECT team FROM includes WHERE event=%s", (event_id))
+    
     team_id = curr.fetchone()
+    
+    conn.close()
     return jsonify(team_id), 200
 
 
 # given team id and username, invites the user to the team
 @app.route("/invite", methods=["POST"])
 def invite():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     data = request.get_json()
     curr = conn.cursor()
 
@@ -1515,6 +1669,7 @@ def invite():
     admin = data["admin"]
     admin = decrypt_username(admin)
     if username == admin:
+        conn.close()
         return jsonify("ko"), 400
 
     # Check if the user is already present in the team
@@ -1523,6 +1678,7 @@ def invite():
     )
     if curr.fetchone() is not None:
         # User is already present in the team
+        conn.close()
         return jsonify("ko"), 400
 
     query_invite = "INSERT INTO invite (username, admin, team) VALUES (%s,%s,%s)"
@@ -1553,18 +1709,23 @@ def invite():
             print("[INFO] /invite: Invite notification registered.")
             socketio.emit("invite_notification", "", room=username)
 
+            conn.close()
             return jsonify("ok"), 200
         except Exception as err:
             print("[ERROR] Invite notification not registered. Err = " + str(err))
+            conn.close()
             return jsonify("ko"), 400
     except Exception as err:
         print("[ERROR] User not invited. Err = " + str(err))
+        conn.close()
         return jsonify("ko"), 400
 
 
 # given username, check invites of user
 @app.route("/checkInvites", methods=["POST"])
 def check_invites():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     curr = conn.cursor()
     data = request.get_json()
 
@@ -1585,12 +1746,15 @@ def check_invites():
                 "team_description": invite[3],
             }
         )
+    conn.close()
     return jsonify({"invites": invitesJson, "status": 200})
 
 
 # Given username, check event invites of the user
 @app.route("/checkEventInvites", methods=["POST"])
 def check_event_invites():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     curr = conn.cursor()
     data = request.get_json()
 
@@ -1619,12 +1783,15 @@ def check_event_invites():
                 "admin": invite[6],
             }
         )
+    conn.close()
     return jsonify({"invites": invitesJson, "status": 200})
 
 
 # given team id and username, user accepts invite and therefore joins team
 @app.route("/acceptInvite", methods=["POST"])
 def accept_invite():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     curr = conn.cursor()
     data = request.get_json()
     username = data["username"]
@@ -1652,13 +1819,17 @@ def accept_invite():
                 id,
             ),
         )
+        conn.close()
         return jsonify({"message": "ok", "status": 200})
     else:
+        conn.close()
         return jsonify("ko"), 400
 
 
 @app.route("/acceptEventInvite", methods=["POST"])
 def accept_event_invite():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     curr = conn.cursor()
     data = request.get_json()
 
@@ -1681,13 +1852,17 @@ def accept_event_invite():
         print("[INFO] Event acceptance successfully updated!")
     except Exception as err:
         print("[ERROR] /acceptEventInvite: " + err)
+        conn.close()
         return jsonify({"message": "Update of event acceptance failed.", "status": 500})
 
+    conn.close()
     return jsonify({"message": "Event successfully joined!", "status": 200})
 
 
 @app.route("/rejectInvite", methods=["POST"])
 def reject_invite():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     curr = conn.cursor()
     data = request.get_json()
 
@@ -1724,13 +1899,17 @@ def reject_invite():
         curr.execute(query_notification, params_notification)
         socketio.emit("message_notification", "", room=admin)
 
+        conn.close()
         return jsonify({"message": "ok", "status": 200})
     else:
+        conn.close()
         return jsonify("ko"), 400
 
 
 @app.route("/rejectEventInvite", methods=["POST"])
 def reject_event_invite():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     curr = conn.cursor()
     data = request.get_json()
 
@@ -1767,14 +1946,18 @@ def reject_event_invite():
         socketio.emit("message_notification", "", room=admin)
     except Exception as err:
         print("[ERROR] /acceptEventInvite: " + err)
+        conn.close()
         return jsonify({"message": "Update of event acceptance failed.", "status": 500})
 
+    conn.close()
     return jsonify({"message": "Event successfully rejected.", "status": 200})
 
 
 # Send message to team
 @app.route("/sendMessageToTeam", methods=["POST"])
 def send_chat_message():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     data = request.get_json()
     curr = conn.cursor()
 
@@ -1805,6 +1988,7 @@ def send_chat_message():
         print(
             "[ERROR] The message has not been registered into the DB. Err: " + str(err)
         )
+        conn.close()
         return jsonify(
             {
                 "message": "The message has not been registered into the DB.",
@@ -1816,12 +2000,15 @@ def send_chat_message():
         socketio.emit("chat_message", message, room=member)
 
     print("[INFO] Message sent successfully!")
+    conn.close()
     return jsonify({"message": "ok", "status": 200})
 
 
 # Get messages
 @app.route("/getMessages", methods=["POST"])
 def get_chat_messages():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     data = request.get_json()
     curr = conn.cursor()
     records = []
@@ -1837,6 +2024,7 @@ def get_chat_messages():
     records = curr.fetchall()
     if not records:
         print("[INFO] There is no message available.")
+        conn.close()
         return jsonify({"message": "No message available.", "status": 201})
 
     for message in records:
@@ -1851,12 +2039,15 @@ def get_chat_messages():
         messages.append(msg)
 
     print("[INFO] Messages retrieved successfully.")
+    conn.close()
     return jsonify({"messages": messages, "status": 200})
 
 
 # INIZIO POLLS
 @app.route("/vote", methods=["POST"])
 def add_vote():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     data = request.get_json()
     pool_id = data.get("pool_id")
     username = data.get("username")
@@ -1872,6 +2063,7 @@ def add_vote():
     )
     pool = curr.fetchone()
     if not pool:
+        conn.close()
         return jsonify({"message": "Pool not found"}), 400
 
     # check if the user has already voted
@@ -1914,12 +2106,16 @@ def add_vote():
         (option_id,),
     )
 
+    conn.close()
     return jsonify({"message": "Success", "status": 200})
 
 
 @app.route("/createPool", methods=["POST"])
 def create_pool():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     data = request.get_json()
+    
     text = data.get("text")
     due_date = data.get("due_date")
     admin = data.get("admin")
@@ -1980,12 +2176,15 @@ def create_pool():
 
             socketio.emit("survey_notification", "", room=user)
 
+    conn.close()
     return jsonify({"message": "Success", "status": 200})
 
 
 # check if already voted in a survey
 @app.route("/home/teams/team/survey", methods=["GET"])
 def has_voted():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     curr = conn.cursor()
     survey = request.args.get("survey")
     username = request.args.get("username")
@@ -1997,13 +2196,17 @@ def has_voted():
     curr.execute("SELECT survey FROM option WHERE id=%s", (vote[0],))
     survey_res = curr.fetchone()
     if int(survey) == int(survey_res[0]):
+        conn.close()
         return jsonify("true"), 200
     else:
+        conn.close()
         return jsonify("false"), 200
 
 
 @app.route("/getSurveys", methods=["GET"])
 def get_surveys():
+    conn = get_connection()
+    conn.set_session(autocommit=True)
     team_id = request.args.get("team_id")
     username = request.args.get("username")
     username = username.replace(" ", "+")
@@ -2053,10 +2256,8 @@ def get_surveys():
             }
         )
 
+    conn.close()
     return jsonify(result)
-
-
-# FINE POLLS
 
 
 ############################ END REST APIs ####################################
