@@ -166,8 +166,7 @@ const WeeklyCalendar = ({
           }));
 
           // Clear existing events and set the new ones
-          const noduplicates = filterEventsWithUniqueIds(formattedEvents);
-          console.log("NO DUPS", noduplicates);
+
           setEvents([]);
           setEvents(filterEventsWithUniqueIds(formattedEvents));
         })
@@ -181,6 +180,7 @@ const WeeklyCalendar = ({
     <div className="weekly-calendar-container">
       <Calendar
         localizer={localizer}
+        views={["day", "week", "month"]}
         defaultView="week"
         startAccessor="start"
         endAccessor="end"

@@ -118,7 +118,7 @@ function TeamView() {
     if (editDescription) {
       //richiesta axios
       var value = document.getElementById("teamDescription").value;
-      console.log('description', value );
+      console.log("description", value);
       axios
         .get(address + flask_port + "/team/editDescription", {
           params: {
@@ -549,40 +549,46 @@ function TeamView() {
                         />
                       </div>
                     </Col>
-                    <Col style={{ marginLeft: "60px" }}>
-                      <Row style={{ marginTop: "200px" }}>
+                  </Row>
+                  <Row
+                    style={{
+                      marginTop: "2%",
+                      textAlign: "center",
+                      marginLeft: "35%",
+                      marginRight: "35%",
+                    }}
+                  >
+                    <Col>
+                      <button
+                        onClick={handleNewTask}
+                        className="btn btn-sm"
+                        style={{
+                          textDecoration: "inherit",
+                          backgroundColor: "#c5fdc8",
+                          width: "100px",
+                        }}
+                      >
+                        New Task
+                      </button>
+                    </Col>
+                    {isAdmin && (
+                      <Col>
                         <button
-                          onClick={handleNewTask}
-                          className="btn"
+                          onClick={handleNewEvent}
+                          className="btn btn-sm"
                           style={{
                             textDecoration: "inherit",
                             backgroundColor: "#c5fdc8",
                             width: "100px",
+                            cursor: isButtonDisabled
+                              ? "not-allowed"
+                              : "pointer",
                           }}
                         >
-                          New Task
+                          New Event
                         </button>
-                      </Row>
-                      <Row></Row>
-                      {isAdmin && (
-                        <Row className="mt-3">
-                          <button
-                            onClick={handleNewEvent}
-                            className="btn"
-                            style={{
-                              textDecoration: "inherit",
-                              backgroundColor: "#c5fdc8",
-                              width: "100px",
-                              cursor: isButtonDisabled
-                                ? "not-allowed"
-                                : "pointer",
-                            }}
-                          >
-                            New Event
-                          </button>
-                        </Row>
-                      )}
-                    </Col>
+                      </Col>
+                    )}
                   </Row>
                 </Accordion.Body>
               </Accordion.Item>
