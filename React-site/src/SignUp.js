@@ -18,6 +18,11 @@ function SignUp() {
     setBirth(localStorage.getItem("birth"));
     setEmail(localStorage.getItem("email"));
     setUsername(localStorage.getItem("username"));
+    if(name=="null") setName("");
+    if(surname=="null") setSurname("");
+    if(birth=="null") setBirth("");
+    if(email=="null") setEmail("");
+    if(username=="null") setUsername("");
   }, []);
 
   useEffect(() => {
