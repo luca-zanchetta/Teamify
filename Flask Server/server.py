@@ -710,16 +710,19 @@ def getColor():
     conn = get_connection()
     conn.set_session(autocommit=True)
     curr = conn.cursor()
+
     event_ids = request.args.get("event")
     event_id_list = event_ids.split(",")
     list_color = {}
+    
     for event in event_id_list:
-        curr.execute("SELECT team FROM includes WHERE event=%s", (event,))
-        data = curr.fetchone()
-        if data != None:
-            curr.execute("SELECT color FROM team WHERE id=%s", (data[0],))
-            color = curr.fetchone()
-            list_color[event] = color[0]
+        if event != '':
+            curr.execute("SELECT team FROM includes WHERE event=%s", (event,))
+            data = curr.fetchone()
+            if data != None:
+                curr.execute("SELECT color FROM team WHERE id=%s", (data[0],))
+                color = curr.fetchone()
+                list_color[event] = color[0]
 
     conn.close()
     return jsonify(list_color), 200
