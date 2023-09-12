@@ -4,6 +4,7 @@ import io from 'socket.io-client';
 import alarm from "../icons/alarm.png";
 import account from "../icons/user.png";
 import chat_alarm from "../icons/chat_alarm.png";
+import FetchEnpoint from './EndpointFinder';
 
 import { address, flask_port } from './Endpoint';
 

@@ -8,7 +8,6 @@ import axios from "axios";
 import FetchEnpoint from "./components/EndpointFinder";
 
 import { address, flask_port } from "./components/Endpoint";
-import FetchEnpoint from "./components/EndpointFinder";
 
 var endpoint = await FetchEnpoint()+"/login";
 const loggedIn = localStorage.getItem("LoggedUser");
