@@ -14,6 +14,8 @@ import axios from "axios";
 import moment from "moment";
 import Form from "react-bootstrap/Form";
 import Notifications from "./components/Notifications";
+import FetchEnpoint from "./components/EndpointFinder";
+
 import {
   formatTime,
   formatDate,
@@ -23,9 +25,9 @@ import {
 
 import { address, flask_port } from "./components/Endpoint";
 
-const endpoint = address + flask_port + "/home/newtask";
+const endpoint = await FetchEnpoint() + "/home/newtask";
 
-function NewTask() {
+async function NewTask() {
   const location = useLocation();
   const [previousPage, setPreviousPage] = useState("/home"); // a way to get the page i'm coming from
   const decryptedUsername = localStorage.getItem("username");
@@ -48,7 +50,7 @@ function NewTask() {
   const [team, setTeam] = useState(0);
   const [eventMembers, setEventMembers] = useState([]);
   const [modifyEvent, setModifyEvent] = useState(false);
-  const endpoint2 = address + flask_port + "/home/event/members";
+  const endpoint2 = await FetchEnpoint() + "/home/event/members";
   const [checkboxStates, setCheckboxStates] = useState({});
   const [selectedMembers, setSelectedMembers] = useState([]);
 
@@ -180,7 +182,7 @@ function NewTask() {
     } else if (buttonId == "Edit") {
       try {
         const response = await axios.post(
-          address + flask_port + "/home/updatetask",
+          await FetchEnpoint() + "/home/updatetask",
           {
             local_user: userFromLocal,
             task_id: task.id,
@@ -197,7 +199,7 @@ function NewTask() {
             console.log(eventMembers);
             try {
               const response = await axios.post(
-                address + flask_port + "/home/team/event/editmember",
+                await FetchEnpoint() + "/home/team/event/editmember",
                 {
                   id: task.id,
                   members: eventMembers,

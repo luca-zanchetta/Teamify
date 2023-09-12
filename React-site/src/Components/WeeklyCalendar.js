@@ -12,9 +12,10 @@ import "../css/Calendar.css";
 import axios from "axios";
 
 import { address, flask_port } from "./Endpoint";
+import FetchEnpoint from "./EndpointFinder";
 
-var endpoint1 = address + flask_port + "/tasks";
-var endpoint2 = address + flask_port + "/teamview";
+var endpoint1 = await FetchEnpoint() + "/tasks";
+var endpoint2 = await FetchEnpoint() + "/teamview";
 
 const localizer = momentLocalizer(moment);
 
@@ -43,7 +44,7 @@ const WeeklyCalendar = ({
   const [events, setEvents] = useState([]);
   const localUser = localStorage.getItem("LoggedUser");
   const localTeam = 0; //da gestire quando si implementano i team
-  const endpoint_event = address + flask_port + "/getColor";
+  const endpoint_event = FetchEnpoint() + "/getColor";
   const currentPath = window.location.href; //get the current position
   const [colors, setColors] = useState({});
 

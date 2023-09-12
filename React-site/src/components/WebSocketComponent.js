@@ -20,7 +20,7 @@ const WebSocketComponent =  forwardRef((props, ref) => {
 
   useEffect(() => {
     // New WebSocket connection at start
-    const newSocket = io(address+flask_port);
+    const newSocket = io(FetchEnpoint());
 
     newSocket.on('connect', () => {
       console.log('[INFO] Connected to the WebSocket server.');

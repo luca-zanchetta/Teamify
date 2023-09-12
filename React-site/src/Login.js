@@ -5,6 +5,7 @@ import Alert from "./components/Alert.tsx";
 import { Link, useNavigate, Navigate } from "react-router-dom";
 import React, { useState, useEffect } from 'react';
 import axios from "axios";
+import FetchEnpoint from "./components/EndpointFinder";
 
 import { address, flask_port } from "./components/Endpoint";
 import FetchEnpoint from "./components/EndpointFinder";

@@ -23,10 +23,11 @@ import "./css/Survey.css";
 import { address, flask_port } from "./components/Endpoint";
 import Chat from "./components/chat";
 import CreateSurvey from "./components/CreateSurvey";
+import FetchEnpoint from "./components/EndpointFinder";
 
-const endpoint = address + flask_port + "/teamGivenID";
+const endpoint = await FetchEnpoint() + "/teamGivenID";
 
-function TeamView() {
+async function TeamView() {
   const location = useLocation();
   const inviteOk = sessionStorage.getItem("invite_alert") === "true";
   const handleInviteOk = () => {
@@ -66,9 +67,9 @@ function TeamView() {
   const [new_member, setNewMember] = useState("");
   const queryParameters = new URLSearchParams(window.location.search);
   const [id, setId] = useState(queryParameters.get("id"));
-  const endpoint1 = address + flask_port + "/teamDetails";
-  const endpoint2 = address + flask_port + "/invite";
-  const endpoint3 = address + flask_port + "/home/teams/team/newadmin";
+  const endpoint1 = await FetchEnpoint() + "/teamDetails";
+  const endpoint2 = await FetchEnpoint() + "/invite";
+  const endpoint3 = await FetchEnpoint() + "/home/teams/team/newadmin";
   const decryptedUsername = localStorage.getItem("username");
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
@@ -93,12 +94,12 @@ function TeamView() {
   const [editName, setEditName] = useState(false);
   const [editDescription, setEditDescription] = useState(false);
 
-  function ToggleEditName() {
+  async function ToggleEditName() {
     if (editName) {
       //richiesta axios
       var value = document.getElementById("teamName").value;
       axios
-        .get(address + flask_port + "/team/editName", {
+        .get(await FetchEnpoint() + "/team/editName", {
           params: {
             teamId: id,
             teamName: value,
@@ -114,13 +115,13 @@ function TeamView() {
     setEditName(!editName);
   }
 
-  function ToggleEditDescription() {
+  async function ToggleEditDescription() {
     if (editDescription) {
       //richiesta axios
       var value = document.getElementById("teamDescription").value;
       console.log("description", value);
       axios
-        .get(address + flask_port + "/team/editDescription", {
+        .get(await FetchEnpoint() + "/team/editDescription", {
           params: {
             teamId: id,
             teamDescription: value,
@@ -142,7 +143,7 @@ function TeamView() {
 
   async function GatherSurveys() {
     await axios
-      .get(address + flask_port + "/getSurveys", {
+      .get(FetchEnpoint() + "/getSurveys", {
         params: {
           team_id: id,
           username: localStorage.getItem("LoggedUser"),

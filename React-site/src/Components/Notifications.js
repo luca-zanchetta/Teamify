@@ -9,12 +9,13 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 import { address, flask_port } from "./Endpoint";
+import FetchEnpoint from "./EndpointFinder";
 
-var endpoint = address + flask_port + "/home/notifications";
-var endpointReadNotification = address + flask_port + "/readNotification";
-var endpointCheckInvites = address + flask_port + "/checkInvites";
-var endpointCheckEventInvites = address + flask_port + "/checkEventInvites";
-var endpointFindTeamId = address + flask_port + "/event/teamview";
+var endpoint = await FetchEnpoint() + "/home/notifications";
+var endpointReadNotification = await FetchEnpoint()+ "/readNotification";
+var endpointCheckInvites = await FetchEnpoint() + "/checkInvites";
+var endpointCheckEventInvites = await FetchEnpoint() + "/checkEventInvites";
+var endpointFindTeamId = await FetchEnpoint() + "/event/teamview";
 
 function Notifications() {
   const [show, setShow] = useState(false);

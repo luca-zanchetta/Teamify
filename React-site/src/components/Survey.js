@@ -7,9 +7,10 @@ import cancel from "../icons/cancel.png";
 import face from "../img/face.jpeg";
 import { useState } from "react";
 import { address, flask_port } from "./Endpoint";
+import FetchEnpoint from "./EndpointFinder";
 import axios from "axios";
 
-function Survey(props) {
+async function Survey(props) {
   const [vote, setShow] = useState(false);
   const [checkedVote, setCheckedVote] = useState(
     props.entries.map((data) => {
@@ -21,12 +22,12 @@ function Survey(props) {
   const username = localStorage.getItem("LoggedUser");
 
   const [voted, setVoted] = useState(false);
-  const endpoint1 = address + flask_port + "/home/teams/team/survey";
+  const endpoint1 = await FetchEnpoint() + "/home/teams/team/survey";
   console.log(vote);
   async function ToggleVote() {
     if (vote) {
       await axios
-        .post(address + flask_port + "/vote", {
+        .post(await FetchEnpoint() + "/vote", {
           pool_id: poolID,
           username: username,
           option_id: checkedVote,

@@ -8,11 +8,12 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 
 import { address, flask_port } from "./Endpoint";
+import FetchEnpoint from "./EndpointFinder";
 
 // Flask server endpoints
-var endpoint = address+flask_port+"/home/profile";
-var endpoint_modify_info = address+flask_port+"/home/modify-info";
-var endpoint_modify_password = address+flask_port+"/home/modify-password";
+var endpoint = await FetchEnpoint()+"/home/profile";
+var endpoint_modify_info = await FetchEnpoint()+"/home/modify-info";
+var endpoint_modify_password =  await FetchEnpoint()+"/home/modify-password";
 
 function UserInfo() {
   const [name, setName] = useState("");

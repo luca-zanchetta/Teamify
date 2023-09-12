@@ -3,7 +3,7 @@ import { Link, useNavigate, Navigate } from "react-router-dom";
 import TopBar from "./components/TopBar";
 import NavBar from "./components/NavBar";
 import Alert from "./components/Alert.tsx";
-
+import FetchEnpoint from "./components/EndpointFinder";
 import UserIcon from "./components/UserIcon";
 import Notifications from "./components/Notifications";
 import axios from "axios";
@@ -11,7 +11,7 @@ import Chat from "./components/chat";
 
 import { address, flask_port } from "./components/Endpoint";
 
-function Teams() {
+async function Teams() {
   const teamCreated = localStorage.getItem("teamCreated_alert") === "true";
   const handleTeamCreated = () => {
     localStorage.setItem("teamCreated_alert", "false");
@@ -19,7 +19,7 @@ function Teams() {
 
   const username = localStorage.getItem("LoggedUser");
   const navigate = useNavigate();
-  const endpoint = address + flask_port + "/home/teams";
+  const endpoint = await FetchEnpoint() + "/home/teams";
   const [teams, setTeams] = useState([]);
   const team_leaved = sessionStorage.getItem("team_leaved") === "true";
   const team_deleted = sessionStorage.getItem("team_deleted") === "true";
