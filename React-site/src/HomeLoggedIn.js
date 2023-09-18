@@ -282,7 +282,7 @@ function HomeLoggedIn() {
               >
                 <WeeklyCalendar
                   width={(windowWidth * 60) / 100}
-                  height={540}
+                  height={500}
                   handleSelectEvent={handleSelectEvent}
                 />
               </div>
