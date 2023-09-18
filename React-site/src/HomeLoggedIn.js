@@ -268,21 +268,25 @@ function HomeLoggedIn() {
       )}
       <div className="SideContainer">
         <NavBar></NavBar>
-        <div className="CenterContainer">
+        <div className="CenterContainer mt-3">
           {!ProfileData && (
             <div className="container mt-3 mb-2 ">
-              <h3 className="mb-3 mt-3">Personal Agenda</h3>
+              <h3 className=" mt-5">Personal Agenda</h3>
               <div
-                className="row text-center justify-content-center mb-3 mt-3"
-                style={{ marginRight: "10%", marginLeft: "10%" }}
+                className="row text-center justify-content-center mb-3"
+                style={{
+                  marginRight: "10%",
+                  marginLeft: "10%",
+                  marginTop: "3%",
+                }}
               >
                 <WeeklyCalendar
                   width={(windowWidth * 60) / 100}
-                  height={570}
+                  height={540}
                   handleSelectEvent={handleSelectEvent}
                 />
               </div>
-              <div className="row d-flex justify-content-center align-items-center mt-3">
+              <div className="row d-flex justify-content-center align-items-center mt-4">
                 <Link
                   to={{
                     pathname: "/home/newtask",
