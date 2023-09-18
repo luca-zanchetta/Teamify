@@ -9,14 +9,15 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import { objectToArray } from "../support.js";
 import { address, flask_port } from "./Endpoint";
+import FetchEnpoint from "./EndpointFinder";
 
 interface Props {
   task: Object;
 }
 
-function Task({ task }: Props) {
-  const endpoint = address + flask_port + "/home/event/members";
-  const endpoint3 = address + flask_port + "/home/team/member";
+async function Task({ task }: Props) {
+  const endpoint = await FetchEnpoint() + "/home/event/members";
+  const endpoint3 = await FetchEnpoint() + "/home/team/member";
   const decryptedUsername = localStorage.getItem("username");
   const username = localStorage.getItem("LoggedUser");
   const navigate = useNavigate();
@@ -44,7 +45,7 @@ function Task({ task }: Props) {
   const handleComplete = async () => {
     try {
       const response = await axios.put(
-        address + flask_port + `/home/completetask/${task.id}`
+        await FetchEnpoint() + `/home/completetask/${task.id}`
       );
 
       console.log(response.data.message); // Display the response message

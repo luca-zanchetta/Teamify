@@ -5,10 +5,11 @@ import Alert from "./components/Alert.tsx";
 import { Link, useNavigate, Navigate } from "react-router-dom";
 import React, { useState, useEffect } from 'react';
 import axios from "axios";
+import FetchEnpoint from "./components/EndpointFinder";
 
 import { address, flask_port } from "./components/Endpoint";
 
-var endpoint = address+flask_port+"/login";
+var endpoint = await FetchEnpoint()+"/login";
 const loggedIn = localStorage.getItem("LoggedUser");
 
 function Login() {
@@ -99,13 +100,13 @@ function Login() {
               // Handle error
               if (error.response.status === 400) {
                 sessionStorage.setItem("wrongPwd_alert", "true");
-                window.location.replace(window.location.href); // For alert purposes only
+                //window.location.replace(window.location.href); // For alert purposes only
                 console.log(
                   "[ERROR] Username and/or password were not correct! Try again."
                 );
               } else if (error.response.status === 404) {
                 sessionStorage.setItem("usernameNotFound_alert", "true");
-                window.location.replace(window.location.href); // For alert purposes only
+                //window.location.replace(window.location.href); // For alert purposes only
                 console.log("[ERROR] The user was not found in the system.");
               }
             }
@@ -119,7 +120,7 @@ function Login() {
           localStorage.setItem("LoggedUser", encryptedUsername); // Set a session variable
           sessionStorage.setItem("login_alert", "true");
           navigate("/home");
-          window.location.replace(window.location.href);
+          //window.location.replace(window.location.href);
         }
       } catch (error) {
         // Request failed
@@ -128,7 +129,7 @@ function Login() {
     } else {
       // There is at least one mandatory field that has not been filled
       sessionStorage.setItem("fields_alert", "true");
-      window.location.replace(window.location.href); // For alert purposes only
+      //window.location.replace(window.location.href); // For alert purposes only
       console.log("All the fields must be filled!");
     }
   };

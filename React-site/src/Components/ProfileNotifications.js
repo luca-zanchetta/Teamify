@@ -7,10 +7,10 @@ import team from "../icons/team.png";
 import event from "../icons/event.png";
 import { useEffect, useState } from "react";
 import axios from "axios";
-
+import FetchEnpoint from "./EndpointFinder";
 import { address, flask_port } from "./Endpoint";
 
-var endpoint = address+flask_port+"/home/notifications";
+var endpoint = await FetchEnpoint()+"/home/notifications";
 
 function ProfileNotifications() {
   const username = localStorage.getItem("LoggedUser");

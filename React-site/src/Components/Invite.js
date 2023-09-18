@@ -10,11 +10,12 @@ import "../css/Invite.css";
 import axios from "axios";
 
 import {address, flask_port} from "./Endpoint";
+import FetchEnpoint from "./EndpointFinder";
 
-let endpointAcceptTeam = address+flask_port+"/acceptInvite";
-let endpointRejectTeam = address+flask_port+"/rejectInvite";
-let endpointAcceptEvent = address+flask_port+"/acceptEventInvite";
-let endpointRejectEvent = address+flask_port+"/rejectEventInvite";
+let endpointAcceptTeam = await FetchEnpoint()+"/acceptInvite";
+let endpointRejectTeam = await FetchEnpoint()+"/rejectInvite";
+let endpointAcceptEvent = await FetchEnpoint()+"/acceptEventInvite";
+let endpointRejectEvent = await FetchEnpoint()+"/rejectEventInvite";
 
 function Invite() {
   const username = localStorage.getItem("LoggedUser");

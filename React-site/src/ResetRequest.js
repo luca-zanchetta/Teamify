@@ -5,10 +5,11 @@ import Alert from "./components/Alert.tsx";
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import FetchEnpoint from "./components/EndpointFinder";
 
 import { address, flask_port } from "./components/Endpoint";
 
-var endpoint = address+flask_port+"/resetRequest";
+var endpoint = await FetchEnpoint()+"/resetRequest";
 
 function Reset() {
   // Form data

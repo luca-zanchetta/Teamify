@@ -12,12 +12,13 @@ import { address, flask_port } from "./Endpoint";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import io from 'socket.io-client';
+import FetchEnpoint from "./EndpointFinder";
 
 const username = localStorage.getItem('LoggedUser');
-var endpointGetTeamsFromUser = address+flask_port+"/getJoinedTeams";
-var endpointGetTeamMembers = address+flask_port+"/membersGivenTeam";
-var endpointSendMessageToTeam = address+flask_port+"/sendMessageToTeam";
-var endpointGetMessages = address+flask_port+"/getMessages";
+var endpointGetTeamsFromUser = await FetchEnpoint()+"/getJoinedTeams";
+var endpointGetTeamMembers = await FetchEnpoint()+"/membersGivenTeam";
+var endpointSendMessageToTeam = await FetchEnpoint()+"/sendMessageToTeam";
+var endpointGetMessages = await FetchEnpoint()+"/getMessages";
 
 function Chat() {
   const [show, setShow] = useState(false);

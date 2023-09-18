@@ -5,10 +5,10 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate, Navigate } from "react-router-dom";
 import Alert from "./components/Alert.tsx";
 import axios from "axios";
-
+import FetchEnpoint from "./components/EndpointFinder";
 import { address, flask_port } from "./components/Endpoint";
 
-var endpoint = address+flask_port+"/signup";
+var endpoint = await FetchEnpoint()+"/signup";
 const loggedIn = localStorage.getItem("LoggedUser");
 
 function SignUp() {
