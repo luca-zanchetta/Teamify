@@ -270,7 +270,7 @@ function HomeLoggedIn() {
         <NavBar></NavBar>
         <div className="CenterContainer mt-3">
           {!ProfileData && (
-            <div className="container mt-3 mb-2 ">
+            <div className="container mt-1 mb-2 ">
               <h3 className=" mt-5">Personal Agenda</h3>
               <div
                 className="row text-center justify-content-center mb-3"
