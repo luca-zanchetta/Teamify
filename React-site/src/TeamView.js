@@ -26,8 +26,14 @@ import CreateSurvey from "./components/CreateSurvey";
 import FetchEnpoint from "./components/EndpointFinder";
 
 const endpoint = await FetchEnpoint() + "/teamGivenID";
+const endpoint1 = await FetchEnpoint() + "/teamDetails";
+const endpoint2 = await FetchEnpoint() + "/invite";
+const endpoint3 = await FetchEnpoint() + "/home/teams/team/newadmin";
+const endpointEditName = await FetchEnpoint() + "/team/editName";
+const endpointEditDescription = await FetchEnpoint() + "/team/editDescription";
+const endpointGetSurveys =  await FetchEnpoint() + "/getSurveys";
 
-async function TeamView() {
+function TeamView() {
   const location = useLocation();
   const inviteOk = sessionStorage.getItem("invite_alert") === "true";
   const handleInviteOk = () => {
@@ -67,9 +73,6 @@ async function TeamView() {
   const [new_member, setNewMember] = useState("");
   const queryParameters = new URLSearchParams(window.location.search);
   const [id, setId] = useState(queryParameters.get("id"));
-  const endpoint1 = await FetchEnpoint() + "/teamDetails";
-  const endpoint2 = await FetchEnpoint() + "/invite";
-  const endpoint3 = await FetchEnpoint() + "/home/teams/team/newadmin";
   const decryptedUsername = localStorage.getItem("username");
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
@@ -94,12 +97,12 @@ async function TeamView() {
   const [editName, setEditName] = useState(false);
   const [editDescription, setEditDescription] = useState(false);
 
-  async function ToggleEditName() {
+  function ToggleEditName() {
     if (editName) {
       //richiesta axios
       var value = document.getElementById("teamName").value;
       axios
-        .get(await FetchEnpoint() + "/team/editName", {
+        .get(endpointEditName, {
           params: {
             teamId: id,
             teamName: value,
@@ -115,13 +118,13 @@ async function TeamView() {
     setEditName(!editName);
   }
 
-  async function ToggleEditDescription() {
+  function ToggleEditDescription() {
     if (editDescription) {
       //richiesta axios
       var value = document.getElementById("teamDescription").value;
       console.log("description", value);
       axios
-        .get(await FetchEnpoint() + "/team/editDescription", {
+        .get(endpointEditDescription, {
           params: {
             teamId: id,
             teamDescription: value,
@@ -141,9 +144,9 @@ async function TeamView() {
     setWindowWidth(window.innerWidth);
   };
 
-  async function GatherSurveys() {
-    await axios
-      .get(FetchEnpoint() + "/getSurveys", {
+  function GatherSurveys() {
+    axios
+      .get(endpointGetSurveys, {
         params: {
           team_id: id,
           username: localStorage.getItem("LoggedUser"),

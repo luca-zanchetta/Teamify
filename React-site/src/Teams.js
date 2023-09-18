@@ -11,7 +11,9 @@ import Chat from "./components/chat";
 
 import { address, flask_port } from "./components/Endpoint";
 
-async function Teams() {
+const endpoint = await FetchEnpoint() + "/home/teams";
+
+function Teams() {
   const teamCreated = localStorage.getItem("teamCreated_alert") === "true";
   const handleTeamCreated = () => {
     localStorage.setItem("teamCreated_alert", "false");
@@ -19,7 +21,6 @@ async function Teams() {
 
   const username = localStorage.getItem("LoggedUser");
   const navigate = useNavigate();
-  const endpoint = await FetchEnpoint() + "/home/teams";
   const [teams, setTeams] = useState([]);
   const team_leaved = sessionStorage.getItem("team_leaved") === "true";
   const team_deleted = sessionStorage.getItem("team_deleted") === "true";
