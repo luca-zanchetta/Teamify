@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import "../css/confirmation.css";
 import { handleRevert } from "./Profile";
 import axios from "axios";
-
+import FetchEnpoint from "./EndpointFinder";
 import { address, flask_port } from "./Endpoint";
 
 interface Props {
@@ -24,7 +24,7 @@ function PopUp({ type, task_id, message, id, dU }: Props) {
       const decryptedUsername = localStorage.getItem("username");
       const username = localStorage.getItem("LoggedUser");
 
-      const endpoint = address + flask_port + `/home/delete-account`;
+      const endpoint = await FetchEnpoint() + `/home/delete-account`;
 
       // Mak a DELETE request
 
@@ -49,7 +49,7 @@ function PopUp({ type, task_id, message, id, dU }: Props) {
     } else if (type === "task") {
       try {
         const response = await axios.delete(
-          address + flask_port + `/home/deletetask/${task_id}`
+          await FetchEnpoint() + `/home/deletetask/${task_id}`
         );
         if (response.status === 200) {
           localStorage.setItem("delete", false);
@@ -72,7 +72,7 @@ function PopUp({ type, task_id, message, id, dU }: Props) {
   const handleLeaveTeam = async () => {
     try {
       const response = await axios.delete(
-        address + flask_port + `/home/teams/leaveteam`,
+        await FetchEnpoint() + `/home/teams/leaveteam`,
         {
           data: null, // Send an empty data object to indicate no request body
           params: { teamId: id, username: dU }, // Add params if needed
@@ -92,7 +92,7 @@ function PopUp({ type, task_id, message, id, dU }: Props) {
   const handleDelete = async () => {
     try {
       const response = await axios.delete(
-        address + flask_port + `/home/teams/deleteteam`,
+        await FetchEnpoint() + `/home/teams/deleteteam`,
         {
           data: null, // Send an empty data object to indicate no request body
           params: { teamId: id }, // Add params if needed
@@ -117,7 +117,7 @@ function PopUp({ type, task_id, message, id, dU }: Props) {
     //adminToRemove in dU, id team in id
     try {
       const response = await axios.delete(
-        address + flask_port + `/home/teams/team/removeadmin`,
+        await FetchEnpoint() + `/home/teams/team/removeadmin`,
         {
           data: null, // Send an empty data object to indicate no request body
           params: { teamId: id, admin_to_remove: dU }, // Add params if needed

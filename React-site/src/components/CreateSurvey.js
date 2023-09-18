@@ -7,9 +7,9 @@ import "../css/Survey.css"
 import { useState } from "react";
 import cancel from "../icons/cancel.png"
 import { address, flask_port } from "./Endpoint";
+import FetchEnpoint from "./EndpointFinder";
 
-
-function CreateSurvey() {
+async function CreateSurvey() {
 
   const [show, setShow] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -20,9 +20,8 @@ function CreateSurvey() {
   const id = queryParameters.get("id");
   const username = localStorage.getItem("LoggedUser");
   const decryptedUsername = localStorage.getItem("username");
-  const endpointCreate= address + flask_port + "/createPool";
-  const endpointIsAdmin= address + flask_port + "/teamDetails";
-  
+  const endpointCreate= await FetchEnpoint() + "/createPool";
+  const endpointIsAdmin = await FetchEnpoint() + "/teamDetails";
 
   function AddOption() {
     setOptions(options+1);

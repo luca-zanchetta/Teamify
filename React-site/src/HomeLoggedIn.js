@@ -12,7 +12,7 @@ import Profile from "./components/Profile";
 import Alert from "./components/Alert.tsx";
 import Task from "./components/Task.js";
 import PopUp from "./components/PopUp.js";
-
+import FetchEnpoint from "./components/EndpointFinder";
 import { WebSocketComponent } from "./components/WebSocketComponent";
 import Chat from "./components/chat";
 
