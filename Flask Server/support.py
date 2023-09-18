@@ -80,6 +80,8 @@ def encrypt_username(username):
 
 def decrypt_username(encryptedUsername):
     key = b"em45E0z!UA56MOw19Og4EkBUnW35qYB%"
+    encryptedUsername = encryptedUsername.replace(" ", "+")
+    print(encryptedUsername)
     cipher = AES.new(key, AES.MODE_ECB)
     # Decrypt the encrypted string
     decrypted_string = unpad(
