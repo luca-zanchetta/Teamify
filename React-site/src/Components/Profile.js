@@ -62,7 +62,7 @@ function Profile() {
           </div>
         </div>
         <div id="divider"></div>
-          {(currentTab == 1 && <UserInfo></UserInfo>) ||
+        {(currentTab == 1 && <UserInfo></UserInfo>) ||
           (currentTab == 2 && <UserInfo></UserInfo>) ||
           (currentTab == 3 && <ProfileNotifications></ProfileNotifications>)}
       </div>

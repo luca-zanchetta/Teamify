@@ -5,6 +5,12 @@ import axios from "axios";
 import FetchEnpoint from "./EndpointFinder";
 import { address, flask_port } from "./Endpoint";
 
+const endpoint1 = (await FetchEnpoint()) + `/home/delete-account`;
+const endpoint2 = (await FetchEnpoint()) + `/home/teams/leaveteam`;
+const endpoint3 = (await FetchEnpoint()) + `/home/teams/deleteteam`;
+const enpoint4 = (await FetchEnpoint()) + `/home/teams/team/removeadmin`;
+const endpoint5 = (await FetchEnpoint()) + `/home/deletetask`;
+
 interface Props {
   type: string;
   message: string;
@@ -24,13 +30,10 @@ function PopUp({ type, task_id, message, id, dU }: Props) {
       const decryptedUsername = localStorage.getItem("username");
       const username = localStorage.getItem("LoggedUser");
 
-      const endpoint = await FetchEnpoint() + `/home/delete-account`;
-
       // Mak a DELETE request
-
       try {
         // Send a POST request to the /newtask endpoint of the Flask server
-        const response = await axios.post(endpoint, {
+        const response = await axios.post(endpoint1, {
           username: decryptedUsername,
         });
         // If task has been successfully created, then redirect the user to the Home page.
@@ -48,9 +51,10 @@ function PopUp({ type, task_id, message, id, dU }: Props) {
       }
     } else if (type === "task") {
       try {
-        const response = await axios.delete(
-          await FetchEnpoint() + `/home/deletetask/${task_id}`
-        );
+        const response = await axios.delete(endpoint5, {
+          data: null,
+          params: { taskId: task_id },
+        });
         if (response.status === 200) {
           localStorage.setItem("delete", false);
           localStorage.setItem("task_to_delete", 0);
@@ -71,13 +75,10 @@ function PopUp({ type, task_id, message, id, dU }: Props) {
 
   const handleLeaveTeam = async () => {
     try {
-      const response = await axios.delete(
-        await FetchEnpoint() + `/home/teams/leaveteam`,
-        {
-          data: null, // Send an empty data object to indicate no request body
-          params: { teamId: id, username: dU }, // Add params if needed
-        }
-      );
+      const response = await axios.delete(endpoint2, {
+        data: null, // Send an empty data object to indicate no request body
+        params: { teamId: id, username: dU }, // Add params if needed
+      });
       if (response.status === 200) {
         // If the deletion was successful, update local storage and reload the page
         window.location.replace("/home/teams");
@@ -91,13 +92,10 @@ function PopUp({ type, task_id, message, id, dU }: Props) {
 
   const handleDelete = async () => {
     try {
-      const response = await axios.delete(
-        await FetchEnpoint() + `/home/teams/deleteteam`,
-        {
-          data: null, // Send an empty data object to indicate no request body
-          params: { teamId: id }, // Add params if needed
-        }
-      );
+      const response = await axios.delete(endpoint3, {
+        data: null, // Send an empty data object to indicate no request body
+        params: { teamId: id }, // Add params if needed
+      });
       if (response.status === 200) {
         // If the deletion was successful, update local storage and reload the page
         window.location.replace("/home/teams");
@@ -116,13 +114,10 @@ function PopUp({ type, task_id, message, id, dU }: Props) {
   const handleRemoveAdmin = async () => {
     //adminToRemove in dU, id team in id
     try {
-      const response = await axios.delete(
-        await FetchEnpoint() + `/home/teams/team/removeadmin`,
-        {
-          data: null, // Send an empty data object to indicate no request body
-          params: { teamId: id, admin_to_remove: dU }, // Add params if needed
-        }
-      );
+      const response = await axios.delete(endpoint4, {
+        data: null, // Send an empty data object to indicate no request body
+        params: { teamId: id, admin_to_remove: dU }, // Add params if needed
+      });
       if (response.status === 200) {
         // If the deletion was successful, update local storage and reload the page
         sessionStorage.setItem("removed_admin", "true");

@@ -113,10 +113,9 @@ def handle_disconnect():
 
 
 # Login API
-@app.route("/", methods=['POST', 'GET'])
+@app.route("/", methods=["POST", "GET"])
 def fetch():
-    return jsonify({"message":"fetch succesfull!","status":200})
-
+    return jsonify({"message": "fetch succesfull!", "status": 200})
 
 
 @app.route("/login", methods=["POST"])
@@ -604,11 +603,13 @@ def get_tasks():
 
 
 # delete a task API
-@app.route("/home/deletetask/<int:task_id>", methods=["DELETE"])
-def delete_task(task_id):
+@app.route("/home/deletetask", methods=["DELETE"])
+def delete_task():
     conn = get_connection()
     conn.set_session(autocommit=True)
     curr = conn.cursor()
+
+    task_id = request.args.get("taskId")
 
     # remove all the task connected to the user
     query_delete = "DELETE FROM task WHERE id = %s"
@@ -720,9 +721,9 @@ def getColor():
     event_ids = request.args.get("event")
     event_id_list = event_ids.split(",")
     list_color = {}
-    
+
     for event in event_id_list:
-        if event != '':
+        if event != "":
             curr.execute("SELECT team FROM includes WHERE event=%s", (event,))
             data = curr.fetchone()
             if data != None:
@@ -1649,9 +1650,9 @@ def give_team_id():
 
     event_id = data["event"]
     curr.execute("SELECT team FROM includes WHERE event=%s", (event_id))
-    
+
     team_id = curr.fetchone()
-    
+
     conn.close()
     return jsonify(team_id), 200
 
@@ -2115,7 +2116,7 @@ def create_pool():
     conn = get_connection()
     conn.set_session(autocommit=True)
     data = request.get_json()
-    
+
     text = data.get("text")
     due_date = data.get("due_date")
     admin = data.get("admin")
