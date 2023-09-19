@@ -12,7 +12,7 @@ import axios from "axios";
 const endpoint1 = await FetchEnpoint() + "/home/teams/team/survey";
 const endpoint2 = await FetchEnpoint() + "/vote";
 
-async function Survey(props) {
+function Survey(props) {
   const [vote, setShow] = useState(false);
 
   const [checkedVote, setCheckedVote] = useState(

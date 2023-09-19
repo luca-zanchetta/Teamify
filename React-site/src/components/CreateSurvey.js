@@ -12,7 +12,7 @@ import FetchEnpoint from "./EndpointFinder";
 const endpointCreate= await FetchEnpoint() + "/createPool";
 const endpointIsAdmin = await FetchEnpoint() + "/teamDetails";
 
-async function CreateSurvey() {
+function CreateSurvey() {
 
   const [show, setShow] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);

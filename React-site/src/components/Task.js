@@ -17,7 +17,7 @@ interface Props {
   task: Object;
 }
 
-async function Task({ task }: Props) {
+function Task({ task }: Props) {
 
   const decryptedUsername = localStorage.getItem("username");
   const username = localStorage.getItem("LoggedUser");

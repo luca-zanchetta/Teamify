@@ -41,6 +41,7 @@ CREATE TABLE team (
     id SERIAL UNIQUE,
     name VARCHAR(100) NOT NULL DEFAULT 'unnamed_team',
     description VARCHAR(500),
+    color VARCHAR(100),
     CONSTRAINT joinn_pkey
         PRIMARY KEY(name, description)
 );
