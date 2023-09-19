@@ -9,6 +9,9 @@ import cancel from "../icons/cancel.png"
 import { address, flask_port } from "./Endpoint";
 import FetchEnpoint from "./EndpointFinder";
 
+const endpointCreate= await FetchEnpoint() + "/createPool";
+const endpointIsAdmin = await FetchEnpoint() + "/teamDetails";
+
 async function CreateSurvey() {
 
   const [show, setShow] = useState(false);
@@ -20,8 +23,7 @@ async function CreateSurvey() {
   const id = queryParameters.get("id");
   const username = localStorage.getItem("LoggedUser");
   const decryptedUsername = localStorage.getItem("username");
-  const endpointCreate= await FetchEnpoint() + "/createPool";
-  const endpointIsAdmin = await FetchEnpoint() + "/teamDetails";
+  
 
   function AddOption() {
     setOptions(options+1);

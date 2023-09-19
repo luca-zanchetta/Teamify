@@ -10,14 +10,15 @@ import Col from "react-bootstrap/Col";
 import { objectToArray } from "../support.js";
 import { address, flask_port } from "./Endpoint";
 import FetchEnpoint from "./EndpointFinder";
+const endpoint = await FetchEnpoint() + "/home/event/members";
+const endpoint3 = await FetchEnpoint() + "/home/team/member";
 
 interface Props {
   task: Object;
 }
 
 async function Task({ task }: Props) {
-  const endpoint = await FetchEnpoint() + "/home/event/members";
-  const endpoint3 = await FetchEnpoint() + "/home/team/member";
+
   const decryptedUsername = localStorage.getItem("username");
   const username = localStorage.getItem("LoggedUser");
   const navigate = useNavigate();

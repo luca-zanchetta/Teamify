@@ -9,6 +9,8 @@ import { useState } from "react";
 import { address, flask_port } from "./Endpoint";
 import FetchEnpoint from "./EndpointFinder";
 import axios from "axios";
+const endpoint1 = await FetchEnpoint() + "/home/teams/team/survey";
+const endpoint2 = await FetchEnpoint() + "/vote";
 
 async function Survey(props) {
   const [vote, setShow] = useState(false);
@@ -22,12 +24,12 @@ async function Survey(props) {
   const decryptedUsername = localStorage.getItem("username");
   const username = localStorage.getItem("LoggedUser");
   const [voted, setVoted] = useState(false);
-  const endpoint1 = await FetchEnpoint() + "/home/teams/team/survey";
+
   // console.log(vote);
   async function ToggleVote() {
     if (vote) {
       await axios
-        .post(await FetchEnpoint() + "/vote", {
+        .post(endpoint2, {
           pool_id: poolID,
           username: username,
           option_id: checkedVote,

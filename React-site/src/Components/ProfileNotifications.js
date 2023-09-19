@@ -10,7 +10,7 @@ import axios from "axios";
 import FetchEnpoint from "./EndpointFinder";
 import { address, flask_port } from "./Endpoint";
 
-var endpoint = await FetchEnpoint()+"/home/notifications";
+var endpoint = await FetchEnpoint() +"/home/notifications";
 
 function ProfileNotifications() {
   const username = localStorage.getItem("LoggedUser");
