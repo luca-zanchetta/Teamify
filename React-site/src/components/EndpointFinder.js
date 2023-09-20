@@ -4,7 +4,7 @@ import axios from "axios";
 export default async function FetchEnpoint() {
   //Lista di tutti gli endpoint possibili
   var EndpointList = [address + flask_port, address + flask_port_2];
-  shuffle(EndpointList);
+  // shuffle(EndpointList);
 
   let endpoint = "";
 
@@ -15,7 +15,6 @@ export default async function FetchEnpoint() {
     } catch (error) {
       continue;
     }
-    console.log(endpoint);
     return endpoint;
   }
 

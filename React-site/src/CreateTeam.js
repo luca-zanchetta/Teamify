@@ -15,8 +15,6 @@ import { address, flask_port } from "./components/Endpoint";
 import FetchEnpoint from "./components/EndpointFinder";
 const endpoint = (await FetchEnpoint()) + "/home/newteam";
 
-const endpoint = await FetchEnpoint() + "/home/newteam";
-
 function CreateTeam() {
   useEffect(() => {
     //useEffect viene chiamato a fine render del component
