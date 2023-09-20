@@ -13,6 +13,7 @@ import axios from "axios";
 
 import { address, flask_port } from "./components/Endpoint";
 import FetchEnpoint from "./components/EndpointFinder";
+const endpoint = (await FetchEnpoint()) + "/home/newteam";
 
 async function CreateTeam() {
   useEffect(() => {
@@ -26,7 +27,6 @@ async function CreateTeam() {
 
   const username = localStorage.getItem("LoggedUser");
   const navigate = useNavigate();
-  const endpoint = await FetchEnpoint() + "/home/newteam";
   const [teams, setTeams] = useState([]);
 
   const ToggleDisplayAgenda = () => {
