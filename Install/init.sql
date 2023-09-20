@@ -29,12 +29,13 @@ CREATE TABLE notification (
         FOREIGN KEY(username)
             REFERENCES member(username)
             ON DELETE CASCADE,
-    CHECK (
+    CHECK ( 
         type = 'invite'
         OR type = 'message'
         OR type = 'survey'
         OR type = 'event'
         OR type = 'admin'
+        OR type = 'modifyevent'
     )
 );
 CREATE TABLE team (

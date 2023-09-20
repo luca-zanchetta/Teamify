@@ -25,10 +25,11 @@ import {
 
 import { address, flask_port } from "./components/Endpoint";
 
-const endpoint = await FetchEnpoint() + "/home/newtask";
-const endpoint2 = await FetchEnpoint() + "/home/event/members";
-const endpointEditMember = await FetchEnpoint() + "/home/team/event/editmember";
-const endpointUpdateTask = await FetchEnpoint() + "/home/updatetask";
+const endpoint = (await FetchEnpoint()) + "/home/newtask";
+const endpoint2 = (await FetchEnpoint()) + "/home/event/members";
+const endpointEditMember =
+  (await FetchEnpoint()) + "/home/team/event/editmember";
+const endpointUpdateTask = (await FetchEnpoint()) + "/home/updatetask";
 
 function NewTask() {
   const location = useLocation();
@@ -54,7 +55,6 @@ function NewTask() {
   const [eventMembers, setEventMembers] = useState([]);
   const [modifyEvent, setModifyEvent] = useState(false);
   const [checkboxStates, setCheckboxStates] = useState({});
-  const [selectedMembers, setSelectedMembers] = useState([]);
 
   const handleClosure = () => {
     sessionStorage.setItem("error_alert", false);
@@ -183,30 +183,25 @@ function NewTask() {
       }
     } else if (buttonId == "Edit") {
       try {
-        const response = await axios.post(endpointUpdateTask,
-          {
-            local_user: userFromLocal,
-            task_id: task.id,
-            title: title,
-            description: description,
-            date: date,
-            time: time,
-            duration: duration, //parameters to pas
-          }
-        );
+        const response = await axios.post(endpointUpdateTask, {
+          local_user: userFromLocal,
+          task_id: task.id,
+          title: title,
+          description: description,
+          date: date,
+          time: time,
+          duration: duration, //parameters to pas
+        });
         if (response.status == 200) {
           sessionStorage.setItem("event_modified", true);
           if (task.type === "event") {
-            console.log(eventMembers);
             try {
-              const response = await axios.post(endpointEditMember,
-                {
-                  id: task.id,
-                  members: eventMembers,
-                  team: team,
-                  admin: task.member,
-                }
-              );
+              const response = await axios.post(endpointEditMember, {
+                id: task.id,
+                members: eventMembers,
+                team: team,
+                admin: task.member,
+              });
             } catch (error) {
               console.error("Error:", error);
             }
