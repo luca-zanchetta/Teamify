@@ -8,6 +8,9 @@ import FetchEnpoint from './EndpointFinder';
 
 import { address, flask_port } from './Endpoint';
 
+const endpoint1 = "http://localhost:5000"
+const endpoint2 = "http://localhost:5001"
+
 const WebSocketComponent =  forwardRef((props, ref) => {
   const username = localStorage.getItem('LoggedUser');
 
@@ -21,7 +24,10 @@ const WebSocketComponent =  forwardRef((props, ref) => {
 
   useEffect(() => {
     // New WebSocket connection at start
-    const newSocket = io(FetchEnpoint());
+    var newSocket = io(endpoint1);
+    if(!newSocket) {
+      newSocket = io(endpoint2);
+    }
 
     newSocket.on('connect', () => {
       console.log('[INFO] Connected to the WebSocket server.');

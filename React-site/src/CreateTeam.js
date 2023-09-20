@@ -14,7 +14,9 @@ import axios from "axios";
 import { address, flask_port } from "./components/Endpoint";
 import FetchEnpoint from "./components/EndpointFinder";
 
-async function CreateTeam() {
+const endpoint = await FetchEnpoint() + "/home/newteam";
+
+function CreateTeam() {
   useEffect(() => {
     //useEffect viene chiamato a fine render del component
     handleRequestFailed();
@@ -26,7 +28,6 @@ async function CreateTeam() {
 
   const username = localStorage.getItem("LoggedUser");
   const navigate = useNavigate();
-  const endpoint = await FetchEnpoint() + "/home/newteam";
   const [teams, setTeams] = useState([]);
 
   const ToggleDisplayAgenda = () => {

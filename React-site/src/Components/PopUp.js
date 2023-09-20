@@ -5,11 +5,11 @@ import axios from "axios";
 import FetchEnpoint from "./EndpointFinder";
 import { address, flask_port } from "./Endpoint";
 
-const endpoint1 = (await FetchEnpoint()) + `/home/delete-account`;
-const endpoint2 = (await FetchEnpoint()) + `/home/teams/leaveteam`;
-const endpoint3 = (await FetchEnpoint()) + `/home/teams/deleteteam`;
-const enpoint4 = (await FetchEnpoint()) + `/home/teams/team/removeadmin`;
-const endpoint5 = (await FetchEnpoint()) + `/home/deletetask`;
+const endpoint1 = await FetchEnpoint() + `/home/delete-account`;
+const endpoint2 = await FetchEnpoint() + `/home/teams/leaveteam`;
+const endpoint3 = await FetchEnpoint() + `/home/teams/deleteteam`;
+const endpoint4 = await FetchEnpoint() + `/home/teams/team/removeadmin`;
+const endpoint5 = await FetchEnpoint() + `/home/deletetask`;
 
 interface Props {
   type: string;
@@ -34,7 +34,7 @@ function PopUp({ type, task_id, message, id, dU }: Props) {
       try {
         // Send a POST request to the /newtask endpoint of the Flask server
         const response = await axios.post(endpoint1, {
-          username: decryptedUsername,
+          username: username,
         });
         // If task has been successfully created, then redirect the user to the Home page.
         console.log(response.status);
