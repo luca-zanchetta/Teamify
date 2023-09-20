@@ -14,7 +14,6 @@ const endpoint2 = "http://localhost:5001";
 const WebSocketComponent =  forwardRef((props, ref) => {
   const username = localStorage.getItem('LoggedUser');
   let newSocket = null;
-  let newConnection = 0;
 
   const sendMessage = () => {
     console.log('CHIAMATA');
@@ -26,9 +25,7 @@ const WebSocketComponent =  forwardRef((props, ref) => {
 
   useEffect(() => {
     // New WebSocket connection at start
-    if(newConnection === 0) {
-      newSocket = io(endpoint1);
-    }
+    newSocket = io(endpoint1, {reconnection:false, timeout:5000});
 
     newSocket.on('connect', () => {
       console.log('[INFO] Connected to the WebSocket server.');
@@ -111,9 +108,8 @@ const WebSocketComponent =  forwardRef((props, ref) => {
 
 
     // New socket if the primary fails
-    newSocket.on('connect_error', () => {
-      newConnection = 1;
-      newSocket = io(endpoint2);
+    newSocket.on('disconnect', () => {
+      newSocket = io(endpoint2,{reconnection:false, timeout:5000});
 
       newSocket.on('connect', () => {
         console.log('[INFO] Connected to the WebSocket server.');
