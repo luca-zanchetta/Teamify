@@ -12,7 +12,7 @@ import { address, flask_port } from "./Endpoint";
 import FetchEnpoint from "./EndpointFinder";
 const endpoint = await FetchEnpoint() + "/home/event/members";
 const endpoint3 = await FetchEnpoint() + "/home/team/member";
-
+const endpoint2 = await FetchEnpoint();
 interface Props {
   task: Object;
 }
@@ -46,7 +46,7 @@ function Task({ task }: Props) {
   const handleComplete = async () => {
     try {
       const response = await axios.put(
-        await FetchEnpoint() + `/home/completetask/${task.id}`
+        endpoint2 + `/home/completetask/${task.id}`
       );
 
       console.log(response.data.message); // Display the response message
