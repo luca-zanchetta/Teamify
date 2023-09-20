@@ -9,7 +9,7 @@ import { address, flask_port } from "./components/Endpoint";
 
 var endpoint = await FetchEnpoint()+"/reset";
 
-function ResetRequest() {
+function Reset() {
   // Form data
   const [password, setPassword] = useState("");
   const [password_again, setPasswordAgain] = useState("");
@@ -112,4 +112,4 @@ function ResetRequest() {
   );
 }
 
-export default ResetRequest;
+export default Reset;

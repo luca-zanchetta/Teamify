@@ -13,6 +13,7 @@ import Teams from "./Teams";
 import Task from "./NewTask.js";
 import CreateTeam from "./CreateTeam";
 import FetchEnpoint from "./components/EndpointFinder";
+import ResetRequest from "./Reset";
 
 function App() {
   //data è la variabile dello stato, setData è la funzione per settare il suo valore
@@ -41,6 +42,7 @@ function App() {
         <Route path="home/teams" element={<Teams />} />
         <Route path="home/tasks/edittask" element={<Task />} />
         <Route path="home/createteam" element={<CreateTeam />} />
+        <Route path='resetRequest' element={<ResetRequest />} />
       </Routes>
     </BrowserRouter>
   );

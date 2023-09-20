@@ -11,7 +11,7 @@ import { address, flask_port } from "./components/Endpoint";
 
 var endpoint = await FetchEnpoint()+"/resetRequest";
 
-function Reset() {
+function ResetRequest() {
   // Form data
   const missingFields = sessionStorage.getItem("fields_alert") === "true";
   const handleMissingFields = () => {
@@ -112,4 +112,4 @@ function Reset() {
   );
 }
 
-export default Reset;
+export default ResetRequest;
