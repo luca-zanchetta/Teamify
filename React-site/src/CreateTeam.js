@@ -13,6 +13,7 @@ import axios from "axios";
 
 import { address, flask_port } from "./components/Endpoint";
 import FetchEnpoint from "./components/EndpointFinder";
+const endpoint = (await FetchEnpoint()) + "/home/newteam";
 
 const endpoint = await FetchEnpoint() + "/home/newteam";
 
