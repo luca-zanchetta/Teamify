@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Link, useNavigate, Navigate } from "react-router-dom";
 import TopBar from "./components/TopBar";
 import NavBar from "./components/NavBar";
@@ -10,6 +10,7 @@ import axios from "axios";
 import Chat from "./components/chat";
 
 import { address, flask_port } from "./components/Endpoint";
+import { WebSocketComponent } from "./components/WebSocketComponent";
 
 const endpoint = await FetchEnpoint() + "/home/teams";
 
@@ -24,6 +25,8 @@ function Teams() {
   const [teams, setTeams] = useState([]);
   const team_leaved = sessionStorage.getItem("team_leaved") === "true";
   const team_deleted = sessionStorage.getItem("team_deleted") === "true";
+
+  const webSocketRef = useRef(null);
 
   const ToggleDisplayAgenda = () => {
     localStorage.setItem("ProfileData", "false");
@@ -80,6 +83,7 @@ function Teams() {
   return (
     <div className="App">
       {!username && <Navigate to="/login" />}
+      <WebSocketComponent ref={webSocketRef} />
       <Chat></Chat>
       <div className="TopBar">
         <div className="BarHeading">
