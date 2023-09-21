@@ -279,7 +279,7 @@ def delete_account():
     username = decrypt_username(user)
 
     #remove all the teams where the user is the only participant
-    query_teams = "delete from team where id in (select id FROM Team, jointeam a, jointeam bwhere a.username = 'admin' and a.team = Team.id and not(b.team = Team.id and b.username != a.username))"
+    query_teams = "delete from team where id in (select id FROM Team, jointeam a, jointeam bwhere a.username = 'admin' and a.team = Team.id and not(b.team = Team.id and b.username != a.username)) cascade"
     param_teams = (username,)
     try:
         curr.execute(query_teams, param_teams)
