@@ -151,12 +151,12 @@
 }
 
 .Descriptor > h2 {
-    font-size: xx-large;
+    font-size: 28px;
 
 }
 
 .Descriptor > h3 {
-    font-size: x-large;
+    font-size: 22px;
     
 }
 iframe{display: none;}
