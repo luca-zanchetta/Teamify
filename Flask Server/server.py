@@ -279,7 +279,11 @@ def delete_account():
     username = decrypt_username(user)
 
     #remove all the teams where the user is the only participant
+<<<<<<< Updated upstream
     query_teams = "delete from team where id in (select id FROM Team, jointeam a, jointeam bwhere a.username = 'admin' and a.team = Team.id and not(b.team = Team.id and b.username != a.username)) cascade"
+=======
+    query_teams = "delete from team where id in (select id FROM Team, jointeam a, jointeam b where a.username = %s and a.team = Team.id and not(b.team = Team.id and b.username != a.username))"
+>>>>>>> Stashed changes
     param_teams = (username,)
     try:
         curr.execute(query_teams, param_teams)
@@ -290,9 +294,9 @@ def delete_account():
     
     # re assing ownership to the teams where the user is the only owner
     # gather all the teams where the user is the only admin but not the only user
-    query_teams_2 = "select id from team t, jointeam j, manage m, manage m where m.admin = %s and m.team = t.id and j.team = t.id and not (mm.admin != m.admin and mm.team = t.id) group by t.id having count(*) > 1"
+    query_teams_2 = "select id from team t, jointeam j, manage m, manage mm where m.admin = %s and m.team = t.id and j.team = t.id and not (mm.admin != m.admin and mm.team = t.id) group by t.id having count(*) > 1"
     
-    query_fix_manage = "insert into manage (select username from member, jointeam where member.username != %s and jointeam.team = id limit 1, %s)"
+    query_fix_manage = "insert into manage VALUES ((select username from member, jointeam where member.username != %s and jointeam.team = id limit 1), %s)"
     try:
         curr.execute(query_teams_2, param_teams)
         res = curr.fetchall()
