@@ -80,11 +80,14 @@ def encrypt_username(username):
 
 def decrypt_username(encryptedUsername):
     key = b"em45E0z!UA56MOw19Og4EkBUnW35qYB%"
-    encryptedUsername = encryptedUsername.replace(" ", "+")
-    cipher = AES.new(key, AES.MODE_ECB)
-    # Decrypt the encrypted string
-    decrypted_string = unpad(
-        cipher.decrypt(base64.b64decode(encryptedUsername)), AES.block_size
-    )
-    # Print the original and decrypted strings
-    return decrypted_string.decode().strip()
+    if encryptedUsername:
+        encryptedUsername = encryptedUsername.replace(" ", "+")
+        cipher = AES.new(key, AES.MODE_ECB)
+        # Decrypt the encrypted string
+        decrypted_string = unpad(
+            cipher.decrypt(base64.b64decode(encryptedUsername)), AES.block_size
+        )
+        # Print the original and decrypted strings
+        return decrypted_string.decode().strip()
+
+    return None

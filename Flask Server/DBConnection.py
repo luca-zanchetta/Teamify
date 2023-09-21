@@ -8,7 +8,7 @@ hosts = ["db", "db-backup"]
 
 def get_connection():
     try:
-        conn = psycopg2.connect(host=hosts[0], port=5432, dbname="postgres", user=user, password=psw, connect_timeout=3)
+        conn = psycopg2.connect(host='localhost', port=5432, dbname="teamify", user=user, password=psw, connect_timeout=3)
         return conn
     except:
         try:

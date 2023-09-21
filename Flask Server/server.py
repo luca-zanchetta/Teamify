@@ -279,11 +279,7 @@ def delete_account():
     username = decrypt_username(user)
 
     #remove all the teams where the user is the only participant
-<<<<<<< Updated upstream
     query_teams = "delete from team where id in (select id FROM Team, jointeam a, jointeam bwhere a.username = 'admin' and a.team = Team.id and not(b.team = Team.id and b.username != a.username)) cascade"
-=======
-    query_teams = "delete from team where id in (select id FROM Team, jointeam a, jointeam b where a.username = %s and a.team = Team.id and not(b.team = Team.id and b.username != a.username))"
->>>>>>> Stashed changes
     param_teams = (username,)
     try:
         curr.execute(query_teams, param_teams)
@@ -2016,6 +2012,10 @@ def send_chat_message():
 
     try:
         curr.execute(query_message, params_message)
+        
+        for member in members:
+            print('[INFO] Message sent to '+str(member))
+            socketio.emit("chat_message", message, room=member)
     except Exception as err:
         print(
             "[ERROR] The message has not been registered into the DB. Err: " + str(err)
@@ -2027,9 +2027,6 @@ def send_chat_message():
                 "status": 500,
             }
         )
-
-    for member in members:
-        socketio.emit("chat_message", message, room=member)
 
     print("[INFO] Message sent successfully!")
     conn.close()
@@ -2303,4 +2300,4 @@ if __name__ == "__main__":
     # app.run(debug=True, host="localhost", port=5000)
     local = "localhost"
     docker = "0.0.0.0"
-    socketio.run(app, host=docker, port=5000, debug=True)
+    socketio.run(app, host=local, port=5000, debug=True)
