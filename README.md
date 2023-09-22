@@ -8,8 +8,7 @@
   - [Survey Creation](#survey-creation)
   - [Real-Time Team Chat](#real-time-team-chat)
 - [Prerequisites](#prerequisites)
-- [Getting Started](#getting-started)
-  - [Installation and Launch](#installation-and-launch)
+- [Installation and Launch](#installation-and-launch)
 
 ## Overview
 
@@ -39,17 +38,13 @@ Stay connected and facilitate quick communication within your team using the int
 
 ## Prerequisites
 
-    - **Internet Connection:** You need an active internet connection.
+    - Internet Connection: You need an active internet connection.
 
-    - **Docker installed:** First and foremost, you need to have Docker installed on your local machine. You can download Docker Desktop (for Windows and macOS) or Docker Engine (for Linux) from the official Docker website (https://www.docker.com/products/docker-desktop) and follow the installation instructions for your specific operating system.
+    - Docker installed: First and foremost, you need to have Docker installed on your local machine. You can download Docker Desktop (for Windows and macOS) or Docker Engine (for Linux) from the official Docker website (https://www.docker.com/products/docker-desktop) and follow the installation instructions for your specific operating system.
 
-    - **Git installed:** You need Git installed on your local machine. You can download Git from the official website (https://git-scm.com/downloads) and follow the installation instructions for your specific operating system.
+    - Git installed: You need Git installed on your local machine. You can download Git from the official website (https://git-scm.com/downloads) and follow the installation instructions for your specific operating system.
 
-## Getting Started
-
-If you have everything you need, we can proceed with the installation and the launch of Teamify.
-
-### Installation and launch
+## Installation and launch
 
 1. **Open a Terminal or Command Prompt:** Depending on your operating system, open a terminal or command prompt. This is where you'll run Git commands.
 
