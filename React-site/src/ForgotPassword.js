@@ -11,7 +11,7 @@ import { address, flask_port } from "./components/Endpoint";
 
 var endpoint = await FetchEnpoint()+"/resetRequest";
 
-function ResetRequest() {
+function ForgotPassword() {
   // Form data
   const missingFields = sessionStorage.getItem("fields_alert") === "true";
   const handleMissingFields = () => {
@@ -91,7 +91,7 @@ function ResetRequest() {
                 Username field must be filled to invite!
               </Alert>
             )}
-          <div className="CardHeading">Reset your password</div>
+          <div className="CardHeading">Request a password reset</div>
           <form onSubmit={handleSubmit}>
             <div className="InputEntry">
               <div className="InputLabel">Username</div>
@@ -112,4 +112,4 @@ function ResetRequest() {
   );
 }
 
-export default ResetRequest;
+export default ForgotPassword;

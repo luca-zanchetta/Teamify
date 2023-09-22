@@ -20,6 +20,7 @@ function Login() {
       handleRequestFailed();
       handleWrongPwd();
       handleUsernameNotFound();
+      handleClosure();
       sessionStorage.setItem("reset_success", "false");
       sessionStorage.setItem("reset_done", "false");
     }, 1000);
@@ -224,7 +225,7 @@ function Login() {
               <input type="submit" value={"Login"} id="Login"></input>
             </form>
             <div className="Link" style={{ fontSize: "small" }}>
-              <Link to="/resetRequest">Forgot password?</Link>
+              <Link to="/forgotPassword">Forgot password?</Link>
             </div>
           </div>
         </div>
