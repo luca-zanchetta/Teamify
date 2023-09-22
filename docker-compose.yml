@@ -1,6 +1,5 @@
-version: '3'
+version: "3"
 services:
-
   db:
     build:
       context: "./Install"
@@ -22,7 +21,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-  
+
   db-backup:
     build:
       context: "./Install"
