@@ -36,13 +36,21 @@ Gather valuable insights and opinions from your team using Teamify's built-in su
 
 Stay connected and facilitate quick communication within your team using the integrated chat feature. Discuss projects, share ideas, and resolve issues in real-time, ensuring effective collaboration regardless of geographical distances.
 
-## Prerequisites
+# Prerequisites
 
-    - Internet Connection: You need an active internet connection.
+Before you begin, make sure you have the following prerequisites in place:
 
-    - Docker installed: First and foremost, you need to have Docker installed on your local machine. You can download Docker Desktop (for Windows and macOS) or Docker Engine (for Linux) from the official Docker website (https://www.docker.com/products/docker-desktop) and follow the installation instructions for your specific operating system.
+- **Internet Connection:** Ensure that you have an active internet connection.
 
-    - Git installed: You need Git installed on your local machine. You can download Git from the official website (https://git-scm.com/downloads) and follow the installation instructions for your specific operating system.
+- **Docker:** Docker is a fundamental requirement for this project. You can download it from the official Docker website based on your operating system:
+
+  - For Windows and macOS: [Docker Desktop](https://www.docker.com/products/docker-desktop)
+  - For Linux: [Docker Engine](https://www.docker.com/products/docker-desktop)
+
+- **Git:** Git is essential for version control. If you don't have Git installed, you can download it from the official website based on your operating system:
+  - [Git Downloads](https://git-scm.com/downloads)
+
+Please follow the installation instructions provided in the links above to set up these prerequisites on your machine. Having these in place will ensure a smooth experience working with this project.
 
 ## Installation and launch
 
