@@ -8,14 +8,14 @@ import WeeklyCalendar from "./components/WeeklyCalendar.js";
 import Alert from "./components/Alert.tsx";
 import { Container } from "./css/Navigator.css";
 import { Accordion, Col, Row } from "react-bootstrap";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 
 import edit from "./icons/edit.png";
 import axios from "axios";
 import { Link, useNavigate, Navigate, useLocation } from "react-router-dom";
 import UserIcon from "./components/UserIcon";
 import Notifications from "./components/Notifications";
-import WebSocketComponent from "./components/WebSocketComponent";
+import { WebSocketComponent } from "./components/WebSocketComponent";
 import Task from "./components/Task.js";
 import PopUp from "./components/PopUp.js";
 import Survey from "./components/Survey";
@@ -96,6 +96,8 @@ function TeamView() {
 
   const [editName, setEditName] = useState(false);
   const [editDescription, setEditDescription] = useState(false);
+
+  const webSocketRef = useRef(null);
 
   function ToggleEditName() {
     if (editName) {
@@ -356,6 +358,7 @@ function TeamView() {
 
   return (
     <div className="App">
+      <WebSocketComponent ref={webSocketRef} />
       <Chat></Chat>
       <div className="TopBar">
         <div className="BarHeading">

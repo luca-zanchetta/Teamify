@@ -121,8 +121,6 @@ function Chat() {
       document.getElementById('chatInput').disabled = false;
       teamId = ids[selectedOption];
 
-      console.log(teamId);
-
       // Get team members
       try {
         const response = await axios

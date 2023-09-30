@@ -80,11 +80,53 @@ def encrypt_username(username):
 
 def decrypt_username(encryptedUsername):
     key = b"em45E0z!UA56MOw19Og4EkBUnW35qYB%"
-    encryptedUsername = encryptedUsername.replace(" ", "+")
-    cipher = AES.new(key, AES.MODE_ECB)
-    # Decrypt the encrypted string
-    decrypted_string = unpad(
-        cipher.decrypt(base64.b64decode(encryptedUsername)), AES.block_size
-    )
-    # Print the original and decrypted strings
-    return decrypted_string.decode().strip()
+    if encryptedUsername:
+        encryptedUsername = encryptedUsername.replace(" ", "+")
+        cipher = AES.new(key, AES.MODE_ECB)
+        # Decrypt the encrypted string
+        decrypted_string = unpad(
+            cipher.decrypt(base64.b64decode(encryptedUsername)), AES.block_size
+        )
+        # Print the original and decrypted strings
+        return decrypted_string.decode().strip()
+
+    return None
+
+
+def get_teams_of(username):
+    teams = []
+    
+    conn = get_connection()
+    conn.set_session(autocommit=True)
+    if conn is None:
+        print("[ERROR] DB Connection failed.")
+        exit()
+    curr = conn.cursor()
+    
+    query = "select name from team, joinTeam WHERE id=team and username = %s"
+    params = (username,)
+    
+    curr.execute(query, params)
+    teams = curr.fetchall()
+    
+    if len(teams) > 0:
+        return teams
+    
+    return []
+
+
+def get_team_name(id):
+    conn = get_connection()
+    conn.set_session(autocommit=True)
+    if conn is None:
+        print("[ERROR] DB Connection failed.")
+        exit()
+    curr = conn.cursor()
+    
+    query = "select name from team where id = %s"
+    params = (id,)
+    
+    curr.execute(query, params)
+    (name,) = curr.fetchone()
+    
+    return name

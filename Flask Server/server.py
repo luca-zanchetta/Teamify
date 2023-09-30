@@ -9,6 +9,8 @@ from support import (
     get_teams,
     encrypt_username,
     decrypt_username,
+    get_teams_of,
+    get_team_name,
 )
 from flask_socketio import SocketIO, emit, join_room, leave_room
 import datetime
@@ -79,6 +81,14 @@ def handle_initial_data(username):
     if insert == True:
         connected_clients.append(new_client)
         join_room(username)
+        socketio.emit('message', 'Joined Room: '+username, room=username)
+        
+        teams = get_teams_of(username)
+        if(len(teams) > 0):
+            for team in teams:
+                join_room(team[0])
+                socketio.emit('message', 'Joined Room: '+team[0], room=username)
+                
         print("[INFO] Client connected: " + str(username))
 
 
@@ -951,6 +961,12 @@ def team_create():
             username,
         ),
     )
+    
+    try:
+        join_room(name)
+    except Exception as err:
+        pass
+    socketio.emit('message', 'Joined Room: '+name, room=username)
 
     conn.close()
     return jsonify("ok"), 200
@@ -1848,6 +1864,13 @@ def accept_invite():
                 id,
             ),
         )
+        name = get_team_name(id)
+        try:
+            join_room(name)
+        except Exception as err:
+            pass
+        socketio.emit('message', 'Joined Room: '+name, room=username)
+        
         conn.close()
         return jsonify({"message": "ok", "status": 200})
     else:
@@ -2013,6 +2036,14 @@ def send_chat_message():
 
     try:
         curr.execute(query_message, params_message)
+        name = get_team_name(team)
+        
+        socketio.emit('message', 'MESSAGE TEAM', room=name)
+        socketio.emit("chat_message", message, room=name)
+        
+        # for member in members:
+        #     print('[INFO] Message sent to '+str(member))
+        #     socketio.emit("chat_message", message, room=member)
     except Exception as err:
         print(
             "[ERROR] The message has not been registered into the DB. Err: " + str(err)
@@ -2024,9 +2055,6 @@ def send_chat_message():
                 "status": 500,
             }
         )
-
-    for member in members:
-        socketio.emit("chat_message", message, room=member)
 
     print("[INFO] Message sent successfully!")
     conn.close()
