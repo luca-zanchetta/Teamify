@@ -109,14 +109,10 @@ notification = """CREATE TABLE notification (
         FOREIGN KEY(username)
             REFERENCES member(username)
             ON DELETE CASCADE,
-    CHECK (
-        type = 'invite'
-        OR type = 'message'
-        OR type = 'survey'
-        OR type = 'event'
-        OR type = 'admin'
-        OR type = 'modifyevent'
-    )
+   CHECK (
+    type IN ('invite', 'message', 'survey', 'event', 'admin', 'modifyevent')
+)
+
 )"""
 try:
     cur.execute(dropNotification)

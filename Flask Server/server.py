@@ -1334,12 +1334,10 @@ def edit_member_event():
 
     for member in new_members:
         if member["member"] not in member_list:
-            query_member = "INSERT INTO includes (event,team,username) VALUES(%s,%s,%s)"
-            param_member = (
-                event_id,
-                team_id,
-                member["member"],
+            query_member = (
+                "INSERT INTO includes (event,team,username,state) VALUES(%s,%s,%s,%s)"
             )
+            param_member = (event_id, team_id, member["member"], "pending")
             try:
                 curr.execute(query_member, param_member)
                 query_notification = "INSERT INTO notification (date, content, type, read, username) VALUES (%s,%s,%s,%s,%s)"
