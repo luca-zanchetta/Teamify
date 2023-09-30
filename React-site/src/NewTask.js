@@ -341,9 +341,13 @@ function NewTask() {
               flexDirection: "column",
             }}
           >
-            <div className="row mb-5">
+            <div className="row mb-3">
               <div
-                style={{ textAlign: "right", cursor: "pointer" }}
+                style={{
+                  textAlign: "right",
+                  cursor: "pointer",
+                  marginTop: "1%",
+                }}
                 onClick={handleBack}
               >
                 <svg
