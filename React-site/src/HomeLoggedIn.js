@@ -270,7 +270,10 @@ function HomeLoggedIn() {
         <NavBar></NavBar>
         <div className="CenterContainer mt-3">
           {!ProfileData && (
-            <div className="container mb-2 " style={{ overflow: "auto" }}>
+            <div
+              className="container mb-2 align-content-center text-center"
+              style={{ overflow: "auto" }}
+            >
               <h3 className=" mt-4">Personal Agenda</h3>
               <div
                 className="row text-center justify-content-center mb-3"
