@@ -3,8 +3,8 @@
 - [Overview](#overview)
 - [Key Features](#key-features)
   - [Personal Agenda](#personal-agenda)
-  - [Team Creation and Member Managment](#team-creation-and-member-management)
-  - [Shared Task Managment](#shared-task-management-events)
+  - [Team Creation and Member Management](#team-creation-and-member-management)
+  - [Shared Task Management](#shared-task-management-events)
   - [Survey Creation](#survey-creation)
   - [Real-Time Team Chat](#real-time-team-chat)
 - [Prerequisites](#prerequisites)
@@ -26,7 +26,7 @@ Seamlessly create teams for different projects, departments, or initiatives. Inv
 
 ### Shared Task Management (Events)
 
-Teamify takes task collaboration to the next level with shared tasks, known as "Events." Easily create Events and invite to collaborate other team members.
+Teamify takes task collaboration to the next level with shared tasks, known as "Events". Easily create Events and invite to collaborate other team members.
 
 ### Survey Creation
 
@@ -56,13 +56,13 @@ Please follow the installation instructions provided in the links above to set u
 
 1. **Open a Terminal or Command Prompt:** Depending on your operating system, open a terminal or command prompt. This is where you'll run Git commands.
 
-2. **Navigate to the Directory Where You Want to Clone the Repository:** Use the `cd` command to navigate to the directory where you want to store the cloned repository. For example, if you want to clone the repository into a folder named "my_project" on your desktop, you can do this:
+2. **Navigate to the Directory Where You Want to Clone the Repository:** Use the `cd` command to navigate to the directory where you want to store the cloned repository. For example, if you want to clone the repository into your desktop, you can do this:
 
    ```bash
    cd ~/Desktop
    ```
 
-Replace ~/Desktop with the path to your desired directory.
+Of course, you can replace "~/Desktop" with the path to your desired directory.
 
 3. **Clone the Github repository:** Use the git clone command followed by the URL of the Git repository you want to clone. For example, if you want to clone a repository hosted on GitHub, the URL might look like this:
 
@@ -70,14 +70,14 @@ Replace ~/Desktop with the path to your desired directory.
    gh repo clone luca-zanchetta/Teamify
    ```
 
-4. **Move to Teamify Repository:** Use another time the 'cd' command to navigate to the directory Teamify
+4. **Move to Teamify Repository:** Use again the 'cd' command to navigate to the directory Teamify
 
    ```bash
    cd path/to/Teamify
 
    ```
 
-5. **Start Docker:** In order to initiate the project, it is necessary to have Docker running. Use the UI to open it.
+5. **Start Docker:** In order to initialize the project, it is necessary to have Docker running. Use the UI to open it.
 
 6. **Start the Docker Containers:** Once the containers are built (or if they are already built), you can start the project by running:
 
@@ -87,11 +87,15 @@ Replace ~/Desktop with the path to your desired directory.
 
    The -d flag runs the containers in detached mode, which means they will run in the background.
 
-7. **Start using Teamify:** Now, open your browser, copy paste this URL and enjoy Teamify!
+   *Note*: Windows users can run the bash script called "deploy-teamify.bat".
+
+8. **Start using Teamify:** Now, open your browser, copy paste this URL and enjoy Teamify!
    http://localhost:3000
 
-8. **Stop Teamify:** When you're done working on Teamify, you can stop the Docker containers by running:
+9. **Stop Teamify:** When you're done working on Teamify, you can stop the Docker containers by running:
    ```bash
     docker-compose down
    ```
    This will stop and remove the containers but keep the project files intact.
+
+   *Note*: for **uninstalling** Teamify, Windows users can run the bash script called "undeploy-teamify.bat".
